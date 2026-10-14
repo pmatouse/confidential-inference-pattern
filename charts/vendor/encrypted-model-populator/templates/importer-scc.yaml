@@ -28,7 +28,8 @@ fsGroup:
 supplementalGroups:
   type: RunAsAny
 seccompProfiles: [runtime/default]
-volumes: [persistentVolumeClaim, configMap, projected, secret]
+volumes: [configMap, persistentVolumeClaim, projected, secret]
+userNamespaceLevel: AllowHostLevel
 users: []
 groups: []
 ---

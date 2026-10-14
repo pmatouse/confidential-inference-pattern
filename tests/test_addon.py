@@ -109,6 +109,8 @@ class AddonTests(unittest.TestCase):
     def test_second_site_no_lab_namespace(self):
         self.v['installation']['namespace']='another-inference';self.v['installation']['clusterIdentity']='another-site'
         self.v['demo']['name']='another-qwen'
+        for name in ('controller','populator','sidecar'):
+            self.v['images'][name]='registry.example.invalid/addon/'+name+'@sha256:'+'a'*64
         docs=addon.foundation(self.v)+addon.provision(self.v)
         serialized=json.dumps(docs)
         self.assertNotIn('confidential-inference-demo',serialized)

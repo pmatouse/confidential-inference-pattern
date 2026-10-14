@@ -1,4 +1,4 @@
-# Lab bootstrap image references only. Rebuild/publish portable images before clean-cluster qualification.
+# Edge lab override; some helper images are still supplied by the existing lab.
 installation:
   namespace: confidential-inference-demo
   clusterIdentity: edge-rtx6k
@@ -11,3 +11,7 @@ images:
   sidecar: image-registry.openshift-image-registry.svc:5000/confidential-storage-test/confidential-storage-sidecar@sha256:aff5a4874e7edf39cd67bf03b7f5c31df70a4a2191bb24e7423e4f65bb798aba
 registry:
   origin: https://image-registry.openshift-image-registry.svc:5000
+gitops:
+  enabled: true
+  repository: git@github.com:pmatouse/confidential-inference-pattern.git
+  revision: e446ccb327b3964ce06042dfdad9a4507ff734e9

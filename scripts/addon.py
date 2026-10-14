@@ -71,12 +71,13 @@ def validate(v, complete=False):
     if v['gitops']['enabled'] and not re.fullmatch('[a-f0-9]{40}',v['gitops']['revision']): raise Invalid('GitOps revision must be a full commit ID')
 
 def run(argv, data=None):
-    p=subprocess.run(argv,input=data,text=True,capture_output=True)
+    p=subprocess.run(argv,input=data,text=True,capture_output=True,timeout=240)
     if p.returncode: raise Invalid(f'{argv[0]} command failed: {p.stderr.strip()[:1200]}')
     return p.stdout
 
 class Cluster:
     def get(self,kind,name=None,namespace=None):
+        kind={'Application':'applications.argoproj.io','AppProject':'appprojects.argoproj.io'}.get(kind,kind)
         args=['oc','get',kind,'-o','json','--request-timeout=20s']
         if name: args += [name,'--ignore-not-found=true']
         if namespace: args += ['-n',namespace]
@@ -156,6 +157,10 @@ def image_access(v):
             if len(parts)!=2:raise Invalid('unsupported internal image repository')
             namespace,stream=parts[0],parts[1].split('@')[0]
             groups.setdefault(namespace,set()).add(stream)
+    repository=v['demo']['source'].get('repository')
+    if repository:
+        namespace,stream=repository.split('/')
+        groups.setdefault(namespace,set()).add(stream)
     result=[]
     for namespace,streams in groups.items():
         role='inference-pull-'+v['installation']['namespace']
@@ -273,7 +278,9 @@ def main():
         preflight(v,api);apply_objects(foundation(v),v,api)
         for name in ['confidential-volume-controller','encrypted-model-populator']:run(['oc','rollout','status','deployment/'+name,'-n',v['installation']['namespace'],'--timeout=180s'])
         print('Add-on controllers ready. This does not authorize keys or establish hardware E2E qualification.')
-    elif a.command=='demo-provision':preflight(v,api);apply_objects(provision(v),v,api)
+    elif a.command=='demo-provision':
+        preflight(v,api)
+        apply_objects([owned(o,v) for o in image_access(v)]+provision(v),v,api)
     elif a.command=='bind-volumes':print(json.dumps(bind(v,api),indent=2))
     elif a.command=='demo-chat':
         if not v['chat']['enabled']:raise Invalid('chat.enabled must be explicitly set')

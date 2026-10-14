@@ -37,7 +37,11 @@ fsGroup:
 supplementalGroups:
   type: RunAsAny
 seccompProfiles: ['runtime/default']
-volumes: [emptyDir, persistentVolumeClaim, configMap]
+volumes: [configMap, emptyDir, persistentVolumeClaim]
+userNamespaceLevel: AllowHostLevel
+readOnlyRootFilesystem: false
+users: []
+groups: []
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
