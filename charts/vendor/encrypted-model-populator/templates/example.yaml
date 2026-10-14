@@ -1,0 +1,32 @@
+{{- if .Values.example.enabled }}
+apiVersion: storage.confidentialcontainers.org/v1alpha1
+kind: EncryptedModelSource
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: {{ .Values.example.name }}
+spec:
+  {{- required "example.source must come from the trusted publisher" .Values.example.source | toYaml | nindent 2 }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: {{ .Values.example.name }}
+spec:
+  accessModes: [ReadWriteOncePod]
+  volumeMode: Block
+  storageClassName: {{ required "storageClassName is required" .Values.storageClassName }}
+  resources:
+    requests:
+      storage: {{ .Values.example.source.diskBytes | int64 | quote }}
+  dataSourceRef:
+    apiGroup: storage.confidentialcontainers.org
+    kind: EncryptedModelSource
+    name: {{ .Values.example.name }}
+{{- end }}

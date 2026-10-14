@@ -1,0 +1,13 @@
+# Lab bootstrap image references only. Rebuild/publish portable images before clean-cluster qualification.
+installation:
+  namespace: confidential-inference-demo
+  clusterIdentity: edge-rtx6k
+base:
+  storageClassName: lvms-vg1
+  trusteeName: kbsconfig
+images:
+  controller: image-registry.openshift-image-registry.svc:5000/confidential-inference-demo/confidential-volume-controller@sha256:ea319a76f3350052df2d4ee4954d8848fd7a73e59ff21de5c754886fc1e790cb
+  populator: image-registry.openshift-image-registry.svc:5000/confidential-storage-test/encrypted-model-populator@sha256:46dc94bd59c9cd8e08437eb35326f740e9327153c970b8e107923e2bfe961ded
+  sidecar: image-registry.openshift-image-registry.svc:5000/confidential-storage-test/confidential-storage-sidecar@sha256:aff5a4874e7edf39cd67bf03b7f5c31df70a4a2191bb24e7423e4f65bb798aba
+registry:
+  origin: https://image-registry.openshift-image-registry.svc:5000

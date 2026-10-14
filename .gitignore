@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.cache/
+.private/
+output/
+values-secret.yaml
+*.key
+*.pem
+*.kubeconfig
+**/target/

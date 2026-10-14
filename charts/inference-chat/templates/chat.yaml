@@ -1,0 +1,75 @@
+{{- if .Values.chat.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.demo.name }}-chat
+data:
+  server.py: |
+{{ .Files.Get "files/server.py" | indent 4 }}
+  index.html: |
+{{ .Files.Get "files/index.html" | indent 4 }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.demo.name }}-chat
+automountServiceAccountToken: false
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.demo.name }}-chat
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: {{ .Values.demo.name }}-chat}
+  template:
+    metadata:
+      labels: {app: {{ .Values.demo.name }}-chat, coco.io/skip-initdata: "true"}
+      annotations:
+        checksum/scripts: {{ printf "%s%s" (.Files.Get "files/server.py") (.Files.Get "files/index.html") | sha256sum }}
+    spec:
+      serviceAccountName: {{ .Values.demo.name }}-chat
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: chat
+          image: {{ .Values.images.python | quote }}
+          command: [python3, /app/server.py]
+          env:
+            - name: INFERENCE_BACKEND
+              value: {{ printf "http://%s-predictor.%s.svc:80" .Values.demo.name .Release.Namespace | quote }}
+            - name: INFERENCE_MODEL
+              value: {{ .Values.demo.modelName | quote }}
+            - {name: PYTHONDONTWRITEBYTECODE, value: "1"}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {cpu: "1", memory: 256Mi}
+          ports: [{name: http, containerPort: 8080}]
+          readinessProbe: {httpGet: {path: /healthz, port: http}}
+          volumeMounts: [{name: app, mountPath: /app, readOnly: true}]
+      volumes:
+        - name: app
+          configMap: {name: {{ .Values.demo.name }}-chat}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.demo.name }}-chat
+spec:
+  type: {{ .Values.chat.serviceType }}
+  selector: {app: {{ .Values.demo.name }}-chat}
+  ports:
+    - name: http
+      port: {{ .Values.chat.port }}
+      targetPort: http
+      {{- if eq .Values.chat.serviceType "NodePort" }}
+      nodePort: {{ .Values.chat.nodePort }}
+      {{- end }}
+{{- end }}

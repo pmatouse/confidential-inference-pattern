@@ -1,0 +1,16 @@
+{
+  "commit": "6b100436f4ab9659f1b992c6e6410c760667aa94",
+  "repository": "https://github.com/kubernetes-csi/lib-volume-populator",
+  "upstream_files": {
+    "LICENSE": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1",
+    "go.mod": "de857b98e7aec5ee569808d1675ca520b58f4e84a1a8603a07aacde714f39cac",
+    "go.sum": "095adaf88a78e9359163a0454b0f5cacc57769b82bbdfe791362ca2bec4e66fa",
+    "populator-machinery/controller.go": "c849d80485725a2b59f44309a7c30e4809c0fe40cbcc16cb43ca1395be054e86",
+    "populator-machinery/controller_test.go": "7369b5ba02a56a2e96ea672689b4e959bb33c0ea30d63d45d435483b5ff9c9b6",
+    "populator-machinery/metrics.go": "a73a7b547ebbf71a83147b2e529a3247c3f4a0c50769189602205a3d33d6372a",
+    "populator-machinery/metrics_test.go": "972d68baeee8ff96d4f4cc3bfe51812b01387e59aa3e1d33e36e9bf28d1939f2",
+    "populator-machinery/util.go": "32feee6a2f6ec33bffb291c3e57046598d358d92060b6d789d3dc7cd13c5c039",
+    "populator-machinery/util_test.go": "ac8e235a08051e13e6e75648e819707bef2d9130ccf31c4bc5106843c39fbf5f"
+  },
+  "version": "v3.2.0"
+}

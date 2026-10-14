@@ -1,0 +1,65 @@
+{{- if .Values.openshift.createImporterSCC }}
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: encrypted-model-importer-{{ .Release.Namespace }}
+allowPrivilegedContainer: false
+allowHostDirVolumePlugin: false
+allowHostIPC: false
+allowHostNetwork: false
+allowHostPID: false
+allowHostPorts: false
+allowPrivilegeEscalation: false
+readOnlyRootFilesystem: true
+requiredDropCapabilities: [ALL]
+allowedCapabilities: []
+defaultAddCapabilities: []
+runAsUser:
+  type: MustRunAs
+  uid: 0
+seLinuxContext:
+  type: MustRunAs
+fsGroup:
+  type: RunAsAny
+supplementalGroups:
+  type: RunAsAny
+seccompProfiles: [runtime/default]
+volumes: [persistentVolumeClaim, configMap, projected, secret]
+users: []
+groups: []
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: encrypted-model-importer-scc
+rules:
+  - apiGroups: [security.openshift.io]
+    resources: [securitycontextconstraints]
+    resourceNames: [encrypted-model-importer-{{ .Release.Namespace }}]
+    verbs: [use]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: encrypted-model-importer-scc
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: encrypted-model-importer-scc
+subjects:
+  - kind: ServiceAccount
+    name: encrypted-model-importer
+    namespace: {{ .Release.Namespace }}
+{{- end }}

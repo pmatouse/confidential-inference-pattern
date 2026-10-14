@@ -1,0 +1,64 @@
+#!/bin/sh
+# Trusted publisher appliance. This is NOT the confidential workload guest.
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+mount -t devtmpfs devtmpfs /dev
+exec </dev/console >/dev/console 2>&1
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t tmpfs -o mode=0700 tmpfs /run
+mkdir -p /dev/mapper /models
+finish() { sync; reboot -f; sleep 5; }
+fail() { echo "MODEL_PUBLISHER_FAIL:$*"; finish; exit 1; }
+trap 'fail unexpected-exit' EXIT
+set -eu
+case " $(cat /proc/cmdline) " in *' coco.publisher=1 '*) ;; *) fail missing-guard;; esac
+for module in virtio_mmio virtio_blk dm_mod dm_crypt dm_verity ext4 sha256_generic xts aes_generic; do
+    modprobe "$module" || fail "module-$module"
+done
+for i in $(seq 1 20); do [ -b /dev/vdb ] && break; sleep 1; done
+[ "$(cat /sys/block/vda/serial)" = publisher-plaintext ] || fail input-serial
+[ "$(cat /sys/block/vdb/serial)" = publisher-ciphertext ] || fail output-serial
+data_bytes=$(cat /data-bytes)
+disk_bytes=$(cat /disk-bytes)
+[ "$(cat /sys/block/vdb/size)" = "$((disk_bytes / 512))" ] || fail output-size
+[ "$(cat /sys/block/vda/size)" = "$(((data_bytes - 16777216) / 512))" ] || fail input-size
+mknod /dev/mapper/control c 10 236 2>/dev/null || true
+dmsetup create publisher-region --table "0 $((data_bytes / 512)) linear /dev/vdb 0" || fail region
+dmsetup mknodes publisher-region || fail region-node
+cryptsetup luksFormat --batch-mode --type luks2 --cipher aes-xts-plain64 \
+    --key-size 512 --sector-size 4096 --pbkdf argon2id --pbkdf-memory 65536 \
+    --pbkdf-parallel 1 --pbkdf-force-iterations 4 --luks2-metadata-size 16k \
+    --luks2-keyslots-size 16744448 --offset 32768 \
+    --key-file /publisher-key /dev/mapper/publisher-region || fail format
+cryptsetup open --type luks2 --disable-external-tokens --disable-keyring \
+    --key-file /publisher-key /dev/mapper/publisher-region publisher-plain || fail open
+# Encrypt the complete clean filesystem, including free space. No host mount or
+# CAP_SYS_ADMIN is needed by the outer publisher pod; only this disposable VM.
+dd if=/dev/vda of=/dev/mapper/publisher-plain bs=1048576 conv=fsync || fail encrypt
+cryptsetup close publisher-plain || fail close
+dmsetup remove publisher-region || fail region-close
+veritysetup format /dev/vdb /dev/vdb --no-superblock --format=1 \
+    --data-block-size=4096 --hash-block-size=4096 --hash=sha256 \
+    --data-blocks="$((data_bytes / 4096))" --hash-offset="$data_bytes" > /run/verity || fail verity-format
+root=$(sed -n 's/^Root hash:[[:space:]]*//p' /run/verity)
+salt=$(sed -n 's/^Salt:[[:space:]]*//p' /run/verity)
+[ "${#root}" = 64 ] && [ "${#salt}" = 64 ] || fail verity-output
+veritysetup open /dev/vdb publisher-verified /dev/vdb "$root" --no-superblock \
+    --format=1 --data-block-size=4096 --hash-block-size=4096 --hash=sha256 \
+    --data-blocks="$((data_bytes / 4096))" --hash-offset="$data_bytes" --salt="$salt" || fail verity-open
+# Validate the entire protected region, not just the files read by this test.
+dd if=/dev/mapper/publisher-verified of=/dev/null bs=1048576 || fail verity-read
+cryptsetup open --readonly --type luks2 --disable-external-tokens --disable-keyring \
+    --key-file /publisher-key /dev/mapper/publisher-verified publisher-plain || fail verified-luks
+mount -t ext4 -o ro,noload,nodev,nosuid,noexec /dev/mapper/publisher-plain /models || fail ro-mount
+(cd /models && sha256sum -c /model-checksums) || fail model-hashes
+if touch /models/should-not-write 2>/dev/null; then fail writable-model; fi
+uuid=$(cryptsetup luksUUID /dev/mapper/publisher-verified)
+header=$(dd if=/dev/mapper/publisher-verified bs=1048576 count=16 2>/dev/null | sha256sum | cut -d ' ' -f 1)
+umount /models || fail unmount
+cryptsetup close publisher-plain || fail luks-close
+veritysetup close publisher-verified || fail verity-close
+echo "MODEL_PUBLISHER_RESULT:{\"format\":\"luks-verity-v1\",\"diskBytes\":$disk_bytes,\"dataBytes\":$data_bytes,\"hashOffsetBytes\":$data_bytes,\"blockBytes\":4096,\"hashAlgorithm\":\"sha256\",\"verityRoot\":\"$root\",\"veritySalt\":\"$salt\",\"luksUuid\":\"$uuid\",\"headerSha256\":\"$header\",\"headerBytes\":16777216,\"filesystem\":\"ext4\"}"
+echo MODEL_PUBLISHER_PASS:encrypted-verity-readonly-model
+trap - EXIT
+finish

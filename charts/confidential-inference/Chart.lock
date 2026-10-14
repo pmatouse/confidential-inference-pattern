@@ -1,0 +1,12 @@
+dependencies:
+- name: confidential-volumes
+  repository: file://../vendor/confidential-volumes
+  version: 0.3.0
+- name: encrypted-model-populator
+  repository: file://../vendor/encrypted-model-populator
+  version: 0.1.0
+- name: confidential-storage-sidecar
+  repository: file://../vendor/confidential-storage-sidecar
+  version: 0.1.0
+digest: sha256:6f5b713249a5336a25ee7ca1d72dfcb815e8e21908904178a9bbaa8c71268821
+generated: "2026-10-14T23:44:09.438751+02:00"

@@ -1,0 +1,188 @@
+package agent_policy
+import rego.v1
+
+profile := __PROFILE_JSON__
+default AllowRequestsFailingPolicy := false
+default CreateContainerRequest := false
+default CreateSandboxRequest := false
+default CopyFileRequest := false
+default ExecProcessRequest := false
+default SetPolicyRequest := false
+default WriteStreamRequest := false
+default AddSwapRequest := false
+default AddSwapPathRequest := false
+default SetGuestDateTimeRequest := false
+default ReseedRandomDevRequest := false
+default UpdateContainerRequest := false
+default UpdateEphemeralMountsRequest := false
+default RemoveStaleVirtiofsShareMountsRequest := false
+default GetDiagnosticDataRequest := false
+default StartContainerRequest := true
+default RemoveContainerRequest := true
+default DestroySandboxRequest := true
+default SignalProcessRequest := true
+default WaitProcessRequest := true
+default ReadStreamRequest := true
+default CloseStdinRequest := true
+default StatsContainerRequest := true
+default GuestDetailsRequest := true
+default GetOOMEventRequest := true
+default GetMetricsRequest := true
+default UpdateInterfaceRequest := true
+default UpdateRoutesRequest := true
+default AddARPNeighborsRequest := true
+default ListInterfacesRequest := true
+default ListRoutesRequest := true
+default OnlineCPUMemRequest := true
+
+CreateSandboxRequest if {
+    input.guest_hook_path == ""
+    count(input.kernel_modules) == 0
+    regex.match("^[a-f0-9]{64}$", input.sandbox_id)
+}
+
+# Equivalent confinement principle to upstream genpolicy's copy-file rules:
+# only the copied host-file staging directory, never executable/rootfs paths.
+# Top-level links and directory traversal are forbidden.
+copy_path if {
+    regex.match("^/run/kata-containers/shared/containers/[a-f0-9]{64}-[a-f0-9]{16}-(resolv.conf|hostname|[.]containerenv|hosts|passwd|group|termination-log|configuration|secrets)(/[A-Za-z0-9_.:-]+)*$", input.path)
+    not ".." in split(input.path, "/")
+    not "." in split(input.path, "/")
+}
+CopyFileRequest if {
+    copy_path
+    input.file_type in {"Regular", "Directory"}
+    input.file_size >= 0
+    input.file_size <= 1048576
+}
+CopyFileRequest if {
+    copy_path
+    input.file_type == "Symlink"
+    count(split(input.path, "/")) > 6
+    regex.match("^[A-Za-z0-9_.:/-]+$", input.symlink_target)
+    not startswith(input.symlink_target, "/")
+    not ".." in split(input.symlink_target, "/")
+    not "." in split(input.symlink_target, "/")
+}
+
+mount_matches(actual, expected) if {
+    object.remove(actual, {"source"}) == object.remove(expected, {"source"})
+    actual.source == expected.source
+}
+mount_matches(actual, expected) if {
+    object.remove(actual, {"source"}) == object.remove(expected, {"source"})
+    startswith(expected.source, "shared:")
+    suffix := trim_prefix(expected.source, "shared:")
+    regex.match(sprintf("^/run/kata-containers/shared/containers/%s-[a-f0-9]{16}-%s$", [input.container_id, suffix]), actual.source)
+}
+
+common if {
+    regex.match("^[a-f0-9]{64}$", input.container_id)
+    input.OCI.Root.Path == sprintf("/run/kata-containers/%s/rootfs", [input.container_id])
+    input.OCI.Hooks == null
+    input.string_user == null
+    input.OCI.Process.Terminal == false
+    input.OCI.Process.Cwd == "/"
+    input.OCI.Annotations["io.kubernetes.pod.namespace"] == profile.namespace
+    count(input.shared_mounts) == 0
+    count(input.OCI.Linux.Namespaces) == 3
+    {ns.Type | some ns in input.OCI.Linux.Namespaces} == {"ipc", "uts", "mount"}
+    every ns in input.OCI.Linux.Namespaces { ns.Path == "" }
+    count(input.OCI.Linux.UIDMappings) == 0
+    count(input.OCI.Linux.GIDMappings) == 0
+    every key, value in input.OCI.Linux.Sysctl {
+        key == "net.ipv4.ping_group_range"
+        value == "0 2147483647"
+    }
+    input.OCI.Linux.RootfsPropagation == ""
+}
+
+image_storage(image) if {
+    images := [s | some s in input.storages; s.driver == "image_guest_pull"]
+    count(images) == 1
+    images[0].source == image
+    images[0].mount_point == input.OCI.Root.Path
+    images[0].fstype == "overlay"
+    images[0].options == []
+    images[0].shared == false
+    count(images[0].driver_options) == 1
+    metadata := json.unmarshal(trim_prefix(images[0].driver_options[0], "image_guest_pull=")).metadata
+    metadata["io.katacontainers.pkg.oci.container_type"] == input.OCI.Annotations["io.katacontainers.pkg.oci.container_type"]
+}
+
+storage_allowed(storage, settings) if { storage.driver == "image_guest_pull" }
+storage_allowed(storage, settings) if { storage in settings.ephemeralStorages }
+
+workload_matches(settings) if {
+    common
+    input.OCI.Process.Args == settings.args
+    input.OCI.Root.Readonly == settings.readonlyRoot
+    input.OCI.Process.User.UID == settings.uid
+    input.OCI.Process.User.GID == settings.gid
+    input.OCI.Process.NoNewPrivileges == settings.noNewPrivileges
+    every environment in input.OCI.Process.Env { environment in settings.environment }
+    every required in settings.requiredEnvironment { required in input.OCI.Process.Env }
+    input.OCI.Process.User.AdditionalGids in settings.additionalGroups
+    every _, caps in input.OCI.Process.Capabilities { every cap in caps { cap in settings.capabilities } }
+    image_storage(settings.image)
+    every storage in input.storages {
+        storage_allowed(storage, settings)
+    }
+    count(input.storages) == 1 + count(settings.ephemeralStorages)
+    count(input.OCI.Mounts) == count(settings.mounts)
+    count({m.destination | some m in input.OCI.Mounts}) == count(input.OCI.Mounts)
+    every actual in input.OCI.Mounts {
+        some expected in settings.mounts
+        mount_matches(actual, expected)
+    }
+}
+
+CreateContainerRequest if {
+    workload_matches(profile.helper)
+    input.OCI.Annotations["io.kubernetes.container.name"] == "storage-sidecar"
+    input.OCI.Annotations["io.katacontainers.pkg.oci.container_type"] == "pod_container"
+    input.sandbox_pidns == true
+    count(input.devices) == count(profile.helper.rawDevices)
+    {d.container_path | some d in input.devices} == {path | some path in profile.helper.rawDevices}
+    every device in input.devices { device.type_ == "scsi"; device.options == [] }
+    every device in input.OCI.Linux.Devices { device.Path in profile.helper.rawDevices; device.Type == "b" }
+    count({k | some k, _ in input.OCI.Annotations; startswith(k, "cdi.k8s.io/")}) == 0
+}
+
+CreateContainerRequest if {
+    workload_matches(profile.application)
+    input.OCI.Annotations["io.kubernetes.container.name"] == "kserve-container"
+    input.OCI.Annotations["io.katacontainers.pkg.oci.container_type"] == "pod_container"
+    input.sandbox_pidns == true
+    every device in input.devices { device.type_ == "vfio-pci-gk" }
+    # Guest-kernel VFIO transport is translated by stock CDI after policy.
+    # Never accept caller-supplied character-device major/minor numbers.
+    count(input.OCI.Linux.Devices) == 0
+    count(input.devices) <= profile.gpuCount
+    cdi := {k: v | some k, v in input.OCI.Annotations; startswith(k, "cdi.k8s.io/")}
+    count(cdi) == profile.gpuCount
+    every k, v in cdi { regex.match("^cdi.k8s.io/vfio[0-9]{1,5}$", k); v == "nvidia.com/gpu=0" }
+}
+
+# The pause executable comes from the stock measured guest's built-in image.
+# No arbitrary code, hooks, devices or additional mounts are accepted here.
+CreateContainerRequest if {
+    common
+    input.OCI.Annotations["io.kubernetes.container.name"] == "POD"
+    input.OCI.Annotations["io.katacontainers.pkg.oci.container_type"] == "pod_sandbox"
+    image_storage("pause")
+    count(input.storages) == 1
+    input.OCI.Process.Args == ["/usr/bin/pod"]
+    input.OCI.Process.User.UID == 0
+    input.OCI.Process.User.GID == 0
+    count(input.devices) == 0
+    count(input.OCI.Linux.Devices) == 0
+    input.OCI.Root.Readonly == true
+    every environment in input.OCI.Process.Env { environment in profile.pause.environment }
+    every _, caps in input.OCI.Process.Capabilities { every cap in caps { cap in profile.pause.capabilities } }
+    every actual in input.OCI.Mounts {
+        some expected in profile.pause.mounts
+        mount_matches(actual, expected)
+    }
+    count({m.destination | some m in input.OCI.Mounts}) == count(input.OCI.Mounts)
+}

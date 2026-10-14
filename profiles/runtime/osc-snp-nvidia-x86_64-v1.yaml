@@ -1,0 +1,23 @@
+apiVersion: inference.confidentialcontainers.org/v1alpha1
+kind: RuntimeCompatibilityProfile
+metadata:
+  name: osc-snp-nvidia-x86_64-v1
+qualification:
+  existingRuntimePath: demonstrated
+  freshAddonInstall: pending
+  blankRWFirstUseSidecar: pending
+requirements:
+  architecture: amd64
+  tee: snp
+  gpu: nvidia
+  confidentialGPUAttestation: true
+  runtimeHandler: kata-snp-nvidia-gpu
+  applicationUID: 1001
+  stockKata: true
+  stockVllm: true
+  volumeBindingMode: Immediate
+  accessMode: ReadWriteOncePod
+limits:
+  volumes: 8
+  volumeBytes: 68719476736
+  replicas: 1

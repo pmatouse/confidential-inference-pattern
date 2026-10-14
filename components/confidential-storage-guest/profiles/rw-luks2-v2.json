@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 2,
+  "name": "rw-luks2-v2",
+  "access": "rw",
+  "filesystem": "ext4",
+  "headerBytes": 16777216,
+  "metadataBytes": 16384,
+  "dataOffsetBytes": 16777216,
+  "cipher": "aes-xts-plain64",
+  "encryptionKeyBytes": 64,
+  "integrity": "hmac(sha256)",
+  "integrityKeyBytes": 32,
+  "sectorBytes": 4096,
+  "integrityMode": "journal",
+  "allowDiscards": false,
+  "keyslots": 1,
+  "tokens": false,
+  "reencryption": false,
+  "kdf": {
+    "type": "argon2id",
+    "minTime": 4,
+    "maxTime": 10,
+    "minMemoryKiB": 65536,
+    "maxMemoryKiB": 1048576,
+    "minCpus": 1,
+    "maxCpus": 4
+  },
+  "keyslotCipher": "aes-xts-plain64",
+  "keyslotEncryptionKeyBytes": 64,
+  "keyslotOffsetBytes": 32768,
+  "keyslotAreaBytes": 385024,
+  "af": {
+    "type": "luks1",
+    "stripes": 4000,
+    "hash": "sha256"
+  },
+  "digest": {
+    "type": "pbkdf2",
+    "hash": "sha256",
+    "minIterations": 1000,
+    "maxIterations": 10000000
+  },
+  "headerChecksum": "sha256",
+  "requireMatchingMetadataCopies": true,
+  "allowHeaderRepair": false,
+  "destinationBinding": "authenticated-grant",
+  "filesystemOwner": {
+    "uid": 1001,
+    "gid": 1001
+  }
+}

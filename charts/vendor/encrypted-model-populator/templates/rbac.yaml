@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: encrypted-model-populator
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: encrypted-model-importer
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: encrypted-model-populator
+rules:
+  - apiGroups: [""]
+    resources: [persistentvolumeclaims]
+    verbs: [get, list, watch, patch, create, delete]
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [get, list, watch, create, delete]
+  - apiGroups: [""]
+    resources: [events]
+    verbs: [create, patch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: encrypted-model-populator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: encrypted-model-populator
+subjects:
+  - kind: ServiceAccount
+    name: encrypted-model-populator
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: encrypted-model-populator-{{ .Release.Namespace }}
+rules:
+  - apiGroups: [""]
+    resources: [persistentvolumes]
+    verbs: [get, list, watch, patch]
+  - apiGroups: [storage.k8s.io]
+    resources: [storageclasses]
+    verbs: [get, list, watch]
+  - apiGroups: [storage.confidentialcontainers.org]
+    resources: [encryptedmodelsources]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: encrypted-model-populator-{{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: encrypted-model-populator-{{ .Release.Namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: encrypted-model-populator
+    namespace: {{ .Release.Namespace }}

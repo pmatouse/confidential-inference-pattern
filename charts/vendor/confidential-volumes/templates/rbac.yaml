@@ -1,0 +1,77 @@
+{{- if .Values.controller.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  namespace: {{ .Release.Namespace }}
+  name: confidential-volume-controller
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  namespace: {{ .Release.Namespace }}
+  name: confidential-volume-controller
+rules:
+  - apiGroups: [storage.confidentialcontainers.org]
+    resources: [confidentialvolumes, encryptedmodelsources]
+    verbs: [get, list]
+  - apiGroups: [storage.confidentialcontainers.org]
+    resources: [confidentialvolumes/status]
+    verbs: [update]
+  - apiGroups: [""]
+    resources: [persistentvolumeclaims]
+    verbs: [get, list]
+  - apiGroups: [""]
+    resources: [configmaps]
+    verbs: [get, create]
+  - apiGroups: [serving.kserve.io]
+    resources: [inferenceservices]
+    verbs: [get, list]
+  {{- if .Values.controller.sidecarWorkloads }}
+  - apiGroups: [storage.confidentialcontainers.org]
+    resources: [confidentialworkloads]
+    verbs: [get, list]
+  - apiGroups: [storage.confidentialcontainers.org]
+    resources: [confidentialworkloads/status]
+    verbs: [update]
+  - apiGroups: [serving.kserve.io]
+    resources: [inferenceservices]
+    verbs: [create]
+  - apiGroups: [serving.kserve.io]
+    resources: [inferenceservices]
+    resourceNames: {{ .Values.controller.sidecarWorkloads | toJson }}
+    # OwnerReferencesPermissionEnforcement requires delete on the dependent
+    # when adopting it, even with blockOwnerDeletion: false.
+    verbs: [update, delete]
+  {{- end }}
+  {{- if .Values.controller.includeStandalonePods }}
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [get, list]
+  {{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  namespace: {{ .Release.Namespace }}
+  name: confidential-volume-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: confidential-volume-controller
+subjects:
+  - kind: ServiceAccount
+    name: confidential-volume-controller
+    namespace: {{ .Release.Namespace }}
+{{- end }}

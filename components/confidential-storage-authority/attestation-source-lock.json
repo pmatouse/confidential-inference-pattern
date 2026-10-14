@@ -1,0 +1,16 @@
+{
+  "status": "source-inspection-only-not-deployment-compatibility",
+  "repository": "https://github.com/confidential-containers/trustee.git",
+  "commit": "71251310045d8be2e95041cf0028691623c73957",
+  "files": {
+    "attestation-service/src/ear_token/broker.rs": "f4fca931de8ee060a88bbfff4be3ee1a35b7de27b5b27d6ca42a120817f14f7c",
+    "attestation-service/src/lib.rs": "760f378e0c67b60b007a90ac249214353f1675eebd4affd3ddce5447fc8c018a",
+    "deps/verifier/src/nvidia/mod.rs": "2e9608fdead839e622478051f436394e5f884e06308127198753461f4c37b37c",
+    "kbs/src/attestation/backend.rs": "2e59afd9dd419a7de6a784e8455d2a68d7e0ad8d1efe47f4f9cb1ca881d17ed5",
+    "kbs/src/token/mod.rs": "e44d55df376b8729e131a13d6ba45cdbd928584f26de93e39525551aabd1d45e"
+  },
+  "runtime_extension": "storage-binding",
+  "hardware_interoperability_tested": false,
+  "gpu_verified_runtime_binding_available": false,
+  "deployment_enabled": false
+}

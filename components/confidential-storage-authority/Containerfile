@@ -1,0 +1,10 @@
+FROM image-registry.openshift-image-registry.svc:5000/openshift/python@sha256:988ed6775f371baef3a5024942a1651d81cefb7927b83f6439d569a56da8e6a2
+USER 1001
+COPY --chown=1001:0 wheels /opt/app-root/src/wheels
+COPY --chown=1001:0 components /opt/app-root/src/components
+RUN python3 -m pip install --no-cache-dir --no-index --find-links=/opt/app-root/src/wheels --require-hashes -r /opt/app-root/src/components/confidential-storage-authority/runtime-requirements.txt
+WORKDIR /opt/app-root/src/components/confidential-storage-authority
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+EXPOSE 8443
+ENTRYPOINT ["python3", "serve.py"]
+CMD ["--config", "/state/server.json"]

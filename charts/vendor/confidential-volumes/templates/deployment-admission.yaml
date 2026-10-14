@@ -1,0 +1,36 @@
+{{- if and .Values.controller.enabled .Values.controller.sidecarWorkloads }}
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: {{ .Release.Namespace }}-confidential-workload-targets
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [serving.kserve.io]
+        apiVersions: [v1beta1]
+        operations: [CREATE, UPDATE]
+        resources: [inferenceservices]
+  matchConditions:
+    - name: controller-identity
+      expression: {{ printf "request.userInfo.username == 'system:serviceaccount:%s:confidential-volume-controller'" .Release.Namespace | quote }}
+  validations:
+    - expression: {{ printf "object.metadata.namespace == '%s' && object.metadata.name in %s" .Release.Namespace (.Values.controller.sidecarWorkloads | toJson) | quote }}
+      message: This controller may deploy only its explicitly enabled workload names.
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: {{ .Release.Namespace }}-confidential-workload-targets
+spec:
+  policyName: {{ .Release.Namespace }}-confidential-workload-targets
+  validationActions: [Deny]
+{{- end }}

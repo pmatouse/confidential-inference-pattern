@@ -1,0 +1,257 @@
+{
+  "namespace": "gpu-workload",
+  "workload": {
+    "apiVersion": "serving.kserve.io/v1beta1",
+    "kind": "InferenceService",
+    "metadata": {
+      "namespace": "gpu-workload",
+      "name": "qwen-storage"
+    },
+    "spec": {
+      "predictor": {
+        "annotations": {
+          "storage.confidentialcontainers.org/bindings": "[{\"volume\": \"base\", \"confidentialVolume\": \"base\", \"container\": \"kserve-container\", \"mountPath\": \"/models/qwen\"}, {\"volume\": \"embedding\", \"confidentialVolume\": \"embedding\", \"container\": \"kserve-container\", \"mountPath\": \"/models/embedding\"}, {\"volume\": \"data\", \"confidentialVolume\": \"data\", \"container\": \"kserve-container\", \"mountPath\": \"/data\"}, {\"volume\": \"checkpoints\", \"confidentialVolume\": \"checkpoints\", \"container\": \"kserve-container\", \"mountPath\": \"/checkpoints\"}]"
+        },
+        "containers": [
+          {
+            "name": "kserve-container",
+            "image": "example.invalid/vllm@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "command": [
+              "vllm",
+              "serve",
+              "/models/qwen"
+            ],
+            "volumeDevices": [
+              {
+                "name": "base",
+                "devicePath": "/dev/coco-volume-0"
+              },
+              {
+                "name": "embedding",
+                "devicePath": "/dev/coco-volume-1"
+              },
+              {
+                "name": "data",
+                "devicePath": "/dev/coco-volume-2"
+              },
+              {
+                "name": "checkpoints",
+                "devicePath": "/dev/coco-volume-3"
+              }
+            ]
+          }
+        ],
+        "volumes": [
+          {
+            "name": "base",
+            "persistentVolumeClaim": {
+              "claimName": "base",
+              "readOnly": true
+            }
+          },
+          {
+            "name": "embedding",
+            "persistentVolumeClaim": {
+              "claimName": "embedding",
+              "readOnly": true
+            }
+          },
+          {
+            "name": "data",
+            "persistentVolumeClaim": {
+              "claimName": "data",
+              "readOnly": false
+            }
+          },
+          {
+            "name": "checkpoints",
+            "persistentVolumeClaim": {
+              "claimName": "checkpoints",
+              "readOnly": false
+            }
+          }
+        ]
+      }
+    }
+  },
+  "declarations": [
+    {
+      "apiVersion": "storage.confidentialcontainers.org/v1alpha1",
+      "kind": "ConfidentialVolume",
+      "metadata": {
+        "namespace": "gpu-workload",
+        "name": "base"
+      },
+      "spec": {
+        "claimRef": {
+          "name": "base",
+          "uid": "00000000-0000-4000-8000-000000000000"
+        },
+        "access": "ReadOnly",
+        "profile": "luks-verity-v1",
+        "initialization": {
+          "policy": "Never"
+        },
+        "keyResource": "kbs:///default/volume-keys/base",
+        "content": {
+          "approvedManifestRef": "base-v1"
+        }
+      }
+    },
+    {
+      "apiVersion": "storage.confidentialcontainers.org/v1alpha1",
+      "kind": "ConfidentialVolume",
+      "metadata": {
+        "namespace": "gpu-workload",
+        "name": "embedding"
+      },
+      "spec": {
+        "claimRef": {
+          "name": "embedding",
+          "uid": "00000000-0000-4000-8000-000000000001"
+        },
+        "access": "ReadOnly",
+        "profile": "luks-verity-v1",
+        "initialization": {
+          "policy": "Never"
+        },
+        "keyResource": "kbs:///default/volume-keys/embedding",
+        "content": {
+          "approvedManifestRef": "embedding-v1"
+        }
+      }
+    },
+    {
+      "apiVersion": "storage.confidentialcontainers.org/v1alpha1",
+      "kind": "ConfidentialVolume",
+      "metadata": {
+        "namespace": "gpu-workload",
+        "name": "data"
+      },
+      "spec": {
+        "claimRef": {
+          "name": "data",
+          "uid": "00000000-0000-4000-8000-000000000002"
+        },
+        "access": "ReadWrite",
+        "profile": "luks-integrity-v1",
+        "initialization": {
+          "policy": "OnceIfApproved",
+          "filesystem": "ext4",
+          "owner": {
+            "uid": 1001,
+            "gid": 1001
+          }
+        },
+        "keyResource": "kbs:///default/volume-keys/data"
+      }
+    },
+    {
+      "apiVersion": "storage.confidentialcontainers.org/v1alpha1",
+      "kind": "ConfidentialVolume",
+      "metadata": {
+        "namespace": "gpu-workload",
+        "name": "checkpoints"
+      },
+      "spec": {
+        "claimRef": {
+          "name": "checkpoints",
+          "uid": "00000000-0000-4000-8000-000000000003"
+        },
+        "access": "ReadWrite",
+        "profile": "luks-integrity-v1",
+        "initialization": {
+          "policy": "OnceIfApproved",
+          "filesystem": "ext4",
+          "owner": {
+            "uid": 1001,
+            "gid": 1001
+          }
+        },
+        "keyResource": "kbs:///default/volume-keys/checkpoints"
+      }
+    }
+  ],
+  "claims": [
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "namespace": "gpu-workload",
+        "name": "base",
+        "uid": "00000000-0000-4000-8000-000000000000"
+      },
+      "spec": {
+        "volumeMode": "Block",
+        "accessModes": [
+          "ReadWriteOncePod"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "2Gi"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "namespace": "gpu-workload",
+        "name": "embedding",
+        "uid": "00000000-0000-4000-8000-000000000001"
+      },
+      "spec": {
+        "volumeMode": "Block",
+        "accessModes": [
+          "ReadWriteOncePod"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "2Gi"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "namespace": "gpu-workload",
+        "name": "data",
+        "uid": "00000000-0000-4000-8000-000000000002"
+      },
+      "spec": {
+        "volumeMode": "Block",
+        "accessModes": [
+          "ReadWriteOncePod"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "1Gi"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "namespace": "gpu-workload",
+        "name": "checkpoints",
+        "uid": "00000000-0000-4000-8000-000000000003"
+      },
+      "spec": {
+        "volumeMode": "Block",
+        "accessModes": [
+          "ReadWriteOncePod"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "1Gi"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+[package]
+name = "confidential-storage-kbs"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+
+[dependencies]
+async-trait = "0.1.89"
+confidential-storage-client = { path = "../confidential-storage-client" }
+kbs_protocol = { path = "../../upstream/attestation-agent/kbs_protocol", default-features = false, features = ["background_check", "rust-crypto"] }
+kbs-types = "=0.15.0"
+reqwest = { version = "=0.13.4", default-features = false, features = ["cookies", "rustls"] }
+ring = "0.17.14"
+serde_json = "1.0"
+thiserror = "2.0"
+tokio = { version = "1.52", features = ["rt-multi-thread", "time", "macros"] }
+zeroize = "1.8.2"
+libc = { version = "0.2", optional = true }
+protos = { path = "../../upstream/protos", default-features = false, features = ["ttrpc"], optional = true }
+ttrpc = { version = "0.9.0", features = ["async"], optional = true }
+
+[dev-dependencies]
+confidential-storage-guest = { path = "../confidential-storage-guest" }
+
+[features]
+test-fixture = []
+private-cdh = ["dep:libc", "dep:protos", "dep:ttrpc"]
+
+[[example]]
+name = "key_fixture"
+required-features = ["test-fixture"]

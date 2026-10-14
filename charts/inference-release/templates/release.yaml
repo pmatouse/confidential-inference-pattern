@@ -1,0 +1,67 @@
+apiVersion: storage.confidentialcontainers.org/v1alpha1
+kind: EncryptedModelSource
+metadata:
+  name: {{ .Values.demo.name }}-model
+spec:
+{{ .Values.demo.source | toYaml | indent 2 }}
+---
+{{- range $role := list "model" "data" }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $.Values.demo.name }}-{{ $role }}
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  storageClassName: {{ $.Values.base.storageClassName | quote }}
+  volumeMode: Block
+  accessModes: [ReadWriteOncePod]
+  resources:
+    requests:
+      storage: {{ index $.Values.demo (printf "%sSize" $role) | quote }}
+  {{- if eq $role "model" }}
+  dataSourceRef:
+    apiGroup: storage.confidentialcontainers.org
+    kind: EncryptedModelSource
+    name: {{ $.Values.demo.name }}-model
+  {{- end }}
+---
+{{- end }}
+apiVersion: storage.confidentialcontainers.org/v1alpha1
+kind: ConfidentialWorkload
+metadata:
+  name: {{ .Values.demo.name }}
+spec:
+  template:
+    metadata:
+      name: {{ .Values.demo.name }}
+      annotations:
+        serving.kserve.io/deploymentMode: Standard
+    spec:
+      predictor:
+        minReplicas: 1
+        maxReplicas: 1
+        deploymentStrategy: {type: Recreate}
+        annotations:
+          storage.confidentialcontainers.org/bindings: {{ list (dict "volume" "model" "confidentialVolume" (printf "%s-model" .Values.demo.name) "container" "kserve-container" "mountPath" .Values.demo.modelMount) (dict "volume" "data" "confidentialVolume" (printf "%s-data" .Values.demo.name) "container" "kserve-container" "mountPath" .Values.demo.dataMount) | toJson | quote }}
+        containers:
+          - name: kserve-container
+            image: {{ .Values.images.application | quote }}
+            command: [python3, -m, vllm.entrypoints.openai.api_server]
+            args: [--model, {{ .Values.demo.modelMount | quote }}, --served-model-name, {{ .Values.demo.modelName | quote }}, --host, "0.0.0.0", --port, "8000", --max-model-len, "4096"]
+            env:
+              - {name: HF_HUB_OFFLINE, value: "1"}
+              - {name: TRANSFORMERS_OFFLINE, value: "1"}
+              - {name: HF_HOME, value: /data/huggingface}
+              - {name: VLLM_CACHE_ROOT, value: /data/vllm}
+            resources:
+              requests: {cpu: "4", memory: 16Gi, nvidia.com/gpu: "1"}
+              limits: {cpu: "6", memory: 48Gi, nvidia.com/gpu: "1"}
+            securityContext:
+              runAsUser: 1001
+              runAsGroup: 1001
+              runAsNonRoot: true
+              privileged: false
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: {drop: [ALL]}

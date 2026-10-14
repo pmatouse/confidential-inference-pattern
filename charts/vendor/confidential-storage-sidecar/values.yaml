@@ -1,0 +1,13 @@
+serviceAccountName: storage-sidecar
+sccName: confidential-storage-sidecar
+allowedSidecarImages: []
+applicationImage: nvcr.io/nvidia/vllm@sha256:15f380ad9c32f0ac57ac16e4b778c6f733c88b9ffe3a936035d0a59ad17b1aab
+allowedClaims:
+- qwen-luks-model-v1
+- qwen-gpu-data-v1
+identityEnabled: false
+publicAddonPull:
+  enabled: false
+  imageStreamName: confidential-storage-sidecar
+global:
+  installationName: ''

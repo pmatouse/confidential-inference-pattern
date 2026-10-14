@@ -1,0 +1,43 @@
+{{- if .Values.openshift.buildEnabled }}
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  namespace: {{ .Release.Namespace }}
+  name: confidential-volume-controller
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  namespace: {{ .Release.Namespace }}
+  name: confidential-volume-controller
+spec:
+  runPolicy: Serial
+  source:
+    type: Binary
+    binary: {}
+  strategy:
+    type: Docker
+    dockerStrategy:
+      noCache: true
+  output:
+    to:
+      kind: ImageStreamTag
+      name: confidential-volume-controller:build
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+  successfulBuildsHistoryLimit: 2
+  failedBuildsHistoryLimit: 2
+{{- end }}

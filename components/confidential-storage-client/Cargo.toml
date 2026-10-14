@@ -1,0 +1,23 @@
+[package]
+name = "confidential-storage-client"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+
+[dependencies]
+base64 = "0.22.1"
+confidential-storage-guest = { path = "../confidential-storage-guest" }
+libc = "0.2"
+reqwest = { version = "=0.13.4", default-features = false, features = ["blocking", "rustls"] }
+ring = "0.17.14"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", features = ["raw_value"] }
+thiserror = "2.0"
+
+protos = { path = "../../upstream/protos", default-features = false, features = ["ttrpc"], optional = true }
+ttrpc = { version = "0.9.0", features = ["async"], optional = true }
+tokio = { version = "1.52", features = ["rt", "time"], optional = true }
+
+[features]
+private-rcar-aa = ["dep:protos", "dep:ttrpc", "dep:tokio"]

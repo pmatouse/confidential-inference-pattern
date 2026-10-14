@@ -1,0 +1,258 @@
+{
+  "type": "object",
+  "properties": {
+    "installation": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "namespace": {
+          "type": "string"
+        },
+        "clusterIdentity": {
+          "type": "string"
+        },
+        "profile": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "namespace",
+        "clusterIdentity",
+        "profile"
+      ]
+    },
+    "base": {
+      "type": "object",
+      "properties": {
+        "runtimeClassName": {
+          "type": "string"
+        },
+        "runtimeHandler": {
+          "type": "string"
+        },
+        "storageClassName": {
+          "type": "string"
+        },
+        "kserveNamespace": {
+          "type": "string"
+        },
+        "kserveDeployment": {
+          "type": "string"
+        },
+        "kserveVersion": {
+          "type": "string"
+        },
+        "trusteeNamespace": {
+          "type": "string"
+        },
+        "trusteeName": {
+          "type": "string"
+        },
+        "gitopsNamespace": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "runtimeClassName",
+        "runtimeHandler",
+        "storageClassName",
+        "kserveNamespace",
+        "kserveDeployment",
+        "kserveVersion",
+        "trusteeNamespace",
+        "trusteeName",
+        "gitopsNamespace"
+      ]
+    },
+    "images": {
+      "type": "object",
+      "properties": {
+        "controller": {
+          "type": "string"
+        },
+        "populator": {
+          "type": "string"
+        },
+        "sidecar": {
+          "type": "string"
+        },
+        "application": {
+          "type": "string"
+        },
+        "python": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "controller",
+        "populator",
+        "sidecar",
+        "application",
+        "python"
+      ]
+    },
+    "registry": {
+      "type": "object",
+      "properties": {
+        "origin": {
+          "type": "string"
+        },
+        "injectServiceCA": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "origin",
+        "injectServiceCA"
+      ]
+    },
+    "approvalKeys": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "demo": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "modelSize": {
+          "type": "string"
+        },
+        "dataSize": {
+          "type": "string"
+        },
+        "modelMount": {
+          "type": "string"
+        },
+        "dataMount": {
+          "type": "string"
+        },
+        "modelName": {
+          "type": "string"
+        },
+        "modelKeyResource": {
+          "type": "string"
+        },
+        "dataKeyResource": {
+          "type": "string"
+        },
+        "approvedManifestRef": {
+          "type": "string"
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "format": {
+              "const": "luks-verity-v1"
+            },
+            "repository": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]{0,62}/[a-z0-9][a-z0-9._-]{0,127}$"
+            },
+            "manifestDigest": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            "diskDigest": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            "diskBytes": {
+              "type": "integer",
+              "minimum": 67108864,
+              "maximum": 68719476736,
+              "multipleOf": 4096
+            }
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "modelSize",
+        "dataSize",
+        "modelMount",
+        "dataMount",
+        "modelName",
+        "modelKeyResource",
+        "dataKeyResource",
+        "approvedManifestRef",
+        "source"
+      ]
+    },
+    "gitops": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "repository": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "valuesFile": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "repository",
+        "revision",
+        "valuesFile"
+      ]
+    },
+    "chat": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "port": {
+          "type": "integer"
+        },
+        "serviceType": {
+          "type": "string"
+        },
+        "nodePort": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "port",
+        "serviceType",
+        "nodePort"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "installation",
+    "base",
+    "images",
+    "registry",
+    "approvalKeys",
+    "demo",
+    "gitops",
+    "chat"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

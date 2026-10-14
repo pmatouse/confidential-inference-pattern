@@ -1,0 +1,22 @@
+[package]
+name = "confidential-storage-service"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+
+[dependencies]
+confidential-storage-client = { path = "../confidential-storage-client" }
+confidential-storage-guest = { path = "../confidential-storage-guest" }
+confidential-storage-kbs = { path = "../confidential-storage-kbs" }
+libc = "0.2"
+ring = "0.17.14"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "2.0"
+tokio = { version = "1.52", features = ["rt-multi-thread", "time"] }
+zeroize = "1.8.2"
+
+[features]
+private-cdh = ["confidential-storage-kbs/private-cdh"]
+trustee-rcar = ["private-cdh", "confidential-storage-client/private-rcar-aa"]

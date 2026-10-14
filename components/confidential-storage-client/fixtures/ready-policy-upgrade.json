@@ -1,0 +1,71 @@
+{
+  "volume_id": "scratch",
+  "generation": 1,
+  "policy_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "profile_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "credential_uri": "kbs:///storage-test/keys/scratch-v1",
+  "mount_binding": {
+    "access": "rw",
+    "container_name": "app",
+    "destination": "/data",
+    "manifest_uri": "kbs:///storage-test/records/scratch-v1"
+  },
+  "initialization_approval": {
+    "plan": {
+      "data_offset_bytes": 16777216,
+      "device_bytes": 67108864,
+      "filesystem": "ext4",
+      "header_bytes": 16777216,
+      "luks_uuid": "abcdef01-2345-4678-8123-456789abcdef",
+      "new_volume": true,
+      "provisioning_id": "01234567-89ab-4cde-8123-456789abcdef",
+      "schema_version": 1
+    },
+    "plan_sha256": "99531c50a6a3ffc1778a362421a22a2a025f105af6dde60414a19c031ea128cb"
+  },
+  "initialization_steps": [
+    {
+      "evidence_sha256": "8888888888888888888888888888888888888888888888888888888888888888",
+      "result": {
+        "header_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      },
+      "status": "Complete",
+      "step": "luks-format",
+      "step_id": "0b63bfcb-e3c9-484d-b7f0-e9b88787ef54"
+    },
+    {
+      "evidence_sha256": "8888888888888888888888888888888888888888888888888888888888888888",
+      "result": {
+        "header_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "stack_sha256": "9999999999999999999999999999999999999999999999999999999999999999"
+      },
+      "status": "Complete",
+      "step": "integrity-initialize",
+      "step_id": "4b061fef-4cfa-4daf-b8e8-2553a25aa803"
+    },
+    {
+      "evidence_sha256": "8888888888888888888888888888888888888888888888888888888888888888",
+      "result": {
+        "filesystem_uuid": "abcdef01-2345-4678-8123-456789abcdef",
+        "header_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      },
+      "status": "Complete",
+      "step": "filesystem-create",
+      "step_id": "08beeaa8-21c5-49fe-81de-5c6a9287fee1"
+    },
+    {
+      "evidence_sha256": "8888888888888888888888888888888888888888888888888888888888888888",
+      "result": {
+        "header_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "manifest_sha256": "cd9eaaf7ccae463d1802dd0356982093a81ef84446eb62af5c539971678be98d"
+      },
+      "status": "Complete",
+      "step": "durability-barrier",
+      "step_id": "974f3fd0-8bf8-435b-b60e-a14c42327d75"
+    }
+  ],
+  "state": "Ready",
+  "owner": null,
+  "initialization_policy_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "manifest": "{\"credentialUri\":\"kbs:///storage-test/keys/scratch-v1\",\"dataOffsetBytes\":16777216,\"deviceBytes\":67108864,\"filesystem\":\"ext4\",\"generation\":1,\"headerBytes\":16777216,\"headerSha256\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\",\"luksUuid\":\"abcdef01-2345-4678-8123-456789abcdef\",\"profileSha256\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"schemaVersion\":1,\"volumeId\":\"scratch\"}"
+}

@@ -1,0 +1,46 @@
+{{- if .Values.openshift.buildEnabled }}
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: encrypted-model-populator
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: encrypted-model-populator
+spec:
+  runPolicy: Serial
+  source:
+    type: Binary
+    binary: {}
+    dockerfile: |
+      FROM {{ .Values.openshift.baseImage }}
+      COPY encrypted-model-populator /usr/local/bin/encrypted-model-populator
+      USER 1001
+      ENTRYPOINT ["/usr/local/bin/encrypted-model-populator"]
+  strategy:
+    type: Docker
+    dockerStrategy:
+      noCache: true
+  output:
+    to:
+      kind: ImageStreamTag
+      name: encrypted-model-populator:build
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+  successfulBuildsHistoryLimit: 2
+  failedBuildsHistoryLimit: 2
+{{- end }}

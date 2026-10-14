@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "status": "development-not-e2e-qualified",
+  "sourceImport": "ebfaf34608dccc383234c38aa35ab1404b96eb95",
+  "siteImages": {
+    "controller": "image-registry.openshift-image-registry.svc:5000/confidential-inference-demo/confidential-volume-controller@sha256:ea319a76f3350052df2d4ee4954d8848fd7a73e59ff21de5c754886fc1e790cb",
+    "populator": "image-registry.openshift-image-registry.svc:5000/confidential-storage-test/encrypted-model-populator@sha256:46dc94bd59c9cd8e08437eb35326f740e9327153c970b8e107923e2bfe961ded",
+    "sidecar": "image-registry.openshift-image-registry.svc:5000/confidential-storage-test/confidential-storage-sidecar@sha256:aff5a4874e7edf39cd67bf03b7f5c31df70a4a2191bb24e7423e4f65bb798aba"
+  },
+  "modelRevision": "c1899de289a04d12100db370d81485cdf75e47ca",
+  "controllerBuild": {
+    "namespace": "confidential-inference-demo",
+    "name": "confidential-volume-controller-1",
+    "sourceArchiveSha256": "58b3c69dbab685b4fcf931bf7ff7ea6fd737e9d39d989bc02e3857df8ca5c693"
+  }
+}

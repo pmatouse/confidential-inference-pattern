@@ -1,0 +1,917 @@
+{
+  "repository": "https://github.com/pmatouse/coco-pattern-edge-rtx6k",
+  "revision": "ebfaf34608dccc383234c38aa35ab1404b96eb95",
+  "license": "Apache-2.0",
+  "files": [
+    {
+      "source": "LICENSE",
+      "path": "LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "source": "charts/coco-supported/confidential-storage-sidecar/Chart.yaml",
+      "path": "charts/vendor/confidential-storage-sidecar/Chart.yaml",
+      "sha256": "95e11fbc95e3c7a4156136bd2c6a34a4af750e4250a7c44c42d972cb88a4dafb"
+    },
+    {
+      "source": "charts/coco-supported/confidential-storage-sidecar/templates/admission.yaml",
+      "path": "charts/vendor/confidential-storage-sidecar/templates/admission.yaml",
+      "sha256": "d819c96f45294f1daddb56a5e446b6b76be3abbb3f090fea37a04a2d4aa2c7ae"
+    },
+    {
+      "source": "charts/coco-supported/confidential-storage-sidecar/templates/identity.yaml",
+      "path": "charts/vendor/confidential-storage-sidecar/templates/identity.yaml",
+      "sha256": "18795f2a8d9af3fe1d7804fad59c56203510543056cde9df34d68d15d9d6e7ea"
+    },
+    {
+      "source": "charts/coco-supported/confidential-storage-sidecar/templates/public-pull.yaml",
+      "path": "charts/vendor/confidential-storage-sidecar/templates/public-pull.yaml",
+      "sha256": "ed5864b6065fe8082ed92bb004537e482c73d5ea372db1133478e8fbe3318a63"
+    },
+    {
+      "source": "charts/coco-supported/confidential-storage-sidecar/values.yaml",
+      "path": "charts/vendor/confidential-storage-sidecar/values.yaml",
+      "sha256": "1ee502cd6bfcaf0cdbb8ce5f01e0acbe8b73c183f6251e193f41b77c2e495298"
+    },
+    {
+      "source": "charts/coco-supported/confidential-volumes/Chart.yaml",
+      "path": "charts/vendor/confidential-volumes/Chart.yaml",
+      "sha256": "85f853456dd9076d81ba7fef591c57ea7351f0bd4b0253258521d2225792c92f"
+    },
+    {
+      "source": "charts/coco-supported/confidential-volumes/crds/confidentialvolumes.yaml",
+      "path": "charts/vendor/confidential-volumes/crds/confidentialvolumes.yaml",
+      "sha256": "8cce232d8e52867c00c2eb08e4f8b67ec3e338b3fca12ca3f405b19c004be79e"
+    },
+    {
+      "source": "charts/coco-supported/confidential-volumes/crds/confidentialworkloads.yaml",
+      "path": "charts/vendor/confidential-volumes/crds/confidentialworkloads.yaml",
+      "sha256": "cae77158de0f9c45f412411a909f82423c19c4b3f101bd898154d7cad2f185c5"
+    },
+    {
+      "source": "charts/coco-supported/confidential-volumes/templates/NOTES.txt",
+      "path": "charts/vendor/confidential-volumes/templates/NOTES.txt",
+      "sha256": "0d6be907896eba0f2fc17a2ca730e10f74fe300333a25b9edaf77b24aafda0f9"
+    },
+    {
+      "source": "charts/coco-supported/confidential-volumes/templates/build.yaml",
+      "path": "charts/vendor/confidential-volumes/templates/build.yaml",
+      "sha256": "3bcb895fae1e77059174ed7b5cb019b360d6c3c36832727c3dc39c4ecd5c6834"
+    },
+    {
+      "source": "charts/coco-supported/confidential-volumes/templates/controller.yaml",
+      "path": "charts/vendor/confidential-volumes/templates/controller.yaml",
+      "sha256": "3e67b64109b7a36a8dbfa02e07cbab5d656543fbfb6bda606611e577e6653d13"
+    },
+    {
+      "source": "charts/coco-supported/confidential-volumes/templates/deployment-admission.yaml",
+      "path": "charts/vendor/confidential-volumes/templates/deployment-admission.yaml",
+      "sha256": "f9374780dbf775bb8764f9535185e4e849c9c7700bf7dda0d3aab639c05f449d"
+    },
+    {
+      "source": "charts/coco-supported/confidential-volumes/templates/rbac.yaml",
+      "path": "charts/vendor/confidential-volumes/templates/rbac.yaml",
+      "sha256": "b0708955737e9eb557bebd907c4c2c345b134359b84393c034b06896f21d3e4a"
+    },
+    {
+      "source": "charts/coco-supported/confidential-volumes/values.yaml",
+      "path": "charts/vendor/confidential-volumes/values.yaml",
+      "sha256": "f59fd1d900ccbfaa52b5c1d52b1572bf115eeb99882d05a831a17b49675883e9"
+    },
+    {
+      "source": "charts/coco-supported/encrypted-model-populator/Chart.yaml",
+      "path": "charts/vendor/encrypted-model-populator/Chart.yaml",
+      "sha256": "0b2c37c45691322407b4d8c62515da88cbf3474aec261d30b6ab5ddf2200d974"
+    },
+    {
+      "source": "charts/coco-supported/encrypted-model-populator/crds/encryptedmodelsources.yaml",
+      "path": "charts/vendor/encrypted-model-populator/crds/encryptedmodelsources.yaml",
+      "sha256": "bd6f19eff305932ee704f4e8367301b55e3b3b35b500811763438be2eda245fe"
+    },
+    {
+      "source": "charts/coco-supported/encrypted-model-populator/templates/build.yaml",
+      "path": "charts/vendor/encrypted-model-populator/templates/build.yaml",
+      "sha256": "2dab1b8b7bed1246be2c5e83c5ef97a585c4fb838cc2eb5d1ba1e55df528dfcb"
+    },
+    {
+      "source": "charts/coco-supported/encrypted-model-populator/templates/controller.yaml",
+      "path": "charts/vendor/encrypted-model-populator/templates/controller.yaml",
+      "sha256": "46d39f2f846130d66a96047d0362d7d4b3ff9716cf49efa894f26450a3bc352a"
+    },
+    {
+      "source": "charts/coco-supported/encrypted-model-populator/templates/example.yaml",
+      "path": "charts/vendor/encrypted-model-populator/templates/example.yaml",
+      "sha256": "35d7195276a86045f1de033ebc14fc09b98e7a983b4cd372997d4a6690fc2c76"
+    },
+    {
+      "source": "charts/coco-supported/encrypted-model-populator/templates/importer-scc.yaml",
+      "path": "charts/vendor/encrypted-model-populator/templates/importer-scc.yaml",
+      "sha256": "5527bae9f0a4ed69d90fa33fdadbff3d306d46d307aa4199efceb7c41aab1ce1"
+    },
+    {
+      "source": "charts/coco-supported/encrypted-model-populator/templates/publisher.yaml",
+      "path": "charts/vendor/encrypted-model-populator/templates/publisher.yaml",
+      "sha256": "ef82e64eb0c78149f43e09fa9ead397fd95bdd71bc5a4f8772085bdd4d602966"
+    },
+    {
+      "source": "charts/coco-supported/encrypted-model-populator/templates/rbac.yaml",
+      "path": "charts/vendor/encrypted-model-populator/templates/rbac.yaml",
+      "sha256": "60300f213dd133edff5b7e4c503c4077a0af0e27981ef82c335f0f42334578d4"
+    },
+    {
+      "source": "charts/coco-supported/encrypted-model-populator/values.yaml",
+      "path": "charts/vendor/encrypted-model-populator/values.yaml",
+      "sha256": "c7875785ed9a56cd548cfbca6977d15b8f92ec328c98e36f4a8bce02676525b4"
+    },
+    {
+      "source": "components/confidential-storage-authority/.gitignore",
+      "path": "components/confidential-storage-authority/.gitignore",
+      "sha256": "580b74c6488c9cbea9c5373203d7e18f5cad43e19ff73b92187c3f6eed1d4f08"
+    },
+    {
+      "source": "components/confidential-storage-authority/Containerfile",
+      "path": "components/confidential-storage-authority/Containerfile",
+      "sha256": "671a4c96c4b39e2c1960fd292f37e77a4edb0d97723d2ef2bda13248a59a5c75"
+    },
+    {
+      "source": "components/confidential-storage-authority/README.md",
+      "path": "components/confidential-storage-authority/README.md",
+      "sha256": "7ff302f81009925780acbd3f0062519fdf3a1d9d12cbcbba274310f26d2e3a3d"
+    },
+    {
+      "source": "components/confidential-storage-authority/as_client.py",
+      "path": "components/confidential-storage-authority/as_client.py",
+      "sha256": "81704c1b0d64a7e0898990796e923bfec9cfabfbba6bac0a9793251e76a34b6e"
+    },
+    {
+      "source": "components/confidential-storage-authority/attestation-build-lock.json",
+      "path": "components/confidential-storage-authority/attestation-build-lock.json",
+      "sha256": "682d38a86835b2f3b99ce75de93b8bad1053e38df8cbd8b32a54b559ea0daa1d"
+    },
+    {
+      "source": "components/confidential-storage-authority/attestation-source-lock.json",
+      "path": "components/confidential-storage-authority/attestation-source-lock.json",
+      "sha256": "d502cbd521928b5825901dbb7a905ab3a6f0c090df3ec870921975631d2c5c1a"
+    },
+    {
+      "source": "components/confidential-storage-authority/attestation.py",
+      "path": "components/confidential-storage-authority/attestation.py",
+      "sha256": "289564c4cb878613e501babc62e04b93b51fa41d295f2464f8f19561425f436f"
+    },
+    {
+      "source": "components/confidential-storage-authority/authority.py",
+      "path": "components/confidential-storage-authority/authority.py",
+      "sha256": "0975df2a4e148ec7faff0ace5fdeecae57674a9c461ed7bfc43f2064809d9eac"
+    },
+    {
+      "source": "components/confidential-storage-authority/executor.py",
+      "path": "components/confidential-storage-authority/executor.py",
+      "sha256": "6dc5eef0e6c89899d202cf307e374d5b877508e5f48ad153f064630556e1172b"
+    },
+    {
+      "source": "components/confidential-storage-authority/gateway.py",
+      "path": "components/confidential-storage-authority/gateway.py",
+      "sha256": "6ca43dd0febb5953d30a29a9f03911888dd7a23ceefcf1bdfd0dc217f63a3994"
+    },
+    {
+      "source": "components/confidential-storage-authority/generate_receipt_fixture.py",
+      "path": "components/confidential-storage-authority/generate_receipt_fixture.py",
+      "sha256": "99f45ab4dc100865e2d6da9a5553f9eec9005ad3940a3424768049d719df00f8"
+    },
+    {
+      "source": "components/confidential-storage-authority/generate_ro_fixture.py",
+      "path": "components/confidential-storage-authority/generate_ro_fixture.py",
+      "sha256": "ac65e9e533727cc020f2638ef2201f10d7e0579065f5931034d064db86a5470a"
+    },
+    {
+      "source": "components/confidential-storage-authority/initialization.py",
+      "path": "components/confidential-storage-authority/initialization.py",
+      "sha256": "059c6b7dbc57f014dc3118a5d96c3805c5720dd3d4c32043e2315094eb594294"
+    },
+    {
+      "source": "components/confidential-storage-authority/initialization_api.py",
+      "path": "components/confidential-storage-authority/initialization_api.py",
+      "sha256": "5ba1295c78e83392eb25326a5d7daa295b77a5f0579a7c64a273315e2b05a739"
+    },
+    {
+      "source": "components/confidential-storage-authority/kbs_rcar.py",
+      "path": "components/confidential-storage-authority/kbs_rcar.py",
+      "sha256": "937091ecf6daef78515623b9a1ef78be7ab537840ba037831c051b97852ecbc9"
+    },
+    {
+      "source": "components/confidential-storage-authority/publication.py",
+      "path": "components/confidential-storage-authority/publication.py",
+      "sha256": "87c08e4b4a75e63d48201697f40eabeddd582637d703a1631644241404fd11ba"
+    },
+    {
+      "source": "components/confidential-storage-authority/rcar_gateway.py",
+      "path": "components/confidential-storage-authority/rcar_gateway.py",
+      "sha256": "aae5d181c29b8c5f06e2ce100fc6714b64da73bfa7747cbe9305c9b6199b4548"
+    },
+    {
+      "source": "components/confidential-storage-authority/receipts.py",
+      "path": "components/confidential-storage-authority/receipts.py",
+      "sha256": "f3f85b8616a5c1f98de04b1b41c4487b5b5a4a6b0c6c371c88896a5aee71e9bf"
+    },
+    {
+      "source": "components/confidential-storage-authority/recover_fenced_reopen.py",
+      "path": "components/confidential-storage-authority/recover_fenced_reopen.py",
+      "sha256": "5a485745287ae6cbf7807cad057867a90bd536df9ad7e7667b0088141927f265"
+    },
+    {
+      "source": "components/confidential-storage-authority/recover_unstarted.py",
+      "path": "components/confidential-storage-authority/recover_unstarted.py",
+      "sha256": "d1cb2adc2fa05b85e98c9640b616498b7a08a91246a93741e3b0bf8ca0689efd"
+    },
+    {
+      "source": "components/confidential-storage-authority/requirements.txt",
+      "path": "components/confidential-storage-authority/requirements.txt",
+      "sha256": "47f9d65a21898d47bcdb492a2b2abf5e9a767e738eeaa329151706ed6c950f87"
+    },
+    {
+      "source": "components/confidential-storage-authority/runtime-requirements.txt",
+      "path": "components/confidential-storage-authority/runtime-requirements.txt",
+      "sha256": "a4182fd79ce0b5b4935d8d48ef262bdc65fd639dd2121f01b91a183572c36255"
+    },
+    {
+      "source": "components/confidential-storage-authority/runtime-wheels.json",
+      "path": "components/confidential-storage-authority/runtime-wheels.json",
+      "sha256": "b3552414ccbc86b5738d18a1837ed70108308403f38dfbebac66f436fa362594"
+    },
+    {
+      "source": "components/confidential-storage-authority/serve.py",
+      "path": "components/confidential-storage-authority/serve.py",
+      "sha256": "2703630a8d84d88478f369dcc789e0fec7d3bfcc3d94c7788e3261472fe208de"
+    },
+    {
+      "source": "components/confidential-storage-authority/storage_profiles.py",
+      "path": "components/confidential-storage-authority/storage_profiles.py",
+      "sha256": "439a5b467d20ec33dfd7ef56d102fcb44280f0b19831d8408be21030ed5ceabb"
+    },
+    {
+      "source": "components/confidential-storage-authority/test_as_client.py",
+      "path": "components/confidential-storage-authority/test_as_client.py",
+      "sha256": "9eb2f46cb15e4d692aedfed8b0a764ed7ce145f7e3ec81fa606f3bb05d7eefb7"
+    },
+    {
+      "source": "components/confidential-storage-authority/test_authority.py",
+      "path": "components/confidential-storage-authority/test_authority.py",
+      "sha256": "3694fd52ddaca6c8f09a6f9e3f570186cad888f185a979338bc61ecc773ed222"
+    },
+    {
+      "source": "components/confidential-storage-authority/test_executor.py",
+      "path": "components/confidential-storage-authority/test_executor.py",
+      "sha256": "7ad1adf513d6e7e4e0a7298423f95d0a5919dea10066162a4a7e669598fa68a9"
+    },
+    {
+      "source": "components/confidential-storage-authority/test_fenced_reopen.py",
+      "path": "components/confidential-storage-authority/test_fenced_reopen.py",
+      "sha256": "d6649715f3052bb34b1aace05da7d405dead5ea9b9a4c39fb096b6115d893ff7"
+    },
+    {
+      "source": "components/confidential-storage-authority/test_gateway.py",
+      "path": "components/confidential-storage-authority/test_gateway.py",
+      "sha256": "996f247eef66fe1495d5b30c934c538ae2eec47b436d237a9007283d2a5f8b29"
+    },
+    {
+      "source": "components/confidential-storage-authority/test_initialization.py",
+      "path": "components/confidential-storage-authority/test_initialization.py",
+      "sha256": "60e790606822f34dceedb6f4e18234660d68ed002f1483ab279b6dcdda94e881"
+    },
+    {
+      "source": "components/confidential-storage-authority/test_initialization_api.py",
+      "path": "components/confidential-storage-authority/test_initialization_api.py",
+      "sha256": "58fb87f0e3b8314bb40eed2108340c27f18b8c1db3494896c44d0810b2923095"
+    },
+    {
+      "source": "components/confidential-storage-authority/test_kbs_rcar.py",
+      "path": "components/confidential-storage-authority/test_kbs_rcar.py",
+      "sha256": "68a1b30ebbdde7dcae6f49b26054affb1477e9ec67dc67b03689b49494d98b67"
+    },
+    {
+      "source": "components/confidential-storage-authority/test_policy_update.py",
+      "path": "components/confidential-storage-authority/test_policy_update.py",
+      "sha256": "2a09857282721f649e585bf71195a7ee44d2a778c27c7f5710d5c0cd27667114"
+    },
+    {
+      "source": "components/confidential-storage-authority/test_publication.py",
+      "path": "components/confidential-storage-authority/test_publication.py",
+      "sha256": "64dd98e1da36189a2e6e0683fbf41a70d7aa96cea3d8efb9956ff37ae1311ea0"
+    },
+    {
+      "source": "components/confidential-storage-authority/test_rcar_gateway.py",
+      "path": "components/confidential-storage-authority/test_rcar_gateway.py",
+      "sha256": "58a85f35f1a2b9e648db7318373a1b1e092366f98111c9a6b8cac8962033c1ae"
+    },
+    {
+      "source": "components/confidential-storage-authority/test_receipts.py",
+      "path": "components/confidential-storage-authority/test_receipts.py",
+      "sha256": "337bd946cd16653dbb808f13633cc6635d37aee429f3407e6e1290dd2f14f316"
+    },
+    {
+      "source": "components/confidential-storage-authority/test_serve.py",
+      "path": "components/confidential-storage-authority/test_serve.py",
+      "sha256": "d6160f44cb060c5ca03896849b0d01cb7e5cad5ea524097486dcd59ff1f92da2"
+    },
+    {
+      "source": "components/confidential-storage-authority/test_storage_profiles.py",
+      "path": "components/confidential-storage-authority/test_storage_profiles.py",
+      "sha256": "291fbcdfa8e0298e0e3c42d4a35204ab324cf5fd356ce6bf4cd486a0abc5d00e"
+    },
+    {
+      "source": "components/confidential-storage-authority/test_transport.py",
+      "path": "components/confidential-storage-authority/test_transport.py",
+      "sha256": "f934df952c70a165e4ab177c64cb508de035d6274c42c056209550a447e93770"
+    },
+    {
+      "source": "components/confidential-storage-authority/test_unstarted_recovery.py",
+      "path": "components/confidential-storage-authority/test_unstarted_recovery.py",
+      "sha256": "6a16cc1382b7ec0139eaab4866d453c67b2425b794db731e6409c84f9d940d5e"
+    },
+    {
+      "source": "components/confidential-storage-authority/transport.py",
+      "path": "components/confidential-storage-authority/transport.py",
+      "sha256": "fdf562c74ba249cf39fe19aa9332686d4cd1b404e6e91e56b06c50c1aa0ff5c7"
+    },
+    {
+      "source": "components/confidential-storage-authority/update_policy.py",
+      "path": "components/confidential-storage-authority/update_policy.py",
+      "sha256": "2ce63fa3f6cb9c31a9f63d8a02a0bc8e70e299e190642ce24a6d82b42cb46046"
+    },
+    {
+      "source": "components/confidential-storage-client/Cargo.lock",
+      "path": "components/confidential-storage-client/Cargo.lock",
+      "sha256": "1b6187db258f5aa3db233fcf1d3ca0f1e8f1b569d2fbefe9825b7ffe6a8fa88e"
+    },
+    {
+      "source": "components/confidential-storage-client/Cargo.toml",
+      "path": "components/confidential-storage-client/Cargo.toml",
+      "sha256": "dddf3a86e21ffa5de9223770a18d3eb1b4a12584a506215ce39e9474a5690dbf"
+    },
+    {
+      "source": "components/confidential-storage-client/README.md",
+      "path": "components/confidential-storage-client/README.md",
+      "sha256": "166b4b19bb4a6675a34e17b8701ae5d7a59b1c5646c19df3941901add1c29c08"
+    },
+    {
+      "source": "components/confidential-storage-client/examples/guest_authority_probe.rs",
+      "path": "components/confidential-storage-client/examples/guest_authority_probe.rs",
+      "sha256": "a2e462f0c4ef9fb88ba6c54e982f6c5ce9aaadac277618121feea0e53ab507e2"
+    },
+    {
+      "source": "components/confidential-storage-client/examples/transport_fixture.rs",
+      "path": "components/confidential-storage-client/examples/transport_fixture.rs",
+      "sha256": "b3c34688bcef753a1473b63e8d689e5b9bc13f85ba5615e92ffcf5b124ff61c4"
+    },
+    {
+      "source": "components/confidential-storage-client/fixtures/ready-policy-upgrade.json",
+      "path": "components/confidential-storage-client/fixtures/ready-policy-upgrade.json",
+      "sha256": "8afcbe05337f48e59083113ded4ef9f0da51ec9da4128b75989356533d0a46d4"
+    },
+    {
+      "source": "components/confidential-storage-client/src/initialization.rs",
+      "path": "components/confidential-storage-client/src/initialization.rs",
+      "sha256": "4b46d7a0bf2c16f293d7242d2f815907a15d1799810489d605407e9a8d2188bd"
+    },
+    {
+      "source": "components/confidential-storage-client/src/keys.rs",
+      "path": "components/confidential-storage-client/src/keys.rs",
+      "sha256": "70ee9d3723dd46b6289494ae7607bc37eac8539a5b363fbaa78ff6e0621bb6c0"
+    },
+    {
+      "source": "components/confidential-storage-client/src/lib.rs",
+      "path": "components/confidential-storage-client/src/lib.rs",
+      "sha256": "70232b1446ca4bc4053c78546f80ecc7037368e1dcff68f28f7f791de193c5f3"
+    },
+    {
+      "source": "components/confidential-storage-client/src/private_aa.rs",
+      "path": "components/confidential-storage-client/src/private_aa.rs",
+      "sha256": "d564543090d6d7118af52075b789a3f8af2c9713f0b5333ae75e5ef8766b11b5"
+    },
+    {
+      "source": "components/confidential-storage-client/src/private_rcar_aa.rs",
+      "path": "components/confidential-storage-client/src/private_rcar_aa.rs",
+      "sha256": "4b33ab97f136f696d3b8841745a66129e502ddfb3b78779dbab5ff43de9c4512"
+    },
+    {
+      "source": "components/confidential-storage-client/test_transport.py",
+      "path": "components/confidential-storage-client/test_transport.py",
+      "sha256": "0985941b04f925f5bc864426c1ee1d638232baa5cdb2406e26fdbefb9757d9e4"
+    },
+    {
+      "source": "components/confidential-storage-guest/.gitignore",
+      "path": "components/confidential-storage-guest/.gitignore",
+      "sha256": "306fd52e74fca6746e12acc750f232de15e71da917756a1270d74c91f5eb7368"
+    },
+    {
+      "source": "components/confidential-storage-guest/Cargo.lock",
+      "path": "components/confidential-storage-guest/Cargo.lock",
+      "sha256": "cf25bf239299c685e72e1220856706ef196cea51ce3be5377f4ecb729e1042e4"
+    },
+    {
+      "source": "components/confidential-storage-guest/Cargo.toml",
+      "path": "components/confidential-storage-guest/Cargo.toml",
+      "sha256": "b6c066efd3c25ec442fb94e89ed22b4add9c64b661b0705ba76412ba0dc5598f"
+    },
+    {
+      "source": "components/confidential-storage-guest/README.md",
+      "path": "components/confidential-storage-guest/README.md",
+      "sha256": "0dbf6a919a7781191108433f5819b07c3d3bb611af09b6afd4dec5893596e5ce"
+    },
+    {
+      "source": "components/confidential-storage-guest/examples/initializer-lab.rs",
+      "path": "components/confidential-storage-guest/examples/initializer-lab.rs",
+      "sha256": "ff28b088b0ae3c3c378c1c8fe04908650b80bf64c41a3cc54731cb6295232a3b"
+    },
+    {
+      "source": "components/confidential-storage-guest/examples/kernel_opener_lab.rs",
+      "path": "components/confidential-storage-guest/examples/kernel_opener_lab.rs",
+      "sha256": "843423f7325924a2d64d75bea6536ce208c4f8df0e1bce9813c7bdde0dcc951b"
+    },
+    {
+      "source": "components/confidential-storage-guest/examples/kernel_opener_lab/lifecycle_lab.rs",
+      "path": "components/confidential-storage-guest/examples/kernel_opener_lab/lifecycle_lab.rs",
+      "sha256": "9a4f9eaf513f89161edd3f5a4fbd7bf3473f93fc2ec0bff7a46bfc511a4e50d4"
+    },
+    {
+      "source": "components/confidential-storage-guest/examples/ro_kernel_lab.rs",
+      "path": "components/confidential-storage-guest/examples/ro_kernel_lab.rs",
+      "sha256": "a136b7747d69a86d02eb8ab2446606fec90d239fc939753d90aebd510c37585a"
+    },
+    {
+      "source": "components/confidential-storage-guest/profiles/README.md",
+      "path": "components/confidential-storage-guest/profiles/README.md",
+      "sha256": "6354c8b48a8eaad4d026402585b2304dc79f65af4c1d101bc132644b7366d3f5"
+    },
+    {
+      "source": "components/confidential-storage-guest/profiles/ro-luks2-verity-v1.json",
+      "path": "components/confidential-storage-guest/profiles/ro-luks2-verity-v1.json",
+      "sha256": "1f46ba950367687ab624d1f18fbd26e5ea7c74977c8a6211db403001e5a7ad69"
+    },
+    {
+      "source": "components/confidential-storage-guest/profiles/ro-luks2-verity-v2.json",
+      "path": "components/confidential-storage-guest/profiles/ro-luks2-verity-v2.json",
+      "sha256": "20c3e80353de4a73e3a1ff9b7abcecc667d17dbc07e38466c9128a035778dda3"
+    },
+    {
+      "source": "components/confidential-storage-guest/profiles/rw-luks2-v1.json",
+      "path": "components/confidential-storage-guest/profiles/rw-luks2-v1.json",
+      "sha256": "d8d4bd81023565806a8996efb6702b2eb785b792929cf8b8a2733286eb2e10cb"
+    },
+    {
+      "source": "components/confidential-storage-guest/profiles/rw-luks2-v2.json",
+      "path": "components/confidential-storage-guest/profiles/rw-luks2-v2.json",
+      "sha256": "684391928604912700f09aec62de6ba2c2f83e08dbbc2573e2b15a7e247a443a"
+    },
+    {
+      "source": "components/confidential-storage-guest/src/agent_lifecycle.rs",
+      "path": "components/confidential-storage-guest/src/agent_lifecycle.rs",
+      "sha256": "4dfb9e1becdcb9622c09658f1c95feceaa06d0f5e06d805c9e7e00895354854c"
+    },
+    {
+      "source": "components/confidential-storage-guest/src/agent_lifecycle/tests.rs",
+      "path": "components/confidential-storage-guest/src/agent_lifecycle/tests.rs",
+      "sha256": "4841578cf55e3eefdc6444f623254e33b61afb84a545dd04b5bf9cd4c798e5d6"
+    },
+    {
+      "source": "components/confidential-storage-guest/src/binding.rs",
+      "path": "components/confidential-storage-guest/src/binding.rs",
+      "sha256": "34d4d9784aa82d2d2ce1558251b5b752c56d63ee4d60a8268b8a209a669de9b0"
+    },
+    {
+      "source": "components/confidential-storage-guest/src/consumer.rs",
+      "path": "components/confidential-storage-guest/src/consumer.rs",
+      "sha256": "ca487ea8e769548de5f0f34948cec11242435d6390b2f0408aa57bb1e06f9542"
+    },
+    {
+      "source": "components/confidential-storage-guest/src/guest_mount.rs",
+      "path": "components/confidential-storage-guest/src/guest_mount.rs",
+      "sha256": "59ed7896193dd0d2cfc55216b9738435493804759ea7d65031f54f8abd934765"
+    },
+    {
+      "source": "components/confidential-storage-guest/src/initializer.rs",
+      "path": "components/confidential-storage-guest/src/initializer.rs",
+      "sha256": "f7ffaa99f93428ff2cad2ee072dd37dd08cabb6e68415b15b05939353603e0ff"
+    },
+    {
+      "source": "components/confidential-storage-guest/src/lib.rs",
+      "path": "components/confidential-storage-guest/src/lib.rs",
+      "sha256": "21804dded3f679bc1d4256eadbe3cc22c283efae4f5101629530fba6446bb6bc"
+    },
+    {
+      "source": "components/confidential-storage-guest/src/lifecycle.rs",
+      "path": "components/confidential-storage-guest/src/lifecycle.rs",
+      "sha256": "bd88744b4e691b305c4e67d77cfc87e548dc4ff21b2d2d9f0d213b68a2b3fc6c"
+    },
+    {
+      "source": "components/confidential-storage-guest/src/lifecycle/tests.rs",
+      "path": "components/confidential-storage-guest/src/lifecycle/tests.rs",
+      "sha256": "d57a3a3a29bb44e6b1c6d25d00a6eef38da67e75fba662f7ec53f83f7be0f1f2"
+    },
+    {
+      "source": "components/confidential-storage-guest/src/linux_backend.rs",
+      "path": "components/confidential-storage-guest/src/linux_backend.rs",
+      "sha256": "5e7e39549e8f114d595cd4588dabb224db066177f1eb5ecd5ced8f3ba9f53246"
+    },
+    {
+      "source": "components/confidential-storage-guest/src/opener.rs",
+      "path": "components/confidential-storage-guest/src/opener.rs",
+      "sha256": "b59a8f853d582ce693bdbb6d3004ae081cb259ef99e08e88e3b8c287fd752ffa"
+    },
+    {
+      "source": "components/confidential-storage-guest/src/opener/tests.rs",
+      "path": "components/confidential-storage-guest/src/opener/tests.rs",
+      "sha256": "52cb86abce3359a591d9ac272621ab4a50bfb0567ebcd851f240a49fac5d5f51"
+    },
+    {
+      "source": "components/confidential-storage-guest/src/profile.rs",
+      "path": "components/confidential-storage-guest/src/profile.rs",
+      "sha256": "c1966cc1c180a4eeadff1be62a4c6d3e46a8455c608daba4f1b323f8f4e3501d"
+    },
+    {
+      "source": "components/confidential-storage-guest/src/profile/tests.rs",
+      "path": "components/confidential-storage-guest/src/profile/tests.rs",
+      "sha256": "c66328717daa4d121da3562a3e29ca67a6bb42f8aaf47ebbd925d82d08bf89e9"
+    },
+    {
+      "source": "components/confidential-storage-guest/src/receipt.rs",
+      "path": "components/confidential-storage-guest/src/receipt.rs",
+      "sha256": "3c6b0583f3f2e56fbaaeba7b88b5efe7fd7c68d3b77a539b12320213bf7ce46c"
+    },
+    {
+      "source": "components/confidential-storage-guest/src/ro_opener.rs",
+      "path": "components/confidential-storage-guest/src/ro_opener.rs",
+      "sha256": "4531f8203e48a262c6dc10618fd039d81fc2d2aa19beda0993092f93360c56f4"
+    },
+    {
+      "source": "components/confidential-storage-guest/src/ro_profile.rs",
+      "path": "components/confidential-storage-guest/src/ro_profile.rs",
+      "sha256": "f3ff42eac7fcfecabf3b75e62953afd0a35464a8da315227a97dfa946578184e"
+    },
+    {
+      "source": "components/confidential-storage-guest/src/ro_profile/tests.rs",
+      "path": "components/confidential-storage-guest/src/ro_profile/tests.rs",
+      "sha256": "67be29e9d6fbb6216ef15867f17c95748e3d10e8c5b0a3063e944512f214b1b9"
+    },
+    {
+      "source": "components/confidential-storage-guest/src/sealed_header.rs",
+      "path": "components/confidential-storage-guest/src/sealed_header.rs",
+      "sha256": "ff0b91100732e605a3313f14392d46031c1ec2b50d22a5792d7d1617ad2538bb"
+    },
+    {
+      "source": "components/confidential-storage-guest/tests/receipt-fixture.json",
+      "path": "components/confidential-storage-guest/tests/receipt-fixture.json",
+      "sha256": "40dd78f5604b01667ac03fed52ce89ee7fb752ebbb2b58f24694d65d9cf07725"
+    },
+    {
+      "source": "components/confidential-storage-guest/tests/receipts.rs",
+      "path": "components/confidential-storage-guest/tests/receipts.rs",
+      "sha256": "69eb9e650daec40d746fc7153618256d21e191accca90a8bf37440acc86c7afa"
+    },
+    {
+      "source": "components/confidential-storage-guest/tests/ro-receipt-fixture.json",
+      "path": "components/confidential-storage-guest/tests/ro-receipt-fixture.json",
+      "sha256": "201acb1d69363311b1ac959371223421831d861d40b79851b7e3f3e6593e1062"
+    },
+    {
+      "source": "components/confidential-storage-kbs/Cargo.lock",
+      "path": "components/confidential-storage-kbs/Cargo.lock",
+      "sha256": "4c0f115fe586730111471cf1c2b38277a4a21da7f1c5af27399ee318151a4d8b"
+    },
+    {
+      "source": "components/confidential-storage-kbs/Cargo.toml",
+      "path": "components/confidential-storage-kbs/Cargo.toml",
+      "sha256": "f3125b35308672007823b2fcaea0c12cb406b865ee7198f40730bc7028969638"
+    },
+    {
+      "source": "components/confidential-storage-kbs/README.md",
+      "path": "components/confidential-storage-kbs/README.md",
+      "sha256": "2544954ecfd5c0ddce5936d9aacab8e40b34ede453e3e327d0f166e1c6a64e44"
+    },
+    {
+      "source": "components/confidential-storage-kbs/examples/key_fixture.rs",
+      "path": "components/confidential-storage-kbs/examples/key_fixture.rs",
+      "sha256": "61fa73dd40a20df4fc567b52fea63a5ce00da2934be4abd2e1ef8e9a3f4fed04"
+    },
+    {
+      "source": "components/confidential-storage-kbs/prepare.py",
+      "path": "components/confidential-storage-kbs/prepare.py",
+      "sha256": "c158b9c93e1740d1726850629987bd8ea7a53ed35c6e794405582b49e4926775"
+    },
+    {
+      "source": "components/confidential-storage-kbs/src/lib.rs",
+      "path": "components/confidential-storage-kbs/src/lib.rs",
+      "sha256": "381dd9cd5131be4c8105b695b4e07a7e5d5820727b672706c2d13ce262693e72"
+    },
+    {
+      "source": "components/confidential-storage-kbs/src/private_cdh.rs",
+      "path": "components/confidential-storage-kbs/src/private_cdh.rs",
+      "sha256": "679f544e88036a5aa99fcfacd9a3b316ec52d03f3409be67fe0278b1c73ff208"
+    },
+    {
+      "source": "components/confidential-storage-kbs/test_keys.py",
+      "path": "components/confidential-storage-kbs/test_keys.py",
+      "sha256": "212cf097024d2564397685dd10634f0012598d5b05d38cb4a0b78e83b3c0d04b"
+    },
+    {
+      "source": "components/confidential-storage-kbs/tests/rcar_wire.rs",
+      "path": "components/confidential-storage-kbs/tests/rcar_wire.rs",
+      "sha256": "8af1b6b274d9028ac79a4dd179d61e404eeb590dcf6d3369701f50f37b1a148e"
+    },
+    {
+      "source": "components/confidential-storage-service/Cargo.lock",
+      "path": "components/confidential-storage-service/Cargo.lock",
+      "sha256": "01ba8672aa6b6d2c1ce183ae9afe5b2caf4e4afb573513fdeee42f46bcaf5f1e"
+    },
+    {
+      "source": "components/confidential-storage-service/Cargo.toml",
+      "path": "components/confidential-storage-service/Cargo.toml",
+      "sha256": "3c98b3c132803f3383952aa4901aa366f76d23d57a23077e1cc6eb6a710a62b5"
+    },
+    {
+      "source": "components/confidential-storage-service/README.md",
+      "path": "components/confidential-storage-service/README.md",
+      "sha256": "afbb7e9caf7e156636e35a0460e0c11de52cf73a9bd3f0630f76011644bb2986"
+    },
+    {
+      "source": "components/confidential-storage-service/src/group.rs",
+      "path": "components/confidential-storage-service/src/group.rs",
+      "sha256": "f50b241e5f9d7e9e74ba42edbeba38a84ecfc7b38fb8b41c034776d1691cc7e0"
+    },
+    {
+      "source": "components/confidential-storage-service/src/lib.rs",
+      "path": "components/confidential-storage-service/src/lib.rs",
+      "sha256": "3835aded5ae82d04ef1d14b3b17793ff832d58c9a8caec0d6d792b84d098c955"
+    },
+    {
+      "source": "components/confidential-storage-service/src/main.rs",
+      "path": "components/confidential-storage-service/src/main.rs",
+      "sha256": "901353be945f98e635ea611dc8ff1cbd2caf6c0176d45945e27a749df5b6ae6c"
+    },
+    {
+      "source": "components/confidential-storage-sidecar/Containerfile",
+      "path": "components/confidential-storage-sidecar/Containerfile",
+      "sha256": "240d0300920c8d7758105a47b414f506507b9daa2bc26d9e96dae1c9b5c3f46c"
+    },
+    {
+      "source": "components/confidential-storage-sidecar/README.md",
+      "path": "components/confidential-storage-sidecar/README.md",
+      "sha256": "845bbc5af0e2fd296446d3e0abaa8cdda04c12f02c9ea5c9311fe3519ddef028"
+    },
+    {
+      "source": "components/confidential-storage-sidecar/build-service.sh",
+      "path": "components/confidential-storage-sidecar/build-service.sh",
+      "sha256": "8b1330c1007b5f5bd5fe849b5a3129a4970fd162b5f599a4c597881c08045011"
+    },
+    {
+      "source": "components/confidential-storage-sidecar/policy.py",
+      "path": "components/confidential-storage-sidecar/policy.py",
+      "sha256": "ef9850597f30216398915321ed5537a3ad883ba230b31bcf0e119dba4a3dc53d"
+    },
+    {
+      "source": "components/confidential-storage-sidecar/policy.rego.in",
+      "path": "components/confidential-storage-sidecar/policy.rego.in",
+      "sha256": "155037e19f0e20092c12b516f9fa21441a127309679142ffe65b71d164819ca7"
+    },
+    {
+      "source": "components/confidential-storage-sidecar/prepare-build.py",
+      "path": "components/confidential-storage-sidecar/prepare-build.py",
+      "sha256": "59d0eb7011aaf9b76b42ea149529f4a770acdad2e18b4e1349035a004c5a95d8"
+    },
+    {
+      "source": "components/confidential-storage-sidecar/prepare-payload.py",
+      "path": "components/confidential-storage-sidecar/prepare-payload.py",
+      "sha256": "b549306661e16df182cc1f4e94f4bf8f9a86ea76dcb8ad3e701966e10301c844"
+    },
+    {
+      "source": "components/confidential-storage-sidecar/prepare-qwen.py",
+      "path": "components/confidential-storage-sidecar/prepare-qwen.py",
+      "sha256": "6b6e7893aee71c24fbf9867d1882df7b51e8f2468a7bbc3791c8470d55caff8c"
+    },
+    {
+      "source": "components/confidential-storage-sidecar/runtime.py",
+      "path": "components/confidential-storage-sidecar/runtime.py",
+      "sha256": "2168e1cd027c0a1f7db8ac9e5a22502ce58412e0345995aefbfc6b0b49c83f20"
+    },
+    {
+      "source": "components/confidential-storage-sidecar/test_runtime.py",
+      "path": "components/confidential-storage-sidecar/test_runtime.py",
+      "sha256": "c9fb9aa9970acde6da81e9e8c91c0f4e95f2bb15c1c8f164d9c263a287d7b910"
+    },
+    {
+      "source": "components/confidential-volume-contract/README.md",
+      "path": "components/confidential-volume-contract/README.md",
+      "sha256": "dce74bb2d11eb8103b0ffcfe5563d79838a807854077430fdf301fa32530069a"
+    },
+    {
+      "source": "components/confidential-volume-contract/compiler.py",
+      "path": "components/confidential-volume-contract/compiler.py",
+      "sha256": "2ec810d16ef7917b44e767d9c4c029d8fedd86c929813b27c80ae83fbcc01b2e"
+    },
+    {
+      "source": "components/confidential-volume-contract/examples/four-volumes.json",
+      "path": "components/confidential-volume-contract/examples/four-volumes.json",
+      "sha256": "ed6c3d7d9b76bdfea337690c293badf358a202ad6f01cdf066828023b40eebc2"
+    },
+    {
+      "source": "components/confidential-volume-contract/test_compiler.py",
+      "path": "components/confidential-volume-contract/test_compiler.py",
+      "sha256": "00aea02df976407dffe193db9f9f7418fb9ab4c1b6855bfaf66a5f057621b1bd"
+    },
+    {
+      "source": "components/confidential-volume-controller/Containerfile",
+      "path": "components/confidential-volume-controller/Containerfile",
+      "sha256": "f4297beca47f9ee0d5670d652833c8b18510ae3519b1fdd1fe998ea284f377a6"
+    },
+    {
+      "source": "components/confidential-volume-controller/README.md",
+      "path": "components/confidential-volume-controller/README.md",
+      "sha256": "c0e8e5ab88cfd9ec6a957dfc19f338526ac37e138e19755c5faa396b492d0462"
+    },
+    {
+      "source": "components/confidential-volume-controller/approve.py",
+      "path": "components/confidential-volume-controller/approve.py",
+      "sha256": "626ae9033f7080075d91276862f6bd8b988f52ada087d37ba1e2cf976e28f6ad"
+    },
+    {
+      "source": "components/confidential-volume-controller/controller.py",
+      "path": "components/confidential-volume-controller/controller.py",
+      "sha256": "a78e92a0b14a188b43975231acaf04731865b9a49a764200cc9c3b4820c13bf0"
+    },
+    {
+      "source": "components/confidential-volume-controller/prepare-build.py",
+      "path": "components/confidential-volume-controller/prepare-build.py",
+      "sha256": "5cd0dee9b785bbf544ea49b3b1c1f0f9a638342ef8ac206ee94448c3de3fc522"
+    },
+    {
+      "source": "components/confidential-volume-controller/prepare-sidecar-package.py",
+      "path": "components/confidential-volume-controller/prepare-sidecar-package.py",
+      "sha256": "f01275696014d82973db00de09f7f8aea4ff89145993050b5a2a727056db29f0"
+    },
+    {
+      "source": "components/confidential-volume-controller/sidecar.py",
+      "path": "components/confidential-volume-controller/sidecar.py",
+      "sha256": "4ecc12ade776227dd54d3c478192c0fab13c8e481801670a1a67209d2c573ff7"
+    },
+    {
+      "source": "components/confidential-volume-controller/test_controller.py",
+      "path": "components/confidential-volume-controller/test_controller.py",
+      "sha256": "1aedd8a4f6a78fe8ecf68b9d28be0d30b48feb8de6d3b491c09b77ebf0f86b74"
+    },
+    {
+      "source": "components/confidential-volume-controller/test_sidecar.py",
+      "path": "components/confidential-volume-controller/test_sidecar.py",
+      "sha256": "f300702a2bc9f98696205cfbf68f1c12670aa339e6e200da01d33465ecf06f0a"
+    },
+    {
+      "source": "components/encrypted-model-populator/.gitignore",
+      "path": "components/encrypted-model-populator/.gitignore",
+      "sha256": "0a893e04c69954f2a6c39ae9292a58e6900361db483a599a9b29a1581fda67e6"
+    },
+    {
+      "source": "components/encrypted-model-populator/README.md",
+      "path": "components/encrypted-model-populator/README.md",
+      "sha256": "5ecb3bfbdca1c0b7646a989c250886fa83857fd33ff0990aced93aa4f1f4be59"
+    },
+    {
+      "source": "components/encrypted-model-populator/controller.go",
+      "path": "components/encrypted-model-populator/controller.go",
+      "sha256": "7d071d74515d0881dd2c9099c44d3b7619df9e662244317db04c60c55db82bb2"
+    },
+    {
+      "source": "components/encrypted-model-populator/controller_test.go",
+      "path": "components/encrypted-model-populator/controller_test.go",
+      "sha256": "769c455003226c02f1bf0a6c692c6d9dc95c3022387c8304fac15fd4084683ba"
+    },
+    {
+      "source": "components/encrypted-model-populator/device_linux.go",
+      "path": "components/encrypted-model-populator/device_linux.go",
+      "sha256": "e01e011bdb87667723a6a96da1cf7840a27eb37f30420f76c667fa53d1656921"
+    },
+    {
+      "source": "components/encrypted-model-populator/device_other.go",
+      "path": "components/encrypted-model-populator/device_other.go",
+      "sha256": "95f4bab81ebcc05916bb315901faa06bb066b380d2dc48b858f11641c892ec5f"
+    },
+    {
+      "source": "components/encrypted-model-populator/fetch_qwen.py",
+      "path": "components/encrypted-model-populator/fetch_qwen.py",
+      "sha256": "58aece0bd6e1835838e0b829ad90e11aad3a320eb231394d7f4ac0ab793ffa89"
+    },
+    {
+      "source": "components/encrypted-model-populator/go.mod",
+      "path": "components/encrypted-model-populator/go.mod",
+      "sha256": "2fd39e3f8ce4621a7cd13c6bfc5eca521d980ea5c4759e3cf638025865a40fd1"
+    },
+    {
+      "source": "components/encrypted-model-populator/go.sum",
+      "path": "components/encrypted-model-populator/go.sum",
+      "sha256": "2b0903f69746173f0750f24ff0ccbf9dac4b4f029e0824646eb264423745b721"
+    },
+    {
+      "source": "components/encrypted-model-populator/import.go",
+      "path": "components/encrypted-model-populator/import.go",
+      "sha256": "224934cb2087201d672a2969bd20466461e3495a3cfa1dff4865f5527fae9c80"
+    },
+    {
+      "source": "components/encrypted-model-populator/import_test.go",
+      "path": "components/encrypted-model-populator/import_test.go",
+      "sha256": "cd0a8740903fee220e10de6e471a9e408659658dbade8d9f54713498e1153b4f"
+    },
+    {
+      "source": "components/encrypted-model-populator/main.go",
+      "path": "components/encrypted-model-populator/main.go",
+      "sha256": "8893b9a0ed0c409cea780796858c067ad73ec4a3b1b97ab09985c54d132acfce"
+    },
+    {
+      "source": "components/encrypted-model-populator/prepare.py",
+      "path": "components/encrypted-model-populator/prepare.py",
+      "sha256": "fa23683b890c56d05b567647444852f4f9ea2f4b1c7e9a4e5a054d1e52ee2496"
+    },
+    {
+      "source": "components/encrypted-model-populator/publish.py",
+      "path": "components/encrypted-model-populator/publish.py",
+      "sha256": "c6af11e3d5df65dead92d13f09e8582c55dd07fea250fd7f8444a750a5d6a75f"
+    },
+    {
+      "source": "components/encrypted-model-populator/publisher-init",
+      "path": "components/encrypted-model-populator/publisher-init",
+      "sha256": "e2913cba9f6a89feeed0b0f21622af4e65259e91cd35bb97037e491105a217c1"
+    },
+    {
+      "source": "components/encrypted-model-populator/registry.go",
+      "path": "components/encrypted-model-populator/registry.go",
+      "sha256": "fc1e65c8dd464144570bf3b650857bbe2b9a996a73e7a3fb068dcefb1ebdb876"
+    },
+    {
+      "source": "components/encrypted-model-populator/source.go",
+      "path": "components/encrypted-model-populator/source.go",
+      "sha256": "e4ce08c23441330cef0caf6d92e49c7f446b16fc5682b7f9572810f7786e2a93"
+    },
+    {
+      "source": "components/encrypted-model-populator/test_publish.py",
+      "path": "components/encrypted-model-populator/test_publish.py",
+      "sha256": "f65c6140656e9225aaa72456c9ac9249f42c347c8b214ed36403de765b3026ee"
+    },
+    {
+      "source": "components/encrypted-model-populator/third_party/lib-volume-populator/LICENSE",
+      "path": "components/encrypted-model-populator/third_party/lib-volume-populator/LICENSE",
+      "sha256": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1"
+    },
+    {
+      "source": "components/encrypted-model-populator/third_party/lib-volume-populator/LOCAL-CHANGES.md",
+      "path": "components/encrypted-model-populator/third_party/lib-volume-populator/LOCAL-CHANGES.md",
+      "sha256": "836b618792ba5fc54a7a7e6e5e8947fe43c80b4e6ec7907499dd3de09259dbbd"
+    },
+    {
+      "source": "components/encrypted-model-populator/third_party/lib-volume-populator/go.mod",
+      "path": "components/encrypted-model-populator/third_party/lib-volume-populator/go.mod",
+      "sha256": "de857b98e7aec5ee569808d1675ca520b58f4e84a1a8603a07aacde714f39cac"
+    },
+    {
+      "source": "components/encrypted-model-populator/third_party/lib-volume-populator/go.sum",
+      "path": "components/encrypted-model-populator/third_party/lib-volume-populator/go.sum",
+      "sha256": "095adaf88a78e9359163a0454b0f5cacc57769b82bbdfe791362ca2bec4e66fa"
+    },
+    {
+      "source": "components/encrypted-model-populator/third_party/lib-volume-populator/populator-machinery/controller.go",
+      "path": "components/encrypted-model-populator/third_party/lib-volume-populator/populator-machinery/controller.go",
+      "sha256": "d335dfe5c40ac40dfc3d9038cb2eddc837109eac7bc996d780133d318f4130fb"
+    },
+    {
+      "source": "components/encrypted-model-populator/third_party/lib-volume-populator/populator-machinery/controller_test.go",
+      "path": "components/encrypted-model-populator/third_party/lib-volume-populator/populator-machinery/controller_test.go",
+      "sha256": "7369b5ba02a56a2e96ea672689b4e959bb33c0ea30d63d45d435483b5ff9c9b6"
+    },
+    {
+      "source": "components/encrypted-model-populator/third_party/lib-volume-populator/populator-machinery/metrics.go",
+      "path": "components/encrypted-model-populator/third_party/lib-volume-populator/populator-machinery/metrics.go",
+      "sha256": "a73a7b547ebbf71a83147b2e529a3247c3f4a0c50769189602205a3d33d6372a"
+    },
+    {
+      "source": "components/encrypted-model-populator/third_party/lib-volume-populator/populator-machinery/metrics_test.go",
+      "path": "components/encrypted-model-populator/third_party/lib-volume-populator/populator-machinery/metrics_test.go",
+      "sha256": "972d68baeee8ff96d4f4cc3bfe51812b01387e59aa3e1d33e36e9bf28d1939f2"
+    },
+    {
+      "source": "components/encrypted-model-populator/third_party/lib-volume-populator/populator-machinery/same_namespace_test.go",
+      "path": "components/encrypted-model-populator/third_party/lib-volume-populator/populator-machinery/same_namespace_test.go",
+      "sha256": "b3f9bb8fa3a3bfe618ccbdf6492816f8ef95e819b283f6df9f0cf2621e13df45"
+    },
+    {
+      "source": "components/encrypted-model-populator/third_party/lib-volume-populator/populator-machinery/util.go",
+      "path": "components/encrypted-model-populator/third_party/lib-volume-populator/populator-machinery/util.go",
+      "sha256": "32feee6a2f6ec33bffb291c3e57046598d358d92060b6d789d3dc7cd13c5c039"
+    },
+    {
+      "source": "components/encrypted-model-populator/third_party/lib-volume-populator/populator-machinery/util_test.go",
+      "path": "components/encrypted-model-populator/third_party/lib-volume-populator/populator-machinery/util_test.go",
+      "sha256": "ac8e235a08051e13e6e75648e819707bef2d9130ccf31c4bc5106843c39fbf5f"
+    },
+    {
+      "source": "components/encrypted-model-populator/third_party/lib-volume-populator/upstream-source-lock.json",
+      "path": "components/encrypted-model-populator/third_party/lib-volume-populator/upstream-source-lock.json",
+      "sha256": "73e4c321122e439f767cf9488db65b15bbda589f7ec3a1e17eec0dd0aa695f60"
+    }
+  ]
+}

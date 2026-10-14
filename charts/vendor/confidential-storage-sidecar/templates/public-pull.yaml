@@ -1,0 +1,34 @@
+{{- if .Values.publicAddonPull.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: public-storage-addon-pull
+  namespace: {{ .Release.Namespace }}
+rules:
+  - apiGroups: [image.openshift.io]
+    resources: [imagestreams/layers]
+    resourceNames: [{{ required "Name the audited public add-on ImageStream" .Values.publicAddonPull.imageStreamName | quote }}]
+    verbs: [get]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: public-storage-addon-pull
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: public-storage-addon-pull
+subjects:
+  - kind: Group
+    apiGroup: rbac.authorization.k8s.io
+    name: system:unauthenticated
+{{- end }}

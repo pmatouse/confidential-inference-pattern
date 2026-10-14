@@ -1,0 +1,47 @@
+# Generic inputs. Site values merge over these. Empty required fields fail preflight.
+installation:
+  name: confidential-inference
+  namespace: confidential-inference
+  clusterIdentity: ''
+  profile: osc-snp-nvidia-x86_64-v1
+base:
+  runtimeClassName: kata-cc-nvidia-gpu
+  runtimeHandler: kata-snp-nvidia-gpu
+  storageClassName: ''
+  kserveNamespace: kserve
+  kserveDeployment: kserve-controller-manager
+  kserveVersion: v0.20.0
+  trusteeNamespace: trustee-operator-system
+  trusteeName: trustee
+  gitopsNamespace: vp-gitops
+images:
+  controller: ''
+  populator: ''
+  sidecar: ''
+  application: nvcr.io/nvidia/vllm@sha256:15f380ad9c32f0ac57ac16e4b778c6f733c88b9ffe3a936035d0a59ad17b1aab
+  python: registry.access.redhat.com/ubi9/python-312@sha256:56fad467cb1e41666f0028b7fd71107df0556bcc9ecfc577597858c85618f55c
+registry:
+  origin: ''
+  injectServiceCA: true
+approvalKeys: {}
+demo:
+  name: qwen-demo-001
+  modelSize: 2Gi
+  dataSize: 1Gi
+  modelMount: /model
+  dataMount: /data
+  modelName: qwen3-0.6b
+  modelKeyResource: kbs:///default/model-keys/qwen3-0-6b-v1
+  dataKeyResource: kbs:///default/model-keys/qwen-demo-001-data
+  approvedManifestRef: qwen3-0-6b-v1
+  source: {}
+gitops:
+  enabled: false
+  repository: https://github.com/pmatouse/confidential-inference-pattern.git
+  revision: ''
+  valuesFile: overrides/sites/edge-rtx6k.yaml
+chat:
+  enabled: false
+  port: 8080
+  serviceType: ClusterIP
+  nodePort: null

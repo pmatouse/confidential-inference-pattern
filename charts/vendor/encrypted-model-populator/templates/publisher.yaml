@@ -1,0 +1,51 @@
+{{- if .Values.publisher.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: encrypted-model-publisher
+automountServiceAccountToken: false
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: {{ .Values.publisher.repository | quote }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: encrypted-model-publisher
+rules:
+  - apiGroups: [image.openshift.io]
+    resources: [imagestreams/layers]
+    resourceNames: [{{ .Values.publisher.repository | quote }}]
+    verbs: [get, update]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: encrypted-model-publisher
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: encrypted-model-publisher
+subjects:
+  - kind: ServiceAccount
+    name: encrypted-model-publisher
+    namespace: {{ .Release.Namespace }}
+{{- end }}

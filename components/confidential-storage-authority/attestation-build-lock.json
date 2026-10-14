@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "status": "isolated-builds-not-deployed-guest-or-hardware-acceptance",
+  "compilerImage": "docker.io/library/rust@sha256:4ec71e955e6c08aeb238885083222ddff79d82eb87654a96c76e38e94da1a53b",
+  "trustee": {
+    "repository": "https://github.com/confidential-containers/trustee.git",
+    "commit": "71251310045d8be2e95041cf0028691623c73957",
+    "cargoLockSha256": "e67235692c07c58d1c32d14a9e6fb50dbe4a9694ecd614d2fef6da001492ac62",
+    "toolchain": "1.95.0",
+    "command": "cargo build --locked --release -p attestation-service --no-default-features --features restful-bin,snp-verifier --bin restful-as",
+    "binarySha256": "160fc86c4224f4504adcbe54698a0e9bdfad4a0638a7d9e03b1c2bd11e507b8d"
+  },
+  "privateClient": {
+    "repository": "https://github.com/manuelh-dev/guest-components.git",
+    "commit": "0ab1fb1be6e46293f29600085f929ae035ca3739",
+    "cargoLockSha256": "88ba3f0378dbb6031b19ffe1a29172ebea42871c16c2ae7f8822c90b78658299",
+    "toolchain": "1.90.0",
+    "command": "cargo build --locked --release -p attestation-agent --no-default-features --features bin,ttrpc,rust-crypto,snp-attester --bin ttrpc-aa-client",
+    "binarySha256": "1a9ea738602ccaebf7141e9e01ced3adfb3125e05a63b1332b930898a86509e5",
+    "requiredSharedLibraries": ["libgcc_s.so.1", "libm.so.6", "libc.so.6"],
+    "maximumRequiredGlibcSymbolVersion": "2.34"
+  },
+  "hardwareInteroperabilityPassed": false,
+  "guestInstalled": false,
+  "productionChanged": false
+}

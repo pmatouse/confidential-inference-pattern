@@ -1,0 +1,9 @@
+FROM registry.access.redhat.com/ubi9/python-312@sha256:56fad467cb1e41666f0028b7fd71107df0556bcc9ecfc577597858c85618f55c
+USER 1001
+COPY --chown=1001:0 wheels /opt/app-root/src/wheels
+COPY --chown=1001:0 components /opt/app-root/src/components
+RUN python3 -m pip install --no-cache-dir --no-index --find-links=/opt/app-root/src/wheels --require-hashes -r /opt/app-root/src/components/confidential-storage-authority/runtime-requirements.txt
+WORKDIR /opt/app-root/src/components/confidential-volume-controller
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+RUN python3 -m unittest discover -s . && python3 -m unittest discover -s ../confidential-volume-contract
+ENTRYPOINT ["python3", "controller.py"]

@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: {{ .Values.installation.name }}
+  namespace: {{ .Values.base.gitopsNamespace }}
+spec:
+  sourceRepos: [{{ .Values.gitops.repository | quote }}]
+  destinations:
+    - {server: "https://kubernetes.default.svc", namespace: {{ .Values.installation.namespace | quote }}}
+  clusterResourceWhitelist:
+    - {group: rbac.authorization.k8s.io, kind: ClusterRole}
+    - {group: rbac.authorization.k8s.io, kind: ClusterRoleBinding}
+    - {group: security.openshift.io, kind: SecurityContextConstraints}
+    - {group: admissionregistration.k8s.io, kind: ValidatingAdmissionPolicy}
+    - {group: admissionregistration.k8s.io, kind: ValidatingAdmissionPolicyBinding}
+    - {group: populator.storage.k8s.io, kind: VolumePopulator}
+  namespaceResourceWhitelist:
+    - {group: "", kind: ConfigMap}
+    - {group: "", kind: ServiceAccount}
+    - {group: apps, kind: Deployment}
+    - {group: rbac.authorization.k8s.io, kind: Role}
+    - {group: rbac.authorization.k8s.io, kind: RoleBinding}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.installation.name }}
+  namespace: {{ .Values.base.gitopsNamespace }}
+spec:
+  project: {{ .Values.installation.name }}
+  source:
+    repoURL: {{ .Values.gitops.repository | quote }}
+    targetRevision: {{ required "Pin the reviewed add-on commit" .Values.gitops.revision | quote }}
+    path: charts/confidential-inference
+    helm:
+      skipCrds: true
+      releaseName: confidential-inference
+      valuesObject:
+{{ .Values.resolved | toYaml | indent 8 }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ .Values.installation.namespace }}
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions: [ServerSideApply=true]

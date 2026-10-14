@@ -1,0 +1,19 @@
+controller:
+  enabled: false
+  image: ''
+  clusterId: ''
+  intervalSeconds: 15
+  includeStandalonePods: false
+  sidecarWorkloads: []
+  approvalKeys: {}
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: '1'
+      memory: 256Mi
+openshift:
+  buildEnabled: false
+global:
+  installationName: ''

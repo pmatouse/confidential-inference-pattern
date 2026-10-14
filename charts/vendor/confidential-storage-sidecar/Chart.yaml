@@ -1,0 +1,5 @@
+apiVersion: v2
+name: confidential-storage-sidecar
+description: Guest-privileged storage add-on for an unprivileged CoCo application
+type: application
+version: 0.1.0

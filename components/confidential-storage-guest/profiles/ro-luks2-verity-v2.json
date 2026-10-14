@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 2,
+  "name": "ro-luks2-verity-v2",
+  "access": "ro",
+  "filesystem": "ext4",
+  "mountOptions": [
+    "ro",
+    "noload",
+    "nodev",
+    "nosuid",
+    "noexec"
+  ],
+  "headerBytes": 16777216,
+  "dataOffsetBytes": 16777216,
+  "cipher": "aes-xts-plain64",
+  "encryptionKeyBytes": 64,
+  "sectorBytes": 4096,
+  "verity": {
+    "version": 1,
+    "superblock": false,
+    "hashAlgorithm": "sha256",
+    "dataBlockBytes": 4096,
+    "hashBlockBytes": 4096,
+    "saltBytes": 32,
+    "protects": "luks-header-and-ciphertext",
+    "hashDevice": "same-disk",
+    "allowCorruptionBypass": false
+  },
+  "allowDiscards": false,
+  "keyslots": 1,
+  "tokens": false,
+  "reencryption": false,
+  "headerChecksum": "sha256",
+  "requireMatchingMetadataCopies": true,
+  "allowHeaderRepair": false,
+  "destinationBinding": "authenticated-grant"
+}

@@ -1,0 +1,93 @@
+{{- if .Values.controller.enabled }}
+{{- if not (regexMatch "^[^ @]+@sha256:[0-9a-f]{64}$" .Values.controller.image) }}
+{{- fail "controller.image must be digest pinned" }}
+{{- end }}
+{{- if not (regexMatch "^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$" .Values.controller.clusterId) }}
+{{- fail "controller.clusterId must be an explicit stable cluster identity" }}
+{{- end }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  namespace: {{ .Release.Namespace }}
+  name: confidential-volume-controller-trust
+data:
+  keys.json: {{ .Values.controller.approvalKeys | toJson | quote }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  namespace: {{ .Release.Namespace }}
+  name: confidential-volume-controller
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: confidential-volume-controller
+  template:
+    metadata:
+      labels:
+        app: confidential-volume-controller
+        coco.io/skip-initdata: "true"
+      annotations:
+        checksum/trust: {{ .Values.controller.approvalKeys | toJson | sha256sum }}
+    spec:
+      serviceAccountName: confidential-volume-controller
+      automountServiceAccountToken: true
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: controller
+          image: {{ .Values.controller.image | quote }}
+          args:
+            - --namespace={{ .Release.Namespace }}
+            - --cluster-id={{ .Values.controller.clusterId }}
+            - --keys=/trust/keys.json
+            - --interval={{ .Values.controller.intervalSeconds }}
+            {{- range .Values.controller.sidecarWorkloads }}
+            - --sidecar-workload={{ . }}
+            {{- end }}
+            {{- if .Values.controller.includeStandalonePods }}
+            - --include-pods
+            {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          resources:
+{{ .Values.controller.resources | toYaml | indent 12 }}
+          readinessProbe:
+            exec:
+              command:
+                - python3
+                - -c
+                - "import os,time; assert time.time()-os.stat('/tmp/cv-controller-ready').st_mtime < 180"
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          volumeMounts:
+            - name: trust
+              mountPath: /trust
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: trust
+          configMap:
+            name: confidential-volume-controller-trust
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 16Mi
+{{- end }}

@@ -1,0 +1,62 @@
+{{- $images := required "Pin approved sidecar image digests" .Values.allowedSidecarImages }}
+{{- range $images }}
+{{- if not (regexMatch "@sha256:[a-f0-9]{64}$" .) }}
+{{- fail "Sidecar images must be digest-pinned" }}
+{{- end }}
+{{- end }}
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: {{ .Release.Namespace }}-storage-sidecar
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ['']
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods]
+  matchConditions:
+    - name: dedicated-service-account
+      expression: {{ printf "object.metadata.namespace == '%s' && object.spec.serviceAccountName == '%s'" .Release.Namespace .Values.serviceAccountName | quote }}
+  validations:
+    - expression: "has(object.spec.runtimeClassName) && object.spec.runtimeClassName in ['kata-cc', 'kata-cc-nvidia-gpu']"
+      message: The storage helper must run in an approved stock Kata guest.
+    - expression: "(!has(object.spec.hostPID) || !object.spec.hostPID) && (!has(object.spec.hostIPC) || !object.spec.hostIPC) && (!has(object.spec.hostNetwork) || !object.spec.hostNetwork) && has(object.spec.automountServiceAccountToken) && !object.spec.automountServiceAccountToken"
+      message: Host namespaces and Kubernetes API tokens are forbidden.
+    - expression: "(!has(object.spec.initContainers) || size(object.spec.initContainers) == 0) && (!has(object.spec.ephemeralContainers) || size(object.spec.ephemeralContainers) == 0) && size(object.spec.containers) <= 2 && object.spec.containers.filter(c, c.name == 'storage-sidecar').size() == 1"
+      message: Only the storage helper and the approved application may run.
+    - expression: >-
+        object.spec.containers.all(c,
+          c.name == 'storage-sidecar' ?
+            (c.image in {{ $images | toJson }} && has(c.securityContext) && c.securityContext.runAsUser == 0 && c.securityContext.privileged) :
+            (c.name == 'kserve-container' && c.image == {{ .Values.applicationImage | quote }} && has(c.securityContext) &&
+             c.securityContext.runAsUser == 1001 && c.securityContext.runAsGroup == 1001 &&
+             c.securityContext.runAsNonRoot && !c.securityContext.privileged &&
+             !c.securityContext.allowPrivilegeEscalation && c.securityContext.readOnlyRootFilesystem &&
+             c.securityContext.capabilities.drop == ['ALL'] &&
+             (!has(c.securityContext.capabilities.add) || size(c.securityContext.capabilities.add) == 0) &&
+             (!has(c.volumeDevices) || size(c.volumeDevices) == 0)))
+      message: Only the pinned helper may be privileged; vLLM must remain unprivileged with no raw devices.
+    - expression: >-
+        !has(object.spec.volumes) || object.spec.volumes.all(v,
+          has(v.configMap) ||
+          (has(v.emptyDir) && has(v.emptyDir.medium) && v.emptyDir.medium == 'Memory') ||
+          (has(v.persistentVolumeClaim) && v.persistentVolumeClaim.claimName in {{ .Values.allowedClaims | toJson }}))
+      message: Only public configuration, guest memory volumes and the approved encrypted PVCs are allowed.
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: {{ .Release.Namespace }}-storage-sidecar
+spec:
+  policyName: {{ .Release.Namespace }}-storage-sidecar
+  validationActions: [Deny]

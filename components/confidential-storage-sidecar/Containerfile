@@ -1,0 +1,11 @@
+FROM image-registry.openshift-image-registry.svc:5000/openshift/python@sha256:988ed6775f371baef3a5024942a1651d81cefb7927b83f6439d569a56da8e6a2
+USER 0
+ADD payload.tar.gz /opt/storage-sidecar/
+COPY confidential-storage-service runtime.py /opt/storage-sidecar/
+RUN for name in cryptsetup veritysetup integritysetup dmsetup mkfs.ext4; do \
+      printf '#!/bin/sh\nset -eu\nunset LD_PRELOAD LD_AUDIT GLIBC_TUNABLES LD_LIBRARY_PATH\nexec /opt/storage-sidecar/tools/lib/ld-linux-x86-64.so.2 --library-path /opt/storage-sidecar/tools/lib /opt/storage-sidecar/tools/bin/%s "$@"\n' "$name" > "/usr/sbin/$name"; \
+      chmod 0700 "/usr/sbin/$name"; \
+    done && chmod -R go-w /opt/storage-sidecar && chmod 0700 /opt/storage-sidecar/confidential-storage-service
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+WORKDIR /
+ENTRYPOINT ["python3", "/opt/storage-sidecar/runtime.py"]

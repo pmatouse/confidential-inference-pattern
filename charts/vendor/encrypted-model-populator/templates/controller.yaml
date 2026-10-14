@@ -1,0 +1,74 @@
+{{- if .Values.controller.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: encrypted-model-populator
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: encrypted-model-populator
+  template:
+    metadata:
+      labels:
+        app: encrypted-model-populator
+        coco.io/skip-initdata: "true"
+    spec:
+      serviceAccountName: encrypted-model-populator
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: controller
+          image: {{ required "controller.image must be digest-pinned" .Values.controller.image | quote }}
+          args:
+            - --mode=controller
+            - --namespace={{ .Release.Namespace }}
+            - --image={{ .Values.controller.image }}
+            - --storage-class={{ required "storageClassName is required" .Values.storageClassName }}
+            - --registry={{ required "registry.origin is required" .Values.registry.origin }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+---
+apiVersion: populator.storage.k8s.io/v1beta1
+kind: VolumePopulator
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: encrypted-model-populator-{{ .Release.Namespace }}
+sourceKind:
+  group: storage.confidentialcontainers.org
+  kind: EncryptedModelSource
+{{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  {{- if .Values.global.installationName }}
+  labels:
+    inference.confidentialcontainers.org/installation: {{ .Values.global.installationName | quote }}
+  {{- end }}
+  name: encrypted-model-registry-ca
+  {{- if .Values.openshift.injectRegistryCA }}
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+  {{- end }}

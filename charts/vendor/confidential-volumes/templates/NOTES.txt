@@ -1,0 +1,14 @@
+ConfidentialVolume and ConfidentialWorkload schemas are included.
+{{- if .Values.controller.enabled }}
+The namespace controller is enabled. It publishes approval requests and verifies
+independently signed public configuration; it never reads storage keys or formats disks.
+{{- if .Values.controller.sidecarWorkloads }}
+Approved stock-sidecar packages can create/adopt/update the explicitly enabled
+KServe targets. Install the target admission guard before granting workload RBAC.
+{{- else }}
+Publication-only mode: workload deployment is disabled.
+{{- end }}
+{{- else }}
+The controller is disabled. Installing schemas alone does not deploy workloads.
+{{- end }}
+Helm upgrades do not update existing CRDs; apply reviewed CRD updates explicitly.

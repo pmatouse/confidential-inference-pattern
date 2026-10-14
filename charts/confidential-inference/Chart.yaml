@@ -1,0 +1,14 @@
+apiVersion: v2
+name: confidential-inference
+version: 0.1.0
+type: application
+dependencies:
+- name: confidential-volumes
+  version: 0.3.0
+  repository: file://../vendor/confidential-volumes
+- name: encrypted-model-populator
+  version: 0.1.0
+  repository: file://../vendor/encrypted-model-populator
+- name: confidential-storage-sidecar
+  version: 0.1.0
+  repository: file://../vendor/confidential-storage-sidecar

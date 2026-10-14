@@ -1,0 +1,162 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: confidentialvolumes.storage.confidentialcontainers.org
+spec:
+  group: storage.confidentialcontainers.org
+  scope: Namespaced
+  names:
+    plural: confidentialvolumes
+    singular: confidentialvolume
+    kind: ConfidentialVolume
+    shortNames: [cv]
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+        - name: Claim
+          type: string
+          jsonPath: .spec.claimRef.name
+        - name: Access
+          type: string
+          jsonPath: .spec.access
+      schema:
+        openAPIV3Schema:
+          type: object
+          required: [spec]
+          properties:
+            status:
+              type: object
+              properties:
+                observedGeneration:
+                  type: integer
+                  format: int64
+                phase:
+                  type: string
+                  enum: [WaitingForConsumer, AwaitingApproval, Approved, Blocked]
+                resolvedClaimUID:
+                  type: string
+                consumers:
+                  type: array
+                  maxItems: 32
+                  items:
+                    type: object
+                    required: [kind, name, uid, phase, reason]
+                    properties:
+                      kind:
+                        type: string
+                        enum: [Pod, InferenceService, ConfidentialWorkload]
+                      name:
+                        type: string
+                      uid:
+                        type: string
+                      phase:
+                        type: string
+                      reason:
+                        type: string
+                      deploymentAction:
+                        type: string
+                      requestSha256:
+                        type: string
+                      requestConfigMap:
+                        type: string
+                      artifactConfigMap:
+                        type: string
+                      approvalSha256:
+                        type: string
+                      expiresAt:
+                        type: integer
+                        format: int64
+                conditions:
+                  type: array
+                  maxItems: 3
+                  x-kubernetes-list-type: map
+                  x-kubernetes-list-map-keys: [type]
+                  items:
+                    type: object
+                    required: [type, status, reason, observedGeneration, lastTransitionTime]
+                    properties:
+                      type:
+                        type: string
+                      status:
+                        type: string
+                        enum: ['True', 'False', Unknown]
+                      reason:
+                        type: string
+                      observedGeneration:
+                        type: integer
+                        format: int64
+                      lastTransitionTime:
+                        type: string
+                        format: date-time
+            spec:
+              type: object
+              required: [claimRef, access, profile, initialization, keyResource]
+              x-kubernetes-validations:
+                - rule: self == oldSelf
+                  message: Volume declarations are immutable; a new declaration still requires authority approval
+                - rule: "self.access == 'ReadOnly' ? (self.profile == 'luks-verity-v1' && self.initialization.policy == 'Never' && has(self.content)) : (self.profile == 'luks-integrity-v1' && !has(self.content))"
+                  message: Select an immutable model profile or an exclusive writable profile
+                - rule: "self.access == 'ReadWrite' ? (has(self.initialization.filesystem) && has(self.initialization.owner)) : (!has(self.initialization.filesystem) && !has(self.initialization.owner))"
+                  message: Writable declarations require filesystem and owner; model declarations must omit them
+              properties:
+                claimRef:
+                  type: object
+                  required: [name, uid]
+                  properties:
+                    name:
+                      type: string
+                      maxLength: 63
+                      pattern: '^[a-z0-9]([a-z0-9-]*[a-z0-9])?$'
+                    uid:
+                      type: string
+                      maxLength: 36
+                      pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+                access:
+                  type: string
+                  enum: [ReadOnly, ReadWrite]
+                profile:
+                  type: string
+                  enum: [luks-verity-v1, luks-integrity-v1]
+                initialization:
+                  type: object
+                  required: [policy]
+                  properties:
+                    policy:
+                      type: string
+                      enum: [Never, OnceIfApproved]
+                    filesystem:
+                      type: string
+                      enum: [ext4]
+                    owner:
+                      type: object
+                      required: [uid, gid]
+                      properties:
+                        uid:
+                          type: integer
+                          format: int64
+                          minimum: 1
+                          maximum: 2147483647
+                        gid:
+                          type: integer
+                          format: int64
+                          minimum: 1
+                          maximum: 2147483647
+                content:
+                  type: object
+                  required: [approvedManifestRef]
+                  properties:
+                    approvedManifestRef:
+                      type: string
+                      maxLength: 63
+                      pattern: '^[a-z0-9]([a-z0-9-]*[a-z0-9])?$'
+                keyResource:
+                  type: string
+                  maxLength: 256
+                  pattern: '^kbs:///[a-z0-9][a-z0-9-]{0,62}/[a-z0-9][a-z0-9-]{0,62}/[a-z0-9][a-z0-9-]{0,62}$'
