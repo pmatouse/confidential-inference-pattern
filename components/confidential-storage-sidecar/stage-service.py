@@ -26,7 +26,16 @@ def stage(source, output):
     upstream = output / 'upstream'
     upstream.mkdir(parents=True)
     with tarfile.open(fileobj=io.BytesIO(archive)) as tar:
-        tar.extractall(upstream, filter='data')
+        for member in tar:
+            if member.name.startswith('/') or '..' in Path(member.name).parts or not (member.isfile() or member.isdir()):
+                raise ValueError('unsupported upstream source archive entry')
+            target=upstream/member.name
+            if member.isdir():
+                target.mkdir(parents=True,exist_ok=True)
+            else:
+                target.parent.mkdir(parents=True,exist_ok=True)
+                target.write_bytes(tar.extractfile(member).read())
+                target.chmod(member.mode & 0o777)
     if hashlib.sha256((upstream / 'Cargo.lock').read_bytes()).hexdigest() != LOCK:
         raise ValueError('unexpected upstream lock')
     # Do not patch upstream. Only the protos crate is a compiled dependency;

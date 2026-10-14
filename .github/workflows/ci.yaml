@@ -30,14 +30,11 @@ jobs:
       image: rust@sha256:4ec71e955e6c08aeb238885083222ddff79d82eb87654a96c76e38e94da1a53b
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
       - name: Stage unchanged protocol definitions
         run: |
           git clone --no-checkout https://github.com/manuelh-dev/guest-components.git /tmp/guest-components
           git -C /tmp/guest-components checkout --detach 0ab1fb1be6e46293f29600085f929ae035ca3739
-          python3 components/confidential-storage-sidecar/stage-service.py --upstream /tmp/guest-components --output /tmp/service-build
+          /usr/bin/python3 components/confidential-storage-sidecar/stage-service.py --upstream /tmp/guest-components --output /tmp/service-build
       - name: Test stock-CDH adapter and service
         run: |
           cargo test --locked --manifest-path /tmp/service-build/components/confidential-storage-client/Cargo.toml --features private-rcar-aa
