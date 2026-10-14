@@ -18,5 +18,6 @@ tokio = { version = "1.52", features = ["rt-multi-thread", "time"] }
 zeroize = "1.8.2"
 
 [features]
+default = ["private-cdh"]
 private-cdh = ["confidential-storage-kbs/private-cdh"]
 trustee-rcar = ["private-cdh", "confidential-storage-client/private-rcar-aa"]

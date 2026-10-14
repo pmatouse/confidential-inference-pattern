@@ -16,3 +16,10 @@ jobs:
       - run: python -m pip install -r requirements.txt
       - run: make test lint
       - run: make render VALUES=overrides/sites/edge-rtx6k.yaml
+  guest-library:
+    runs-on: ubuntu-latest
+    container:
+      image: rust@sha256:4ec71e955e6c08aeb238885083222ddff79d82eb87654a96c76e38e94da1a53b
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo test --locked --manifest-path components/confidential-storage-guest/Cargo.toml

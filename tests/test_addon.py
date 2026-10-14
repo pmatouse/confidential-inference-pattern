@@ -16,7 +16,7 @@ class FakeCluster:
           ('storageclass',b['storageClassName']):{'volumeBindingMode':'Immediate'},
           ('deploy',b['kserveDeployment']):{'status':{'availableReplicas':1},'spec':{'template':{'spec':{'containers':[{'image':'kserve/kserve-controller:'+b['kserveVersion']}]}}}},
           ('crd','inferenceservices.serving.kserve.io'):{},
-          ('crd','volumepopulators.populator.storage.k8s.io'):{},
+          ('crd','volumepopulators.populator.storage.k8s.io'):{'spec':{'versions':[{'name':'v1beta1','served':True}]}},
           ('kbsconfig',b['trusteeName']):{},
         }
         self.mutations=[]
@@ -27,7 +27,7 @@ class FakeCluster:
 class AddonTests(unittest.TestCase):
     def setUp(self):
         self.v=addon.load(addon.ROOT/'overrides/sites/edge-rtx6k.yaml')
-        self.v['demo']['source']={'format':'luks-verity-v1','repository':'demo/models','manifestDigest':'sha256:'+'a'*64,'diskDigest':'sha256:'+'b'*64,'diskBytes':2**31}
+        self.v['demo']['source']={'format':'luks-verity-v1','repository':self.v['installation']['namespace']+'/models','manifestDigest':'sha256:'+'a'*64,'diskDigest':'sha256:'+'b'*64,'diskBytes':2**31}
     def test_generic_missing_inputs_cannot_install(self):
         v=addon.load(addon.ROOT/'values-global.yaml')
         with self.assertRaises(addon.Invalid):addon.validate(v,complete=True)
@@ -47,6 +47,11 @@ class AddonTests(unittest.TestCase):
     def test_wffc_rejected(self):
         api=FakeCluster(self.v);api.objects[('storageclass','lvms-vg1')]['volumeBindingMode']='WaitForFirstConsumer'
         self.assertTrue(any(r['action']=='incompatible' for r in addon.inventory(self.v,api)))
+        self.assertEqual(api.mutations,[])
+    def test_missing_registration_installed_once(self):
+        api=FakeCluster(self.v);del api.objects[('crd','volumepopulators.populator.storage.k8s.io')]
+        row=next(r for r in addon.inventory(self.v,api) if r['resource']=='volume-populator-registration')
+        self.assertEqual(row['action'],'create')
         self.assertEqual(api.mutations,[])
     def test_missing_trustee_rejected(self):
         api=FakeCluster(self.v);del api.objects[('kbsconfig','kbsconfig')]
@@ -103,12 +108,16 @@ class AddonTests(unittest.TestCase):
     def test_deleting_claim_refused(self):
         e,a=self.claims();next(iter(a.values()))['metadata']['deletionTimestamp']='now'
         with self.assertRaises(addon.Invalid):declarations(self.v,e,a)
+    def test_cross_namespace_registry_source_rejected(self):
+        self.v['demo']['source']['repository']='another-namespace/models'
+        with self.assertRaises(addon.Invalid):addon.provision(self.v)
     def test_no_source_no_provision(self):
         self.v['demo']['source']={}
         with self.assertRaises(addon.Invalid):addon.provision(self.v)
     def test_second_site_no_lab_namespace(self):
         self.v['installation']['namespace']='another-inference';self.v['installation']['clusterIdentity']='another-site'
         self.v['demo']['name']='another-qwen'
+        self.v['demo']['source']['repository']='another-inference/models'
         for name in ('controller','populator','sidecar'):
             self.v['images'][name]='registry.example.invalid/addon/'+name+'@sha256:'+'a'*64
         docs=addon.foundation(self.v)+addon.provision(self.v)

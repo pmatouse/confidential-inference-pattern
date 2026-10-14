@@ -6,7 +6,7 @@ pub fn destination(value: &str) -> bool {
         return false;
     }
     let parts: Vec<_> = value[1..].split('/').collect();
-    if parts.is_empty() || parts.len() > 8 || !matches!(parts[0], "models" | "data" | "checkpoints")
+    if parts.is_empty() || parts.len() > 8 || !matches!(parts[0], "model" | "models" | "data" | "checkpoints")
     {
         return false;
     }
@@ -32,7 +32,7 @@ mod tests {
     use super::*;
     #[test]
     fn rejects_control_paths_traversal_unicode_and_overlapping_targets() {
-        for path in ["/models", "/models/qwen", "/data", "/checkpoints/v1"] {
+        for path in ["/model", "/model/qwen", "/models", "/models/qwen", "/data", "/checkpoints/v1"] {
             assert!(destination(path));
         }
         for path in [

@@ -7,7 +7,8 @@ release still needs reproducible image publication and trusted release automatio
 ## One-time platform prerequisites
 
 Install CoCo VP, configure the confidential CPU/GPU runtime, and provide KServe,
-Trustee, a raw Block CSI class and the volume-populator registration CRD. Existing
+Trustee and a raw Block CSI class. The installer creates the pinned upstream
+volume-populator registration CRD if absent, or verifies an existing one. Existing
 platform resources remain under their current owners. The installer checks the
 stock GPU RuntimeClass handler, Immediate storage, available KServe version and
 Trustee resource. Those checks do not prove attestation or hardware correctness.
@@ -120,3 +121,17 @@ as a routine retry. Claims and source declarations carry explicit Argo prune/del
 protection, independent of workload ownership. Preserve authority history and key
 backend records together with retained ciphertext. Never reset authority ownership
 to resolve an ordinary deployment error.
+
+## Registry namespace contract
+
+The current populator deliberately accepts only model repositories inside its own
+workload namespace. Publish there or promote an already verified ciphertext image
+by digest using an OpenShift ImageStreamTag before creating a new model source.
+Cross-namespace registry sources now fail before any claim is created. Promotion
+changes only the registry reference; verify the manifest digest is unchanged.
+Reusing a published artifact is a population regression, not a fresh-publication
+acceptance run.
+
+The registration CRD is vendored from [the upstream validator project](https://github.com/kubernetes-csi/volume-data-source-validator),
+with the exact source revision and file hash in `prerequisites/source-lock.json`.
+The optional warning-event validator controller is not duplicated.

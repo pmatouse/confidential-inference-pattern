@@ -1,4 +1,4 @@
-FROM image-registry.openshift-image-registry.svc:5000/openshift/python@sha256:988ed6775f371baef3a5024942a1651d81cefb7927b83f6439d569a56da8e6a2
+FROM registry.access.redhat.com/ubi9/python-312@sha256:56fad467cb1e41666f0028b7fd71107df0556bcc9ecfc577597858c85618f55c
 USER 1001
 COPY --chown=1001:0 wheels /opt/app-root/src/wheels
 COPY --chown=1001:0 components /opt/app-root/src/components

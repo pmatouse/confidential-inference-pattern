@@ -8,7 +8,6 @@ use confidential_storage_guest::{
     receipt::{Expected, VerifiedGrant},
     ro_opener::RoOpener,
 };
-use confidential_storage_kbs::SnpCpuKbs;
 use confidential_storage_service::{
     invalid, read_frame, write_frame, Request, Reservation, Response, CONFIG, SOCKET,
 };
@@ -47,15 +46,6 @@ struct Authority {
     receipt_key_id: String,
 }
 #[derive(Clone, Deserialize)]
-#[serde(deny_unknown_fields)]
-struct CpuKbs {
-    origin: String,
-    certificate_der: Vec<u8>,
-    address: Option<SocketAddr>,
-    allowed_resources: Vec<String>,
-    require_gpu: bool,
-}
-#[derive(Clone, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 enum CdhProvider {
     PrivateCdh,
@@ -75,7 +65,6 @@ struct CdhConfig {
 #[derive(Clone, Deserialize)]
 #[serde(untagged)]
 enum Kbs {
-    Cpu(CpuKbs),
     Cdh(CdhConfig),
 }
 #[derive(Deserialize)]
@@ -263,7 +252,6 @@ impl Loaded {
 }
 
 enum KeySource {
-    Cpu(SnpCpuKbs),
     #[cfg(feature = "private-cdh")]
     Cdh(confidential_storage_kbs::private_cdh::PrivateCdh),
 }
@@ -273,7 +261,6 @@ impl KeySource {
         permit: confidential_storage_client::keys::KeyPermit,
     ) -> confidential_storage_kbs::Result<confidential_storage_kbs::KeyMaterial> {
         match self {
-            Self::Cpu(k) => k.retrieve(permit).await,
             #[cfg(feature = "private-cdh")]
             Self::Cdh(k) => k.retrieve(permit).await,
         }
@@ -329,7 +316,7 @@ struct Service {
     mounted: bool,
 }
 impl Service {
-    fn new(config: Config, initdata: String) -> Result<Self> {
+    fn new(config: Config, _initdata: String) -> Result<Self> {
         let a = config.authority;
         if a.trustee_rcar && !cfg!(feature = "trustee-rcar") {
             return Err(invalid().into());
@@ -353,17 +340,6 @@ impl Service {
             PrivateAa,
         )?;
         let kbs = match config.kbs {
-            Kbs::Cpu(k) => KeySource::Cpu(SnpCpuKbs::new(
-                &authority,
-                confidential_storage_kbs::Config {
-                    origin: k.origin,
-                    certificate_der: k.certificate_der,
-                    address: k.address,
-                    init_data_toml: initdata,
-                    allowed_resources: k.allowed_resources,
-                    require_gpu: k.require_gpu,
-                },
-            )?),
             Kbs::Cdh(k) => {
                 let _ = k.provider;
                 #[cfg(feature = "private-cdh")]
@@ -901,6 +877,13 @@ mod config_tests {
     }
     fn valid(value: Value) -> bool {
         serde_json::from_value::<Loaded>(value).is_ok_and(|c| c.validate().is_ok())
+    }
+    #[test]
+    fn legacy_cpu_provider_is_not_a_fallback() {
+        let mut value = fixture();
+        value["kbs"] = json!({"origin":"https://kbs.invalid","certificate_der":[],
+            "address":null,"allowed_resources":["kbs:///default/keys/data"],"require_gpu":false});
+        assert!(!valid(value));
     }
     #[test]
     fn batch_config_rejects_aliases_unknown_profiles_and_model_initialization() {

@@ -1,0 +1,6 @@
+{
+  "repository": "https://github.com/kubernetes-csi/volume-data-source-validator",
+  "revision": "bf93aacc7f80a7e0c023f7864773fbd4e6b8e346",
+  "path": "client/config/crd/populator.storage.k8s.io_volumepopulators.yaml",
+  "sha256": "b9d6077245b0a40bf4a4217a648e54786c26d2a1021d004ca11634ef07b37499"
+}

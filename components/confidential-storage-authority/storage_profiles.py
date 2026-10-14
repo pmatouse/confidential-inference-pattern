@@ -13,7 +13,7 @@ def destination(value):
     parts = value[1:].split("/")
     return (
         1 <= len(parts) <= 8
-        and parts[0] in {"models", "data", "checkpoints"}
+        and parts[0] in {"model", "models", "data", "checkpoints"}
         and all(re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9_.-]{0,62}", p) for p in parts)
     )
 

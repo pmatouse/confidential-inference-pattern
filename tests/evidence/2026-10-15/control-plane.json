@@ -1,0 +1,112 @@
+{
+  "timestamp": "2026-10-14T22:08:26.327642+00:00",
+  "scope": "control-plane-and-population-regression-only",
+  "freshModelPublication": false,
+  "confidentialGuestInference": false,
+  "blankRWInitialized": false,
+  "gitops": {
+    "revision": "855cbdb42e48b2b77153c027135591a0c141e12a",
+    "sync": "Synced",
+    "health": "Healthy"
+  },
+  "claims": [
+    {
+      "name": "qwen-demo-002-model",
+      "uid": "a32b672d-c04e-4687-8816-4c203a717915",
+      "volume": "pvc-6fc709b3-6ddf-4fb5-bbd8-ba567242f220",
+      "phase": "Bound",
+      "mode": "Block",
+      "declaration": {
+        "access": "ReadOnly",
+        "claimRef": {
+          "name": "qwen-demo-002-model",
+          "uid": "a32b672d-c04e-4687-8816-4c203a717915"
+        },
+        "content": {
+          "approvedManifestRef": "qwen3-0-6b-v1"
+        },
+        "initialization": {
+          "policy": "Never"
+        },
+        "keyResource": "kbs:///default/model-keys/qwen3-0-6b-v1",
+        "profile": "luks-verity-v1"
+      },
+      "annotations": {}
+    },
+    {
+      "name": "qwen-demo-002-data",
+      "uid": "ed7bf26b-0530-4ded-be7b-d0e95b43491f",
+      "volume": "pvc-ed7bf26b-0530-4ded-be7b-d0e95b43491f",
+      "phase": "Bound",
+      "mode": "Block",
+      "declaration": {
+        "access": "ReadWrite",
+        "claimRef": {
+          "name": "qwen-demo-002-data",
+          "uid": "ed7bf26b-0530-4ded-be7b-d0e95b43491f"
+        },
+        "initialization": {
+          "filesystem": "ext4",
+          "owner": {
+            "gid": 1001,
+            "uid": 1001
+          },
+          "policy": "OnceIfApproved"
+        },
+        "keyResource": "kbs:///default/model-keys/qwen-demo-002-data",
+        "profile": "luks-integrity-v1"
+      },
+      "annotations": {}
+    }
+  ],
+  "bindingJob": {
+    "name": "qwen-demo-002-binding",
+    "succeeded": 1
+  },
+  "workload": {
+    "kind": "ConfidentialWorkload",
+    "name": "qwen-demo-002",
+    "observedGeneration": 1,
+    "phase": "AwaitingApproval",
+    "reason": "ApprovalMissing",
+    "requestConfigMap": "cv-request-95e874472bc1fa7023b6109f71beb2b49a659e79550ff824",
+    "requestSha256": "95e874472bc1fa7023b6109f71beb2b49a659e79550ff8247911dac9ff52e5aa",
+    "uid": "d69b3cc3-34a4-46cd-a58b-da110f38d73b"
+  },
+  "protectedWorkloads": [
+    {
+      "namespace": "confidential-storage-test",
+      "name": "qwen-chat-777b4d7f44-tzch7",
+      "uid": "ee6a4a4b-2e67-4eea-b537-9dbd3b96804c",
+      "unchangedAndReady": true
+    },
+    {
+      "namespace": "confidential-storage-test",
+      "name": "qwen-storage-predictor-54f7997fb-sfhnj",
+      "uid": "ae2939be-3249-4bd7-a08f-929d1d9457f9",
+      "unchangedAndReady": true
+    },
+    {
+      "namespace": "confidential-storage-test",
+      "name": "storage-gpu-authority-694dd4d9d5-7b8nn",
+      "uid": "6ba8ea2a-69b8-4d0a-9463-fa4fab82e785",
+      "unchangedAndReady": true
+    },
+    {
+      "namespace": "gpu-workload",
+      "name": "encrypted-qwen-predictor-c68947bb9-gw9ml",
+      "uid": "d5cc3080-ae0b-4490-b145-56a216732566",
+      "unchangedAndReady": true
+    },
+    {
+      "namespace": "gpu-workload",
+      "name": "qwen-chat-6fd79bd4b-vvrqc",
+      "uid": "839d51fc-94fe-491b-9e77-cec5a4c1ae48",
+      "unchangedAndReady": true
+    }
+  ],
+  "guestLibraryTests": {
+    "passed": 55,
+    "ignoredPrivilegedKernelTests": 3
+  }
+}

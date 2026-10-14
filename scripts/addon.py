@@ -102,8 +102,10 @@ def inventory(v,api):
     serving=api.get('deploy',b['kserveDeployment'],b['kserveNamespace'])
     images=[c['image'] for c in (serving or {}).get('spec',{}).get('template',{}).get('spec',{}).get('containers',[])]
     check(serving and any(i.endswith(':'+b['kserveVersion']) for i in images) and serving.get('status',{}).get('availableReplicas',0)>0,'kserve','reuse','Require compatible available controller; never install or overwrite it implicitly')
-    for crd in ('inferenceservices.serving.kserve.io','volumepopulators.populator.storage.k8s.io'):
+    for crd in ('inferenceservices.serving.kserve.io',):
         check(api.get('crd',crd) is not None,crd,'reuse','Shared platform CRD must already be installed')
+    registration=api.get('crd','volumepopulators.populator.storage.k8s.io')
+    check(registration is None or any(x.get('name')=='v1beta1' and x.get('served') for x in registration.get('spec',{}).get('versions',[])),'volume-populator-registration','reuse' if registration is not None else 'create','Pinned upstream CRD; existing schema is never rewritten')
     trustee=api.get('kbsconfig',b['trusteeName'],b['trusteeNamespace'])
     check(trustee is not None,'trustee','configure-through-existing-owner','Key policies and enrollment remain in the trusted domain')
     existing=api.get('namespace',ns)
@@ -173,7 +175,7 @@ def image_access(v):
 def foundation(v):
     validate(v,complete=True)
     ns=v['installation']['namespace'];d=v['demo']; im=v['images']
-    objects=[{'apiVersion':'v1','kind':'Namespace','metadata':{'name':ns}}]+image_access(v)
+    objects=[{'apiVersion':'v1','kind':'Namespace','metadata':{'name':ns}},yaml.safe_load((ROOT/'prerequisites/volumepopulators.yaml').read_text())]+image_access(v)
     objects+=helm(ROOT/'charts/vendor/confidential-volumes',{'controller':{'enabled':True,'image':im['controller'],'clusterId':v['installation']['clusterIdentity'],'sidecarWorkloads':[d['name']],'approvalKeys':v['approvalKeys']}},ns)
     objects+=helm(ROOT/'charts/vendor/encrypted-model-populator',{'controller':{'enabled':True,'image':im['populator']},'storageClassName':v['base']['storageClassName'],'registry':{'origin':v['registry']['origin']},'openshift':{'createImporterSCC':True,'injectRegistryCA':v['registry']['injectServiceCA']}},ns)
     objects+=helm(ROOT/'charts/vendor/confidential-storage-sidecar',{'sccName':ns+'-storage-sidecar','identityEnabled':True,'allowedSidecarImages':[im['sidecar']],'applicationImage':im['application'],'allowedClaims':[d['name']+'-model',d['name']+'-data']},ns)
@@ -183,6 +185,7 @@ def provision(v):
     validate(v,complete=True)
     source=v['demo']['source']
     if set(source)!= {'format','repository','manifestDigest','diskDigest','diskBytes'}: raise Invalid('complete publisher receipt/source required; no implicit reuse of lab artifacts')
+    if source['repository'].split('/')[0]!=v['installation']['namespace']:raise Invalid('publish or promote ciphertext into the workload namespace registry; cross-namespace model sources are not supported')
     objects=[owned(o,v) for o in helm(ROOT/'charts/inference-release',v,v['installation']['namespace'])]
     claims={o['metadata']['name']:o for o in objects if o['kind']=='PersistentVolumeClaim'}
     binding={'values':{'installation':v['installation'],'demo':v['demo']},'claims':claims}
@@ -279,8 +282,9 @@ def main():
         for name in ['confidential-volume-controller','encrypted-model-populator']:run(['oc','rollout','status','deployment/'+name,'-n',v['installation']['namespace'],'--timeout=180s'])
         print('Add-on controllers ready. This does not authorize keys or establish hardware E2E qualification.')
     elif a.command=='demo-provision':
+        objects=provision(v)
         preflight(v,api)
-        apply_objects([owned(o,v) for o in image_access(v)]+provision(v),v,api)
+        apply_objects([owned(o,v) for o in image_access(v)]+objects,v,api)
     elif a.command=='bind-volumes':print(json.dumps(bind(v,api),indent=2))
     elif a.command=='demo-chat':
         if not v['chat']['enabled']:raise Invalid('chat.enabled must be explicitly set')
