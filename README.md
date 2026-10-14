@@ -13,15 +13,17 @@ storage authority manages volume lifecycle authorization.
 
 **Implementation status:** the separate repository, installer, GitOps chart,
 preflight, controller/populator packaging, declaration binder, chat chart and
-create-once authority bootstrap are implemented. The controllers were installed
+create-once authority bootstrap, trusted metadata enrollment and public release
+packaging are implemented. The controllers were installed
 in an isolated namespace on the edge cluster. The full fresh-install workflow,
-portable trusted release generation/enrollment and first-format sidecar E2E test
+scoped key provisioning, qualified release profiles and first-format sidecar E2E test
 are **not yet qualified**. Do not treat the earlier lab workload as proof that
 this repository can already reproduce it from zero.
 
 ## Start here
 
 - [Current executable setup and component ownership](docs/demo/setup.md)
+- [Trusted Vault bootstrap prerequisite](docs/demo/vault-bootstrap.md)
 - [Implementation status and remaining release gates](docs/implementation-status.md)
 - [Detailed design](docs/confidential-inference-pattern-plan.md)
 - [Planned complete E2E acceptance procedure](docs/qwen-clean-cluster-demo-plan.md)

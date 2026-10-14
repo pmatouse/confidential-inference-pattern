@@ -87,9 +87,11 @@ identity, not deletion of retained claims.
 
 ## Trusted preparation still required
 
-Portable release rendering, scoped key enrollment, measured policy generation,
-authority deployment/enrollment and approval renewal are not wired into one
-command yet. The legacy `prepare-qwen.py` is retained as source provenance and
+The [release renderer and metadata enrollment commands](../../components/inference-release/README.md)
+are implemented and contract tested. Qualified runtime profiles, scoped key
+enrollment, Trustee-owner integration and approval renewal are not wired into one
+command yet. The [Vault bootstrap proposal](vault-bootstrap.md) describes the
+remaining trusted-authentication prerequisite. The legacy `prepare-qwen.py` is retained as source provenance and
 is not a clean-install interface. Do not copy the old lab's prepared state to make
 this stage pass.
 
