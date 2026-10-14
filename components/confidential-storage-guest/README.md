@@ -1,14 +1,19 @@
 # Signed authorization and guest mount lifecycle core
 
+> Imported implementation notes: historical deployment/test statements below refer
+> to the original experiment. Linked historical material is pinned to its source
+> revision. For this separate add-on, use the [current setup](../../docs/demo/setup.md)
+> and [qualification status](../../docs/implementation-status.md).
+
 This library implements receipt verification and the lifecycle controller intended
 for the privileged **guest system service**. It has no daemon, public RPC, real CDH
 adapter or production Kata namespace integration. It now includes
 [authenticated RW header preparation](profiles/README.md) using Linux memfd seals
-and a [Linux reopen/close primitive](../../docs/confidential-storage/guest-opener.md)
+and a [Linux reopen/close primitive](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/guest-opener.md)
 that passes those sealed bytes to cryptsetup, plus a
-[Linux lifecycle backend](../../docs/confidential-storage/guest-mount-backend.md)
+[Linux lifecycle backend](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/guest-mount-backend.md)
 for private guest staging mounts with injected trusted providers.
-The [consumer manager](../../docs/confidential-storage/consumer-namespace.md) now owns
+The [consumer manager](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/consumer-namespace.md) now owns
 the application bind using retained namespace/root descriptors; production Kata
 callbacks and attested providers remain unfinished. The Kata experiment's
 activation gate remains closed. **This is not working encrypted persistent storage.**
@@ -172,7 +177,7 @@ are added by this library.
 
 The Rust dependency graph is pinned by `Cargo.lock`. Tests were compiled on AMD64
 with Rust 1.94.1 in the same disposable unprivileged compiler defined in
-[the Kata experiment](../confidential-storage-kata/README.md).
+[the Kata experiment](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/components/confidential-storage-kata/README.md).
 
 ```sh
 cd components/confidential-storage-guest
@@ -209,16 +214,16 @@ are injected test doubles; those tests have no real disk or TEE operations. Thei
 The separate `kernel_opener_lab` example exercises real block operations with the
 new opener inside the disposable non-TEE guest. It generates synthetic signatures
 in memory and uses the lab's random test key. See the
-[opener guide](../../docs/confidential-storage/guest-opener.md) for reproduction,
+[opener guide](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/guest-opener.md) for reproduction,
 negative cases and remaining production prerequisites.
 The example also tests the Linux lifecycle backend with synthetic providers,
 including authentication before key retrieval, busy unmount, release ordering
-and acknowledgement retry. See the [mount backend guide](../../docs/confidential-storage/guest-mount-backend.md).
+and acknowledgement retry. See the [mount backend guide](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/guest-mount-backend.md).
 
-The [trusted-agent coordinator](../../docs/confidential-storage/agent-lifecycle.md)
+The [trusted-agent coordinator](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/agent-lifecycle.md)
 now reserves ownership before paused namespace creation and serializes verified
 bind attachment, application startup and teardown. It connects to `LinuxBackend`
 but still requires real Kata callbacks and attested providers. The lab runtime is
 synthetic; this is not an installed agent integration.
 
-The RO profile and sealed-header validator now consume the [approved published-model manifest](../../docs/confidential-storage/published-model-approval.md). `RoOpener` and the common Linux backend implement the read-only verity/LUKS stack and `/models` consumer bind. Live attested providers and production runtime integration remain unfinished.
+The RO profile and sealed-header validator now consume the [approved published-model manifest](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/published-model-approval.md). `RoOpener` and the common Linux backend implement the read-only verity/LUKS stack and `/models` consumer bind. Live attested providers and production runtime integration remain unfinished.

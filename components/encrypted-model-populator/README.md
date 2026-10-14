@@ -1,8 +1,13 @@
 # Encrypted model population
 
+> Imported implementation notes: historical deployment/test statements below refer
+> to the original experiment. Linked historical material is pinned to its source
+> revision. For this separate add-on, use the [current setup](../../docs/demo/setup.md)
+> and [qualification status](../../docs/implementation-status.md).
+
 Development implementation of trusted LUKS/verity publication and untrusted
 ciphertext transport from the internal OCI registry into a CSI raw-block PVC.
-The [guide](../../docs/confidential-storage/model-populator.md) explains the
+The [guide](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/model-populator.md) explains the
 layout, permissions, lifecycle and reproduction commands.
 
 - `fetch_qwen.py`: verify the existing pinned Qwen3-0.6B revision.
@@ -17,7 +22,7 @@ layout, permissions, lifecycle and reproduction commands.
 Run `go test -race github.com/kubernetes-csi/lib-volume-populator/v3/populator-machinery ./...`
 and `python3 -m unittest -v test_publish.py` here. The local TLS tests need loopback
 listener permission. The actual cluster population test is
-[`validate_population.py`](../../tests/confidential-storage/validate_population.py).
+[`validate_population.py`](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/tests/confidential-storage/validate_population.py).
 
 No application container or attested guest key-delivery implementation is supplied
 by this component. A Bound PVC and unsigned publisher descriptor do not authorize

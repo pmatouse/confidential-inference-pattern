@@ -1,5 +1,10 @@
 # Private-volume authority core
 
+> Imported implementation notes: historical deployment/test statements below refer
+> to the original experiment. Linked historical material is pinned to its source
+> revision. For this separate add-on, use the [current setup](../../docs/demo/setup.md)
+> and [qualification status](../../docs/implementation-status.md).
+
 This component implements durable storage transition rules and an authenticated
 TLS gateway. The isolated CPU RO/RW path has passed hardware tests. The new
 standard-Trustee GPU adapter is not deployed; this service is not a key broker.
@@ -91,7 +96,7 @@ Kata activation gate closed until those pieces pass their respective tests.
 
 ## First-use initialization journal
 
-[The initialization guide](../../docs/confidential-storage/first-use-initialization.md)
+[The initialization guide](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/first-use-initialization.md)
 describes the explicit approval, four durable steps, failure timeline and remaining
 guest work. `initialization.py` is an internal protocol library; it executes no
 formatting command and does not issue signed format capabilities. A missing LUKS
@@ -117,7 +122,7 @@ The concrete backend is currently the non-TEE QEMU test driver. No production
 guest daemon or attested RPC adapter has been installed. The coordinator itself
 needs only the Python standard library; receipt signing and the full unit suite
 still require the pinned cryptography dependency. See
-[execution contract and tests](../../docs/confidential-storage/initialization-executor.md).
+[execution contract and tests](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/initialization-executor.md).
 
 ## Attested request boundary
 
@@ -133,19 +138,19 @@ hardware attestation or production key is involved. The custom
 the inspected NVIDIA result does not export the required binding. GPU-required
 requests remain denied instead of falling back to CPU-only authorization.
 
-See [the gateway guide](../../docs/confidential-storage/attested-authority-gateway.md)
+See [the gateway guide](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/attested-authority-gateway.md)
 for the protocol, retry behavior, pinned upstream source inspection, limitations
 and remaining deployment gates. Kata activation remains disabled.
 
 `serve.py` now provides a bounded TLS 1.3 listener and a fixed-policy loopback
 Trustee relay. It exposes challenge/attest/execute only; administrator operations,
 initialization and key delivery are absent. See [HTTPS setup and private guest
-integration](../../docs/confidential-storage/authority-https.md). Ninety tests pass,
+integration](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/authority-https.md). Ninety tests pass,
 including real TLS transport and synthetic AS interoperability. The pinned real
 AS and private ttRPC client build successfully; installed guest diagnostics found
 the public attestation API disabled. Neither storage E2E has passed yet.
 
-The [published-model approval guide](../../docs/confidential-storage/published-model-approval.md) describes the separate immutable RO path and its replay limits.
+The [published-model approval guide](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/published-model-approval.md) describes the separate immutable RO path and its replay limits.
 
 ## Signed guest initialization API
 
@@ -154,7 +159,7 @@ existing attested TLS gateway. Each response is Ed25519-signed and bound to the
 fresh challenge, exact request, session and workload policy. The Rust guest
 client checks all bindings and reconstructs the immutable plan/manifest before
 accepting metadata. Started retries return reconciliation, never a second execute
-decision. See [protocol and evidence](../../docs/confidential-storage/guest-initialization-protocol.md).
+decision. See [protocol and evidence](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/guest-initialization-protocol.md).
 
 The guest API has no administrator, reset, key or disk endpoints. Physical disk
 completion remains a trusted guest-executor responsibility; the current network
@@ -171,7 +176,7 @@ both SNP and NVIDIA appraisals. Each request retains its own fresh KBS handshake
 and execution requires its exact verified token plus the guest's signing proof.
 No resource request, policy mutation or AS private signing key is involved.
 
-See [configuration, security checks and evidence](../../docs/confidential-storage/standard-trustee-adapter.md).
+See [configuration, security checks and evidence](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/standard-trustee-adapter.md).
 The authority suite now passes 121 tests. Live verified TLS `/auth` passed;
 composite hardware `/attest` acceptance still needs the candidate guest.
 
@@ -192,4 +197,4 @@ An evidence hash is an audit reference, not proof that a hostile host destroyed 
 VM. The lab exercised explicit administrator recovery after proving no old sandbox
 or sidecar VM remained. Production use requires independent fencing; timeouts and
 host statements alone are insufficient. See the
-[sidecar shutdown result](../../docs/confidential-storage/stock-kata-qwen-storage-addon.md).
+[sidecar shutdown result](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/stock-kata-qwen-storage-addon.md).

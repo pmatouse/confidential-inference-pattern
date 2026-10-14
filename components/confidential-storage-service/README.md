@@ -1,13 +1,18 @@
 # Private guest storage service (development)
 
-**Current status:** the v2 multi-volume service with private CDH and standard Trustee RCAR is deployed in the validated Qwen GPU guest. See the [current walkthrough](../../docs/confidential-storage/qwen-storage-walkthrough-and-gaps.md). Earlier deployment-status statements below are historical checkpoints.
+> Imported implementation notes: historical deployment/test statements below refer
+> to the original experiment. Linked historical material is pinned to its source
+> revision. For this separate add-on, use the [current setup](../../docs/demo/setup.md)
+> and [qualification status](../../docs/implementation-status.md).
+
+**Current status:** the v2 multi-volume service with private CDH and standard Trustee RCAR is deployed in the validated Qwen GPU guest. See the [current walkthrough](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/qwen-storage-walkthrough-and-gaps.md). Earlier deployment-status statements below are historical checkpoints.
 
 This component connects the tested authority client, private SNP KBS client and
 read-only LUKS/dm-verity opener and journaled RW initializer/opener. It is
 **previous single-volume version is installed only in the isolated development guest**.
 The new multi-volume version is compiled and tested, but not installed. Both
-[model inference](../../docs/confidential-storage/native-model-serving.md) and
-[RW first-use/reopen](../../docs/confidential-storage/native-rw-storage.md) passed.
+[model inference](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/native-model-serving.md) and
+[RW first-use/reopen](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/native-rw-storage.md) passed.
 RW configuration pins an immutable initialization-plan hash; Ready uses its signed
 manifest, while only explicitly approved Uninitialized state can format.
 
@@ -59,8 +64,8 @@ cleanup after partial failure. These do not substitute for live
 service/agent/Trustee/PVC and failure-recovery testing. The release build requires
 Linux glibc through 2.34, compatible with the recorded RHEL 10 guest base.
 
-See the [native lifecycle experiment](../confidential-storage-kata/native-agent/README.md)
-and [private guest packaging](../../tests/confidential-storage/native-guest/README.md).
+See the [native lifecycle experiment](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/components/confidential-storage-kata/native-agent/README.md)
+and [private guest packaging](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/tests/confidential-storage/native-guest/README.md).
 
 ## Version 2 configuration
 
@@ -85,7 +90,7 @@ or formatting is performed. Backend RW geometry remains 1 GiB.
 
 The declarative compiler emits an approval request, not this configuration.
 The authority resolver/approval packaging is still required. See the
-[checkpoint and remaining gates](../../docs/confidential-storage/multi-volume-implementation.md).
+[checkpoint and remaining gates](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/multi-volume-implementation.md).
 
 ## Opt-in standard Trustee authentication
 
@@ -96,4 +101,4 @@ collector. Select the private CDH key provider explicitly in the measured key
 configuration. A build without this feature rejects RCAR selection.
 
 The feature is compiled and tested, not installed in Qwen. See the
-[protocol and remaining hardware gates](../../docs/confidential-storage/standard-trustee-adapter.md).
+[protocol and remaining hardware gates](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/standard-trustee-adapter.md).

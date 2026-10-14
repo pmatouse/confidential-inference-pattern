@@ -1,5 +1,10 @@
 # ConfidentialVolume approval-request compiler
 
+> Imported implementation notes: historical deployment/test statements below refer
+> to the original experiment. Linked historical material is pinned to its source
+> revision. For this separate add-on, use the [current setup](../../docs/demo/setup.md)
+> and [qualification status](../../docs/implementation-status.md).
+
 The [ConfidentialVolume controller](../confidential-volume-controller/README.md) now invokes this compiler against live namespace resources. The standalone CLI remains available; neither compiler nor controller grants storage authorization.
 
 Development tooling, not an operator or a runtime authorization service.
@@ -36,5 +41,5 @@ The resolver must select an exact approved profile. The implemented guest's new
 RW profile currently supports UID/GID 1001 and 1 GiB geometry; accepting another
 owner/capacity in an approval request does not imply backend support.
 
-See the [API proposal](../../docs/confidential-storage/confidential-volume-api-proposal.md)
-and [component gap report](../../docs/confidential-storage/minimal-integration-and-stock-gaps.md).
+See the [API proposal](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/confidential-volume-api-proposal.md)
+and [component gap report](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/minimal-integration-and-stock-gaps.md).

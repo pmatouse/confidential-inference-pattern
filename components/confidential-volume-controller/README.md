@@ -1,5 +1,10 @@
 # ConfidentialVolume controller
 
+> Imported implementation notes: historical deployment/test statements below refer
+> to the original experiment. Linked historical material is pinned to its source
+> revision. For this separate add-on, use the [current setup](../../docs/demo/setup.md)
+> and [qualification status](../../docs/implementation-status.md).
+
 Namespace-scoped reconciliation for the existing `ConfidentialVolume` API and
 Pod/KServe binding format. It reuses the contract compiler; it never formats a
 disk, reads a Secret, retrieves a volume key or signs an approval. It does not
@@ -31,7 +36,7 @@ reference during adoption; the reconciler itself does not send DELETE requests. 
 Secret read, PVC write, exec, signer or Trustee administration permission.
 
 See the [deployment guide, one-time installation requirements and per-volume
-approval steps](../../docs/confidential-storage/controller-sidecar-deployment.md).
+approval steps](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/controller-sidecar-deployment.md).
 The existing offline signer is retained; automatic trusted approval issuance and
 renewal are not implemented by this change.
 

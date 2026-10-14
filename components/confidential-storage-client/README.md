@@ -1,5 +1,10 @@
 # Trusted guest authority client
 
+> Imported implementation notes: historical deployment/test statements below refer
+> to the original experiment. Linked historical material is pinned to its source
+> revision. For this separate add-on, use the [current setup](../../docs/demo/setup.md)
+> and [qualification status](../../docs/implementation-status.md).
+
 Development library for the privileged **guest system service**, not the
 application container. No listener, public RPC, disk operation or key-byte delivery API is provided.
 Opaque key permits are consumed by the separate private KBS provider. The isolated
@@ -50,14 +55,14 @@ and a private process group for timeout cleanup. No socket or executable path
 can be chosen by a request.
 
 The collector is now hardware-validated in the isolated
-[RO](../../docs/confidential-storage/native-model-serving.md) and
-[RW](../../docs/confidential-storage/native-rw-storage.md) SNP guests.
+[RO](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/native-model-serving.md) and
+[RW](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/native-rw-storage.md) SNP guests.
 Earlier no-secret diagnostic initrds remain ineligible for keys.
 
 ## Reproduce transport tests
 
 On Linux with Rust 1.94.1 and Python 3.11+, first stage the pinned upstream sources
-with [prepare.py](../confidential-storage-kbs/prepare.py), including
+with [prepare.py](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/components/confidential-storage-kbs/prepare.py), including
 `--with-test-fixtures`. The optional private AA dependency resolves through that
 staged tree even when its feature is disabled. Run these commands from the staged
 `components/confidential-storage-client` directory:
@@ -89,7 +94,7 @@ production deployment and operational recovery remain separate work.
 same authenticated channel. A verified opaque record pins the approved plan;
 one-shot execute permits expire and cannot be cloned/deserialized. A Started
 retry requires reconciliation and Ready never grants another format decision.
-See [the full timeline and manifest recovery contract](../../docs/confidential-storage/guest-initialization-protocol.md).
+See [the full timeline and manifest recovery contract](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/guest-initialization-protocol.md).
 The fixture tests these messages with synthetic completion data, not real disks.
 
 ## Private key authorization
@@ -110,6 +115,6 @@ and SHA-384 selection; it cannot fall back to the legacy CPU collector. The gues
 collects NVIDIA evidence first and binds its exact bytes into the SNP runtime
 digest. The request proof and signed receipt checks remain in place.
 
-See the [protocol, configuration and validation checkpoint](../../docs/confidential-storage/standard-trustee-adapter.md).
+See the [protocol, configuration and validation checkpoint](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/standard-trustee-adapter.md).
 Five client tests pass with this feature, four without it. Full hardware RCAR
 interoperability in the combined GPU guest remains untested.

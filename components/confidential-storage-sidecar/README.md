@@ -130,7 +130,7 @@ never replace the retained authority database or reformat the existing PVC.
 ## Verification
 
 The stock-engine test harness and captured request fixtures live under
-[`tests/confidential-storage/stock-agent-sidecar`](../../tests/confidential-storage/stock-agent-sidecar/).
+[`tests/confidential-storage/stock-agent-sidecar`](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/tests/confidential-storage/stock-agent-sidecar).
 Generate cases with `prepare-policy-tests.py OUTPUT` and evaluate them using
 `policy-check` against the exact stock Regorus revision. Tests cover intended
 requests and injection of commands, privileges, raw/control devices, unsafe
