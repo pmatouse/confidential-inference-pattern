@@ -96,8 +96,10 @@ this stage pass.
 `components/confidential-storage-authority/bootstrap.py` creates a new authority
 history directory exactly once in a trusted environment. Normal server restart
 must verify retained state and must not rerun fresh initialization. Missing history,
-partial bootstrap, symlinks or changed installation identity fail closed. Integrating
-this operation with the authority Helm chart and scoped secret backend remains work.
+partial bootstrap, symlinks or changed installation identity fail closed. The
+[authority chart](../../charts/storage-authority/README.md) now separates explicit
+bootstrap from normal retained-state verification. It consumes existing Secret
+references; scoped backend provisioning and release enrollment remain separate.
 
 ## Chat
 

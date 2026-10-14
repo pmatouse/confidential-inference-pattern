@@ -7,6 +7,7 @@ from pathlib import Path
 import sqlite3
 import stat
 import uuid
+from contextlib import closing
 from authority import Authority
 
 MARKER='bootstrap.json'
@@ -32,11 +33,20 @@ def verify(path, identity):
     if record.get('installation')!=identity or record.get('schemaVersion')!=1 or record.get('state')!='Ready':
         raise ValueError('authority bootstrap identity mismatch or incomplete bootstrap')
     # Read-only validation: never silently reconstruct a missing database.
-    with sqlite3.connect(db.as_uri()+'?mode=ro',uri=True) as c:
+    with closing(sqlite3.connect(db.as_uri()+'?mode=ro',uri=True)) as c:
         if c.execute('PRAGMA integrity_check').fetchone()[0]!='ok':raise ValueError('authority database corrupt')
         tables={r[0] for r in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-        if not {'volumes','events'} <= tables:raise ValueError('authority schema missing')
+        if not {'volumes','events','operations','initialization_sources'} <= tables:
+            raise ValueError('authority schema missing')
     return record
+
+def verify_server(path, state, identity):
+    """Normal restart validates retained history before Authority can open it."""
+    state=Path(state).absolute()
+    verify(state, identity)
+    config=json.loads(Path(path).read_text())
+    if Path(config['database']).absolute() != state/'authority.db':
+        raise ValueError('server database differs from verified retained history')
 
 def bootstrap(path,identity):
     path=Path(path).absolute()

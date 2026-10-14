@@ -1,4 +1,4 @@
-"""Public cross-language fixture: real publisher metadata, synthetic authority."""
+"""Public cross-language fixture: synthetic publisher metadata, synthetic authority."""
 
 import json
 from pathlib import Path
@@ -14,7 +14,8 @@ from receipts import ReceiptIssuer, compact
 
 def main():
     root = Path(__file__).resolve().parents[2]
-    evidence = root / "tests/confidential-storage/evidence/2026-10-13/model-populator"
+    from publication_fixture import fixture
+    descriptor, source = fixture()
     binding = {
         "manifest_uri": "kbs:///storage-test/model-records/qwen-v1",
         "container_name": "model",
@@ -34,8 +35,8 @@ def main():
         )
         manifest = from_publisher(
             record,
-            json.loads((evidence / "guest-manifest.unsigned.json").read_text()),
-            json.loads((evidence / "source.json").read_text()),
+            descriptor,
+            source,
         )
         authority.approve_published_model("qwen-v1", manifest)
         issuer = ReceiptIssuer(
@@ -61,7 +62,7 @@ def main():
             profile_sha256=profile_sha256(),
         )
         output = {
-            "purpose": "synthetic-signature-real-publisher-metadata-no-attestation",
+            "purpose": "synthetic-signature-and-publisher-metadata-no-attestation",
             "issuer": "storage-test",
             "key_id": "fixture-v1",
             "now": 2000000000,

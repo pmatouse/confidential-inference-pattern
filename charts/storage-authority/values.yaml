@@ -1,0 +1,14 @@
+# Bootstrap once, enroll the retained state, then upgrade with mode: serve.
+# Never enable bootstrap as an init container or a normal startup action.
+mode: bootstrap
+installation: ""
+image: ""
+state:
+  storageClassName: ""
+  size: 1Gi
+  existingClaim: ""
+# Public configuration from the trusted release. Paths in server.json must use
+# /config for public material and /private for the two private key files.
+publicConfigMap: ""
+# Existing Secret/ExternalSecret output, with tls.key and receipt.key.
+credentialsSecret: ""

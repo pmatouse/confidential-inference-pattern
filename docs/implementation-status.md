@@ -15,10 +15,11 @@ hardware evidence is not a new clean-install result.
 | Actual PVC UID binding Job | Implemented; edge Job bound two new PVC UIDs successfully |
 | Unprivileged KServe workload intent and chat chart | Implemented; fresh inference pending |
 | Standalone Qwen source manifest | Extracted pinned model/file identities; no dependency on old producer AST |
-| Create-once authority history bootstrap | Implemented and tested; chart/backend integration pending |
+| Create-once authority history bootstrap | Implemented and tested; two-mode authority chart added; fresh bootstrap Job passed on a retained PVC; normal serving/backend integration pending |
 | Generic measured sidecar release renderer | New offline draft/package renderer added with synthetic contract tests; stock runtime profile and real-hardware qualification pending |
-| Scoped trusted key enrollment and Trustee owner integration | Pending; no root-token harvesting imported into installer |
-| Portable helper/populator/authority image release | Pending; edge override still uses some existing lab artifacts |
+| Trusted metadata enrollment and package generation | Implemented; multi-volume/retry/retained-owner tests pass; live enrollment pending |
+| Scoped key enrollment and Trustee owner integration | Pending; no root-token harvesting imported into installer |
+| Portable helper/populator/authority image release | New helper and authority images built in isolated project; stock protocol/no-CPU-fallback tests pass; guest qualification pending; edge override still uses existing lab artifacts |
 | Fresh model publication → population → guest mount | Population regression passed using an existing encrypted artifact; fresh publication and guest mount pending |
 | Blank RW first-format through stock sidecar → fresh VM reopen | Pending; cannot substitute prior reopened data for this gate |
 | Real Qwen/GPU/chat and negative security E2E | Pending for new installation |
@@ -33,3 +34,7 @@ Rust guest library. Existing helper images predate this change: `/model` require
 a newly built/pinned helper and authority image. Do not assume the updated
 controller alone changes guest mount support. `/models/qwen` remains the previously
 tested lab path.
+
+Build/bootstrap receipts are in [the evidence directory](../tests/evidence/2026-10-15/).
+Candidate helper/authority digests are kept separate from the active site image pins.
+The helper ABI/non-root-denial smoke test passed; it is not a confidential GPU test.

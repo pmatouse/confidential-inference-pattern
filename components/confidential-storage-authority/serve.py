@@ -152,7 +152,11 @@ def configured_server(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", required=True)
+    parser.add_argument("--state", required=True, help="previously bootstrapped retained directory")
+    parser.add_argument("--installation", required=True, help="stable bootstrap identity")
     args = parser.parse_args()
+    from bootstrap import verify_server
+    verify_server(args.config, args.state, args.installation)
     with configured_server(args.config) as server:
         server.serve_forever()
 

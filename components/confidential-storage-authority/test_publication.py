@@ -15,10 +15,8 @@ from publication import from_publisher, profile_sha256
 from receipts import ReceiptIssuer, compact
 from test_receipts import PLAN, decode, initialized
 
-EVIDENCE = (
-    Path(__file__).resolve().parents[2]
-    / "tests/confidential-storage/evidence/2026-10-13/model-populator"
-)
+from publication_fixture import fixture
+
 BINDING = {
     "manifest_uri": "kbs:///storage-test/model-records/qwen-v1",
     "container_name": "model",
@@ -40,10 +38,7 @@ class PublicationTests(unittest.TestCase):
             "kbs:///storage-test/model-keys/qwen-v1",
             mount_binding=BINDING,
         )
-        self.descriptor = json.loads(
-            (EVIDENCE / "guest-manifest.unsigned.json").read_text()
-        )
-        self.source = json.loads((EVIDENCE / "source.json").read_text())
+        self.descriptor, self.source = fixture()
         self.raw = from_publisher(self.record, self.descriptor, self.source)
         self.issuer = ReceiptIssuer(
             self.authority,
@@ -65,7 +60,7 @@ class PublicationTests(unittest.TestCase):
         )
         return self.issuer.reopen(**{**args, **changes})
 
-    def test_actual_publisher_descriptor_binds_signed_ro_receipt(self):
+    def test_synthetic_publisher_descriptor_binds_signed_ro_receipt(self):
         with self.assertRaises(Denied):
             self.open()
         approved = self.authority.approve_published_model("qwen-v1", self.raw)

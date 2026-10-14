@@ -1,8 +1,9 @@
 # Stock-Kata storage add-on
 
-The actual Qwen workload has been migrated to this add-on. See the
-[deployment guide and evidence](../../docs/confidential-storage/stock-kata-qwen-storage-addon.md)
-for current validation and limits. A bootstrap-only probe is not end-to-end evidence.
+This is the add-on implementation imported from the earlier lab and being
+packaged for a separate installation. See [current setup](../../docs/demo/setup.md)
+and the [implementation ledger](../../docs/implementation-status.md) for what has
+actually passed in this repository. Earlier lab evidence is not a fresh E2E run.
 
 This moves the storage integration into a trusted, privileged **guest container**.
 The stock Kata runtime, agent, kernel and initrd are not replaced. The application
@@ -57,7 +58,10 @@ that Trustee accepted the CPU/GPU evidence.
    cryptsetup/e2fsprogs tools and matching integrity modules. It never modifies
    the initrd. Inspect the generated inventory before publishing.
 2. In the pinned Linux compiler environment, stage the adjacent storage components
-   and their locked upstream dependency source, then run `build-service.sh`.
+   with `stage-service.py --upstream PINNED_CHECKOUT --output BUILD_DIRECTORY`,
+   then run the equivalent locked Cargo test/build in that directory. Only unchanged
+   upstream protocol definitions are compiled; the legacy patched KBS client was
+   removed. `build-service.sh` documents the locked compiler commands.
    **`--features trustee-rcar` is required**, including its private-CDH dependency.
 3. Use `prepare-build.py` with the SHA-256 read directly from the successful
    compiler output, then build `Containerfile` with exactly four context files: `Containerfile`,
@@ -65,7 +69,7 @@ that Trustee accepted the CPU/GPU evidence.
    keys, authority credentials, model files or cluster configuration belong in
    this context. Pin the resulting image digest.
 4. Install the dedicated identity and admission guard with the Helm chart
-   [`confidential-storage-sidecar`](../../charts/coco-supported/confidential-storage-sidecar/).
+   [`confidential-storage-sidecar`](../../charts/vendor/confidential-storage-sidecar/).
    Its guard must be present before granting access to its SCC. It restricts the
    service account to stock Kata RuntimeClasses and the reviewed helper/application
    images, rejects host namespaces and API tokens, and rejects raw devices or

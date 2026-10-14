@@ -21,4 +21,3 @@ confidential-storage-guest = { path = "../confidential-storage-guest" }
 
 [features]
 private-cdh = ["dep:libc", "dep:protos", "dep:ttrpc"]
-

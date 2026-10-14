@@ -12,5 +12,16 @@
     "namespace": "confidential-inference-demo",
     "name": "confidential-volume-controller-1",
     "sourceArchiveSha256": "58b3c69dbab685b4fcf931bf7ff7ea6fd737e9d39d989bc02e3857df8ca5c693"
+  },
+  "candidateImages": {
+    "sidecar": "image-registry.openshift-image-registry.svc:5000/confidential-inference-demo/confidential-storage-sidecar@sha256:718a1303cae75cc8d2c5cdb3c37f8b951a0274e6fcf560c1e7b250d594fbea4c",
+    "authority": "image-registry.openshift-image-registry.svc:5000/confidential-inference-demo/confidential-storage-authority@sha256:5c3ee817f2db4ad1f40cc22edbe484d611e46c8f7381c53a5a63fb2dbf359b12"
+  },
+  "helperBuild": {
+    "build": "confidential-storage-sidecar-1",
+    "serviceSHA256": "99560c0d94c915971aecc96d085b56a23996b37565d429ab0889606248128d55",
+    "protocolCommit": "0ab1fb1be6e46293f29600085f929ae035ca3739",
+    "upstreamModified": false,
+    "payloadSHA256": "8a09233c5a1e56dc35ca66024f3215009a273adae95ed2d5fa5c1c821a9c5bd8"
   }
 }

@@ -1,0 +1,4 @@
+apiVersion: v2
+name: storage-authority
+version: 0.1.0
+description: Retained confidential-storage authority in the trusted administration domain

@@ -1,0 +1,146 @@
+{{- $identity := required "installation is required" .Values.installation -}}
+{{- $image := required "image digest is required" .Values.image -}}
+{{- if not (regexMatch "^[^[:space:]@]+@sha256:[a-f0-9]{64}$" $image) }}{{ fail "pin authority image by digest" }}{{ end -}}
+{{- if not (has .Values.mode (list "bootstrap" "serve")) }}{{ fail "mode must be bootstrap or serve" }}{{ end -}}
+{{- $claim := default (printf "%s-state" .Release.Name) .Values.state.existingClaim -}}
+{{- if not .Values.state.existingClaim }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $claim }}
+  annotations:
+    helm.sh/resource-policy: keep
+    argocd.argoproj.io/sync-options: Prune=false
+spec:
+  accessModes: [ReadWriteOnce]
+  volumeMode: Filesystem
+  storageClassName: {{ required "state.storageClassName required" .Values.state.storageClassName | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.state.size | quote }}
+---
+{{- end }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name }}
+automountServiceAccountToken: false
+---
+{{- if eq .Values.mode "bootstrap" }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-bootstrap
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 120
+  template:
+    spec:
+      serviceAccountName: {{ .Release.Name }}
+      automountServiceAccountToken: false
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: bootstrap
+          image: {{ $image | quote }}
+          command: [python3, bootstrap.py]
+          args: [--state, /state/retained, --installation, {{ $identity | quote }}]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits: {cpu: "1", memory: 256Mi}
+          volumeMounts:
+            - {name: state, mountPath: /state}
+      volumes:
+        - name: state
+          persistentVolumeClaim: {claimName: {{ $claim }}}
+{{- else }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {app.kubernetes.io/instance: {{ .Release.Name }}}
+  template:
+    metadata:
+      labels: {app.kubernetes.io/instance: {{ .Release.Name }}}
+    spec:
+      serviceAccountName: {{ .Release.Name }}
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: {type: RuntimeDefault}
+      initContainers:
+        - name: private-credentials
+          image: {{ $image | quote }}
+          command: [python3, -c]
+          args:
+            - |
+              import os
+              from pathlib import Path
+              os.umask(0o077)
+              for name in ('tls.key', 'receipt.key'):
+                  source=Path('/credentials')/name
+                  data=source.read_bytes()
+                  if not 0 < len(data) <= 16384: raise ValueError('invalid credential size')
+                  fd=os.open('/private/'+name, os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW, 0o600)
+                  with os.fdopen(fd,'wb') as f: f.write(data)
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          volumeMounts:
+            - {name: credentials, mountPath: /credentials, readOnly: true}
+            - {name: private, mountPath: /private}
+      containers:
+        - name: authority
+          image: {{ $image | quote }}
+          command: [python3, serve.py]
+          args: [--config, /config/server.json, --state, /state/retained, --installation, {{ $identity | quote }}]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          ports: [{name: https, containerPort: 8443}]
+          readinessProbe:
+            tcpSocket: {port: https}
+            periodSeconds: 5
+          resources:
+            requests: {cpu: 100m, memory: 256Mi}
+            limits: {cpu: "2", memory: 1Gi}
+          volumeMounts:
+            - {name: state, mountPath: /state}
+            - {name: config, mountPath: /config, readOnly: true}
+            - {name: private, mountPath: /private, readOnly: true}
+      volumes:
+        - name: state
+          persistentVolumeClaim: {claimName: {{ $claim }}}
+        - name: config
+          configMap: {name: {{ required "publicConfigMap required in serve mode" .Values.publicConfigMap }}}
+        - name: credentials
+          secret:
+            secretName: {{ required "credentialsSecret required in serve mode" .Values.credentialsSecret }}
+            defaultMode: 0440
+            items:
+              - {key: tls.key, path: tls.key}
+              - {key: receipt.key, path: receipt.key}
+        - name: private
+          emptyDir: {medium: Memory, sizeLimit: 1Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  type: ClusterIP
+  selector: {app.kubernetes.io/instance: {{ .Release.Name }}}
+  ports: [{name: https, port: 8443, targetPort: https}]
+{{- end }}
