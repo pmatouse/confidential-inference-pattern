@@ -121,3 +121,31 @@ class PolicyUpdateTests(unittest.TestCase):
             self.a.update_workload_policy(["scratch","blank"], "a"*64, "f"*64,
                                          "e"*64, allow_never_started=True)
         self.assertEqual(self.a.inspect("scratch")["policy_sha256"], "a"*64)
+
+    def test_blank_reapproval_binds_current_policy_and_retains_geometry(self):
+        from initialization import approved_policy
+        self.blank()
+        before = self.a.inspect("blank")
+        self.a.update_workload_policy(["blank"], "a"*64, "f"*64, "e"*64,
+                                     allow_never_started=True)
+        old_hash = before["initialization_approval"]["plan_sha256"]
+        after = self.a.rebind_unstarted_initialization("blank", "f"*64, old_hash, "e"*64)
+        self.assertEqual(after["initialization_approval"]["plan"], before["initialization_approval"]["plan"])
+        self.assertNotEqual(after["initialization_approval"]["plan_sha256"], old_hash)
+        self.assertEqual(approved_policy(after), "f"*64)
+        self.assertEqual(after["retired_initialization_approvals"][0]["approval"], before["initialization_approval"])
+        for k in ("credential_uri", "profile_sha256", "mount_binding", "generation", "state"):
+            self.assertEqual(before[k], after[k])
+        with self.assertRaises(Denied):
+            self.a.rebind_unstarted_initialization("blank", "f"*64, old_hash, "e"*64)
+
+    def test_blank_reapproval_rejects_released_attempt_and_ready_volume(self):
+        self.blank()
+        old_hash = self.a.inspect("blank")["initialization_approval"]["plan_sha256"]
+        r = self.a.begin("blank", self.peer, "attempt", "initialize", 1)
+        self.a.release_unstarted_initialization("blank", r["owner"]["activation_id"], "e"*64)
+        with self.assertRaises(Denied):
+            self.a.rebind_unstarted_initialization("blank", "a"*64, old_hash, "e"*64)
+        with self.assertRaises(Denied):
+            self.a.rebind_unstarted_initialization("scratch", "a"*64,
+                self.a.inspect("scratch")["initialization_approval"]["plan_sha256"], "e"*64)

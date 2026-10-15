@@ -237,6 +237,44 @@ class Authority:
                 self._save(db, record, "update-workload-policy")
             return records
 
+    def rebind_unstarted_initialization(self, volume_id, policy, previous_plan, evidence):
+        """Administrator-only CAS reapproval of unchanged blank geometry.
+
+        No guest route. Reject any operation history, including released attempts.
+        A new plan hash must be pinned in newly approved measured guest config.
+        """
+        for value in (policy, previous_plan, evidence):
+            digest(value)
+        with self._transaction() as db:
+            record = self._load(db, volume_id)
+            approval = record.get("initialization_approval")
+            if (record["revoked"] or record["state"] != "Uninitialized"
+                    or record["owner"] is not None or record["last_closed"] is not None
+                    or record["header_sha256"] is not None or record["manifest_sha256"] is not None
+                    or record.get("initialization_steps") != []
+                    or record["policy_sha256"] != policy or not approval
+                    or approval["plan_sha256"] != previous_plan
+                    or db.execute("SELECT 1 FROM operations WHERE volume_id=? LIMIT 1",
+                                  (volume_id,)).fetchone() is not None):
+                raise Denied("reapproval requires an approved never-started blank volume")
+            from initialization import approved_policy, canonical
+            import hashlib
+            original_policy = approved_policy(record)
+            intent = {k: record[k] for k in (
+                "volume_id", "generation", "policy_sha256", "profile_sha256",
+                "credential_uri", "mount_binding")}
+            intent["plan"] = approval["plan"]
+            new_hash = hashlib.sha256(canonical(intent).encode()).hexdigest()
+            if new_hash == previous_plan:
+                raise Denied("initialization already bound to active policy")
+            record.setdefault("retired_initialization_approvals", []).append({
+                "approval": approval, "policy_sha256": original_policy,
+                "evidence_sha256": evidence})
+            record["initialization_approval"] = {"plan": approval["plan"], "plan_sha256": new_hash}
+            record.pop("initialization_policy_sha256", None)
+            self._save(db, record, "reapprove-unstarted-initialization")
+            return record
+
     def begin(
         self,
         volume_id,

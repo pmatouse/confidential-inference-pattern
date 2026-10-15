@@ -161,6 +161,11 @@ A strict profile correction requires renewed measured configuration, Trustee
 bindings and authority policy approval. `update_policy.py --allow-never-started`
 can additionally migrate an explicitly approved blank volume only if no operation
 has ever been recorded. It preserves the original initialization identity and
-rejects owned, revoked or previously attempted records. Normal initialized-volume
+rejects owned, revoked or previously attempted records. Before first formatting
+a migrated blank, explicitly reapprove its unchanged plan against the new policy
+with `reapprove_initialization.py`, then regenerate and approve InitData with the
+new plan hash. The guest deliberately rejects an old-policy formatting approval.
+The administrator command checks the previous plan hash and zero operation history
+transactionally, retains the superseded approval, and changes no geometry or keys. Normal initialized-volume
 migration still requires closed Ready state. This is an administrator CLI with
 no guest-accessible route.

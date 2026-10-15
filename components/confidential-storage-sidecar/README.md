@@ -85,11 +85,14 @@ profile and InitData. The policy uses the stock runtime's captured OCI request
 shapes. Different runtime/image versions require reviewing new request shapes,
 not relaxing all request checks.
 
-The internal registry must allow the guest to pull this public add-on image.
+The internal registry must allow the guest to pull the pinned add-on image.
 Host pull credentials are not automatically passed into the confidential guest.
-The lab uses a narrowly scoped anonymous `imagestreams/layers` GET permission for
-this one public add-on ImageStream on the internal ClusterIP registry. This must
-never grant access to other images or be used to publish a context with secrets.
+The fresh demo uses a dedicated registry reader service account in the enrollment
+namespace and a Role granting only `get` on `imagestreams/layers` for the helper
+ImageStream. Its short-lived credential is enrolled through Vault/ESO into Trustee;
+CDH obtains it only after the CPU/GPU and InitData checks succeed. There is no
+anonymous pull grant. Renew and re-enroll the credential before its expiry;
+automatic renewal remains an integration gap.
 
 ## Mount and lifecycle boundary
 
@@ -148,8 +151,10 @@ Required rollout evidence additionally includes:
 - Administrator `oc exec` denied, and application unable to access raw devices,
   private sockets or helper key memory.
 
-The existing `ConfidentialVolume` controller's approved package describes the
-earlier agent-integrated mount path. Its compilation/publication contract still
-needs a reviewed representation of separate transport and consumer containers
-before it can automate this add-on. Manually rendered candidates must not be
-reported as automatically reconciled, approved workloads.
+The `ConfidentialVolume` controller now reconciles an approved sidecar deployment
+package into KServe. Define the volumes and `ConfidentialWorkload`, let the
+controller publish its binding request, then prepare the measured package and
+complete authority/Trustee enrollment. An offline signature approves the exact
+package; the controller verifies it and creates the workload and public InitData
+ConfigMap. Enrollment, policy review and signing remain explicit trusted steps;
+the controller does not possess storage keys or approval-signing credentials.
