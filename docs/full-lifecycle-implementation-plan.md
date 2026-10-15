@@ -7,8 +7,10 @@ persistent encrypted RW `/data`. No manual per-release key enrollment, package
 signing, manifest copying or acceptance commands.
 
 **Status:** the manual path is qualified. The initial `InferenceRelease` controller
-and stage-Job runner passed independent hardware E2E, including fresh-VM
-persistence and controller restart. See the [recorded evidence](../tests/evidence/2026-10-15/controller-e2e.json).
+and stage-Job runner passed a fresh add-on installation: six first-attempt image
+builds and eight initial Jobs, including fresh-VM persistence, with no manual
+fixes/retries. See the [recorded evidence](../tests/evidence/2026-10-15/controller-fresh-e2e.json).
+An earlier qualification separately tested controller restart recovery.
 The [controller runbook](demo/controller.md) is the implemented API contract. Full
 foundation GitOps and lifecycle hardening below remain target work.
 

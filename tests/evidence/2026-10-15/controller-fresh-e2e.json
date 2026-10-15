@@ -1,0 +1,702 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-15",
+  "state": "FreshUnattendedE2EPassed",
+  "hardwareE2EQualified": true,
+  "startingPoint": "Existing OpenShift + CoCo, KServe, standard Trustee, internal registry and compatible shared CRDs; fresh add-on namespaces/builds/keys/model/PVCs/authority/release state. Not a cluster reinstall.",
+  "run": "qwen-controller-006",
+  "namespace": "ci-controller-006",
+  "trustedNamespace": "ci-controller-006-trusted",
+  "sourceCommit": "c273861bfff1e2646ae9722396e85d0a0e7c9ad0",
+  "audit": {
+    "state": "FreshUnattendedE2EPassed",
+    "releaseUID": "0cfce5c0-5ff0-4371-b252-f6a8265b2252",
+    "completedAt": "2026-10-15T12:16:17.856425+00:00",
+    "eightInitialJobs": true,
+    "failedStageJobs": 0,
+    "retryAnnotationAbsent": true,
+    "singleExecutorImage": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/inference-release-executor@sha256:d356b249ecea151463e558175d139aaae2ad3bf8b0146985190424198a455e10",
+    "unchangedController": {
+      "uid": "05a05c52-2484-4ffe-a896-2daf0b66928c",
+      "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/inference-release-executor@sha256:d356b249ecea151463e558175d139aaae2ad3bf8b0146985190424198a455e10",
+      "restarts": 0
+    },
+    "manualFixesDuringRelease": 0,
+    "manualRetries": 0,
+    "baseline": {
+      "observedAt": "2026-10-15T12:03:00.770544+00:00",
+      "sourceCommit": "c273861bfff1e2646ae9722396e85d0a0e7c9ad0",
+      "controller": {
+        "uid": "05a05c52-2484-4ffe-a896-2daf0b66928c",
+        "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/inference-release-executor@sha256:d356b249ecea151463e558175d139aaae2ad3bf8b0146985190424198a455e10",
+        "restarts": 0
+      },
+      "executorContextSha256": "c4c8c95a04931054d3f307f24fbcebdafaa16b8afefc6a9266965b671796a78a",
+      "gpuAllocatedBeforeStart": 1,
+      "gpuCapacity": 2,
+      "modelAndDataClaimsAbsent": true,
+      "releaseAbsent": true,
+      "releaseJobsAbsent": true,
+      "scopedSSHCredentialOnly": true,
+      "namespaceUIDs": {
+        "ci-controller-006": "a1c209c0-7080-4b59-9df5-e005e7d88a3e",
+        "ci-controller-006-trusted": "f03ba2ba-ff0f-449a-bd92-90e08999d738"
+      }
+    },
+    "observations": [
+      {
+        "observedAt": "2026-10-15T12:03:41.554081+00:00",
+        "phase": null,
+        "currentStage": null,
+        "reason": null,
+        "completed": 0
+      },
+      {
+        "observedAt": "2026-10-15T12:03:52.066195+00:00",
+        "phase": "Progressing",
+        "currentStage": "model",
+        "reason": "StageRunning",
+        "completed": 0
+      },
+      {
+        "observedAt": "2026-10-15T12:07:36.194405+00:00",
+        "phase": "Progressing",
+        "currentStage": "volumes",
+        "reason": "StageRunning",
+        "completed": 1
+      },
+      {
+        "observedAt": "2026-10-15T12:08:21.059714+00:00",
+        "phase": "Progressing",
+        "currentStage": "measure",
+        "reason": "StageRunning",
+        "completed": 2
+      },
+      {
+        "observedAt": "2026-10-15T12:08:31.586887+00:00",
+        "phase": "Progressing",
+        "currentStage": "enroll",
+        "reason": "StageRunning",
+        "completed": 3
+      },
+      {
+        "observedAt": "2026-10-15T12:09:13.788996+00:00",
+        "phase": "Progressing",
+        "currentStage": "deploy",
+        "reason": "StageRunning",
+        "completed": 4
+      },
+      {
+        "observedAt": "2026-10-15T12:12:45.473828+00:00",
+        "phase": "Progressing",
+        "currentStage": "test-first",
+        "reason": "StageRunning",
+        "completed": 5
+      },
+      {
+        "observedAt": "2026-10-15T12:12:55.931748+00:00",
+        "phase": "Progressing",
+        "currentStage": "test-reopen",
+        "reason": "StageRunning",
+        "completed": 6
+      },
+      {
+        "observedAt": "2026-10-15T12:16:05.703366+00:00",
+        "phase": "Verifying",
+        "currentStage": "report",
+        "reason": "StageScheduled",
+        "completed": 7
+      },
+      {
+        "observedAt": "2026-10-15T12:16:16.361577+00:00",
+        "phase": "Ready",
+        "currentStage": null,
+        "reason": "E2EPassed",
+        "completed": 8
+      }
+    ]
+  },
+  "executor": {
+    "build": "inference-release-executor-1",
+    "contextSha256": "c4c8c95a04931054d3f307f24fbcebdafaa16b8afefc6a9266965b671796a78a",
+    "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/inference-release-executor@sha256:d356b249ecea151463e558175d139aaae2ad3bf8b0146985190424198a455e10",
+    "namespace": "ci-controller-006"
+  },
+  "bootstrap": {
+    "singleInvocation": true,
+    "manualFixes": 0,
+    "manualRetries": 0,
+    "automaticTransferRetries": 0,
+    "images": {
+      "authority": {
+        "build": "confidential-storage-authority-1",
+        "contextSha256": "5ec5a1eab72b6dd8c269955332262b5d976eb21dc1225d5127e44b849147e3cf",
+        "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/confidential-storage-authority@sha256:6ce7ddbf514e489ff45e405a1eeed173dd8e8b6ff1e7a2465dac2946108f0ac1",
+        "namespace": "ci-controller-006"
+      },
+      "controller": {
+        "build": "confidential-volume-controller-1",
+        "contextSha256": "b1bd863543c4a9ea095d047fd11efeea0a4ddc11fa3990239934c4a696df98ff",
+        "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/confidential-volume-controller@sha256:83f044271fb1ea6ff7d84856dcafbe82e252febd665cd7e31fbca940ecdd4123",
+        "namespace": "ci-controller-006"
+      },
+      "populator": {
+        "build": "encrypted-model-populator-1",
+        "contextSha256": "bce3077b7f33753303b769ee4234344a56de3f56b079966d72875e0785d2644f",
+        "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/encrypted-model-populator@sha256:084afc5530f9dff0e47993dcab648ba199e372cf1888a10b57b158d70f102003",
+        "namespace": "ci-controller-006"
+      },
+      "preparation": {
+        "build": "inference-preparation-1",
+        "contextSha256": "c36eea1865ab4aa0a69c1a42ca8a581f24b0a30d9727672bbebf4814f38308e6",
+        "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/inference-preparation@sha256:ff5540069a28347e344e64b885527b4d1a301bca769ba1f96f562866d799c4db",
+        "namespace": "ci-controller-006"
+      },
+      "sidecar": {
+        "build": "confidential-storage-sidecar-1",
+        "contextSha256": "e49dccd2dd63acebf67eeab8f1e71bfea2f359b9ec59e527f4328721173ae3d1",
+        "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/confidential-storage-sidecar@sha256:07fe1101ad8331c511b51866e6a39e36794e882a01374d263cff956a4d849dcd",
+        "namespace": "ci-controller-006"
+      }
+    },
+    "builds": [
+      {
+        "name": "confidential-storage-authority-1",
+        "uid": "f143a6ce-6b58-419d-b725-238876ec9022",
+        "phase": "Complete",
+        "imageDigest": "sha256:6ce7ddbf514e489ff45e405a1eeed173dd8e8b6ff1e7a2465dac2946108f0ac1",
+        "startTimestamp": "2026-10-15T11:50:13Z",
+        "completionTimestamp": "2026-10-15T11:50:43Z"
+      },
+      {
+        "name": "confidential-storage-sidecar-1",
+        "uid": "5a70d55e-5e2f-476f-bd06-33988b61edde",
+        "phase": "Complete",
+        "imageDigest": "sha256:07fe1101ad8331c511b51866e6a39e36794e882a01374d263cff956a4d849dcd",
+        "startTimestamp": "2026-10-15T11:55:47Z",
+        "completionTimestamp": "2026-10-15T11:56:46Z"
+      },
+      {
+        "name": "confidential-volume-controller-1",
+        "uid": "ce82cff8-697e-4c1b-b2a6-32f3f5c99fd1",
+        "phase": "Complete",
+        "imageDigest": "sha256:83f044271fb1ea6ff7d84856dcafbe82e252febd665cd7e31fbca940ecdd4123",
+        "startTimestamp": "2026-10-15T11:49:34Z",
+        "completionTimestamp": "2026-10-15T11:50:04Z"
+      },
+      {
+        "name": "encrypted-model-populator-1",
+        "uid": "d0e27919-1dee-4b2e-8272-171185efa896",
+        "phase": "Complete",
+        "imageDigest": "sha256:084afc5530f9dff0e47993dcab648ba199e372cf1888a10b57b158d70f102003",
+        "startTimestamp": "2026-10-15T11:56:59Z",
+        "completionTimestamp": "2026-10-15T11:57:30Z"
+      },
+      {
+        "name": "inference-preparation-1",
+        "uid": "667d1603-3b0e-4601-a8c5-0373d5dd0a8a",
+        "phase": "Complete",
+        "imageDigest": "sha256:ff5540069a28347e344e64b885527b4d1a301bca769ba1f96f562866d799c4db",
+        "startTimestamp": "2026-10-15T11:57:36Z",
+        "completionTimestamp": "2026-10-15T11:58:02Z"
+      },
+      {
+        "name": "inference-release-executor-1",
+        "uid": "354124bd-92c5-473b-9511-840b92096852",
+        "phase": "Complete",
+        "imageDigest": "sha256:d356b249ecea151463e558175d139aaae2ad3bf8b0146985190424198a455e10",
+        "startTimestamp": "2026-10-15T12:00:10Z",
+        "completionTimestamp": "2026-10-15T12:00:54Z"
+      }
+    ]
+  },
+  "status": {
+    "completed": [
+      {
+        "job": "ir-0cfce5c05ff04371-0-ac1b5c09",
+        "receipt": "ir-0cfce5c05ff04371-0-ac1b5c09-receipt",
+        "receiptSha256": "7c64d0346889ebffaf1684e4dfab884b2c3cb76b3123fb541659f8512125c4ff",
+        "stage": "model"
+      },
+      {
+        "job": "ir-0cfce5c05ff04371-1-ac1b5c09",
+        "receipt": "ir-0cfce5c05ff04371-1-ac1b5c09-receipt",
+        "receiptSha256": "3817581e89fd91d8df4aacd1d1f4fbfa4832296a08310ea7daf5d7d4c4ee39f9",
+        "stage": "volumes"
+      },
+      {
+        "job": "ir-0cfce5c05ff04371-2-ac1b5c09",
+        "receipt": "ir-0cfce5c05ff04371-2-ac1b5c09-receipt",
+        "receiptSha256": "2be530ec74c053e41aaf0ac20a7bbb86405a298167f5f582dc03b094a60342f8",
+        "stage": "measure"
+      },
+      {
+        "job": "ir-0cfce5c05ff04371-3-ac1b5c09",
+        "receipt": "ir-0cfce5c05ff04371-3-ac1b5c09-receipt",
+        "receiptSha256": "fd833fdb5753b3ca178bffb83c083c2e8ef63fb6ecc3890923650fa3d7f5114b",
+        "stage": "enroll"
+      },
+      {
+        "job": "ir-0cfce5c05ff04371-4-ac1b5c09",
+        "receipt": "ir-0cfce5c05ff04371-4-ac1b5c09-receipt",
+        "receiptSha256": "d20ba18ec068fef35e96e057380acc4615bb0c409d9eca11454083d931d59595",
+        "stage": "deploy"
+      },
+      {
+        "job": "ir-0cfce5c05ff04371-5-ac1b5c09",
+        "receipt": "ir-0cfce5c05ff04371-5-ac1b5c09-receipt",
+        "receiptSha256": "18f8cf59feffee483d4600429b8dd5afa24e14403f92908a1527614b4cf07543",
+        "stage": "test-first"
+      },
+      {
+        "job": "ir-0cfce5c05ff04371-6-ac1b5c09",
+        "receipt": "ir-0cfce5c05ff04371-6-ac1b5c09-receipt",
+        "receiptSha256": "bb20191b5e3959b4f50702741b6f9ca9b91a1279399cda0322bb28a16a6130fd",
+        "stage": "test-reopen"
+      },
+      {
+        "job": "ir-0cfce5c05ff04371-7-ac1b5c09",
+        "receipt": "ir-0cfce5c05ff04371-7-ac1b5c09-receipt",
+        "receiptSha256": "5d7d89043cb969e3a454c279c35b9124449d7c0ea9e4d928da486393bfb1643d",
+        "stage": "report"
+      }
+    ],
+    "conditions": [
+      {
+        "observedGeneration": 1,
+        "reason": "E2EPassed",
+        "status": "True",
+        "type": "Ready"
+      }
+    ],
+    "currentStage": null,
+    "inputSha256": "58230b08cf4b473984e3c78ea0fefc55ebd2844e6db1bd78ffd09f2f061b8dcf",
+    "observedGeneration": 1,
+    "phase": "Ready",
+    "reason": "E2EPassed"
+  },
+  "e2e": {
+    "first": {
+      "applicationImage": "nvcr.io/nvidia/vllm@sha256:15f380ad9c32f0ac57ac16e4b778c6f733c88b9ffe3a936035d0a59ad17b1aab",
+      "boot": "cc8c3976-fbd6-4392-b66f-08e7e1590639",
+      "chatResponse": "<think>\n\n</think>\n\n7 plus 5 equals 12.",
+      "chatStatus": 200,
+      "execDenied": true,
+      "gpu": {
+        "cuda": "13.0",
+        "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+        "event": "CUDA_GPU_PROBE_PASS",
+        "torch": "2.9.0a0+50eac811a6.nv25.09"
+      },
+      "initDataSha256": "595e1058078392d00a3c6c861daf33918a31ab68353a5168dc2bd138ee67159c",
+      "model": "qwen3-0.6b",
+      "modelHashesVerified": true,
+      "namespace": "ci-controller-006",
+      "phase": "first",
+      "pod": "qwen-controller-006-predictor-6576dbb889-pkz4l",
+      "podUid": "33ced8cb-4347-44aa-b111-3859ae46e54e",
+      "pvcUids": {
+        "data": "7c92c475-912d-46ea-b478-ceaaf73963b1",
+        "model": "26f2b95f-72a9-404e-9c48-e4127ba1b76b"
+      },
+      "scope": "application, persistence, chat and exec checks; authority evidence separate",
+      "workload": "qwen-controller-006"
+    },
+    "images": {
+      "authority": {
+        "build": "confidential-storage-authority-1",
+        "contextSha256": "5ec5a1eab72b6dd8c269955332262b5d976eb21dc1225d5127e44b849147e3cf",
+        "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/confidential-storage-authority@sha256:6ce7ddbf514e489ff45e405a1eeed173dd8e8b6ff1e7a2465dac2946108f0ac1",
+        "namespace": "ci-controller-006"
+      },
+      "controller": {
+        "build": "confidential-volume-controller-1",
+        "contextSha256": "b1bd863543c4a9ea095d047fd11efeea0a4ddc11fa3990239934c4a696df98ff",
+        "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/confidential-volume-controller@sha256:83f044271fb1ea6ff7d84856dcafbe82e252febd665cd7e31fbca940ecdd4123",
+        "namespace": "ci-controller-006"
+      },
+      "populator": {
+        "build": "encrypted-model-populator-1",
+        "contextSha256": "bce3077b7f33753303b769ee4234344a56de3f56b079966d72875e0785d2644f",
+        "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/encrypted-model-populator@sha256:084afc5530f9dff0e47993dcab648ba199e372cf1888a10b57b158d70f102003",
+        "namespace": "ci-controller-006"
+      },
+      "preparation": {
+        "build": "inference-preparation-1",
+        "contextSha256": "c36eea1865ab4aa0a69c1a42ca8a581f24b0a30d9727672bbebf4814f38308e6",
+        "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/inference-preparation@sha256:ff5540069a28347e344e64b885527b4d1a301bca769ba1f96f562866d799c4db",
+        "namespace": "ci-controller-006"
+      },
+      "sidecar": {
+        "build": "confidential-storage-sidecar-1",
+        "contextSha256": "e49dccd2dd63acebf67eeab8f1e71bfea2f359b9ec59e527f4328721173ae3d1",
+        "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/confidential-storage-sidecar@sha256:07fe1101ad8331c511b51866e6a39e36794e882a01374d263cff956a4d849dcd",
+        "namespace": "ci-controller-006"
+      }
+    },
+    "limitations": [
+      "Qualified OSC SNP/NVIDIA profile only",
+      "Chat proxy HTTP outside TEE; localhost port-forward",
+      "Retained authority is trusted; full RW snapshot rollback resistance is not claimed"
+    ],
+    "namespace": "ci-controller-006",
+    "reopen": {
+      "applicationImage": "nvcr.io/nvidia/vllm@sha256:15f380ad9c32f0ac57ac16e4b778c6f733c88b9ffe3a936035d0a59ad17b1aab",
+      "boot": "b80647d9-65c0-4c55-bee7-3485e58637ab",
+      "chatResponse": "<think>\n\n</think>\n\n7 plus 5 equals 12.",
+      "chatStatus": 200,
+      "execDenied": true,
+      "gpu": {
+        "cuda": "13.0",
+        "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+        "event": "CUDA_GPU_PROBE_PASS",
+        "torch": "2.9.0a0+50eac811a6.nv25.09"
+      },
+      "initDataSha256": "595e1058078392d00a3c6c861daf33918a31ab68353a5168dc2bd138ee67159c",
+      "model": "qwen3-0.6b",
+      "modelHashesVerified": true,
+      "namespace": "ci-controller-006",
+      "phase": "reopen",
+      "pod": "qwen-controller-006-predictor-6576dbb889-wph8h",
+      "podUid": "3ba16ea9-f0c1-48d6-8571-faf10b47fc3c",
+      "pvcUids": {
+        "data": "7c92c475-912d-46ea-b478-ceaaf73963b1",
+        "model": "26f2b95f-72a9-404e-9c48-e4127ba1b76b"
+      },
+      "scope": "application, persistence, chat and exec checks; authority evidence separate",
+      "workload": "qwen-controller-006"
+    },
+    "run": "qwen-controller-006",
+    "source": {
+      "diskBytes": 2147483648,
+      "diskDigest": "sha256:d7ad6e7a97d5ec28847d48a5b9c68f0691be391ce44b7f1b016150d6e3539afe",
+      "format": "luks-verity-v1",
+      "manifestDigest": "sha256:42e896559ea262d88c1c1dcb921a34610a25cc9ed4a6bdb737e15793c343afb8",
+      "repository": "ci-controller-006/qwen-controller-006-model"
+    },
+    "state": "E2EPassed"
+  },
+  "acceptanceStageResults": {
+    "test-first": {
+      "chatStatus": 200,
+      "cpuGpuAttestation": true,
+      "podUID": "33ced8cb-4347-44aa-b111-3859ae46e54e",
+      "pvcUIDs": {
+        "data": "7c92c475-912d-46ea-b478-ceaaf73963b1",
+        "model": "26f2b95f-72a9-404e-9c48-e4127ba1b76b"
+      },
+      "state": "FirstBootPassed"
+    },
+    "test-reopen": {
+      "chatStatus": 200,
+      "cpuGpuAttestation": true,
+      "initializationUnchanged": true,
+      "oldOwnerClosed": true,
+      "podUID": "3ba16ea9-f0c1-48d6-8571-faf10b47fc3c",
+      "previousPodUID": "33ced8cb-4347-44aa-b111-3859ae46e54e",
+      "samePVCs": true,
+      "state": "FreshVMPersistencePassed"
+    }
+  },
+  "independentChecks": {
+    "clusterAdministratorExecDenied": true,
+    "denial": "ExecProcessRequest is blocked by policy",
+    "attestationMarkers": [
+      "STORAGE_EAR submod=cpu0 status=affirming hardware=2 configuration=3 executables=3",
+      "STORAGE_EAR submod=gpu0 status=affirming hardware=2 configuration=3 executables=3"
+    ]
+  },
+  "credential": {
+    "repository": "pmatouse/coco-pattern-edge-rtx6k",
+    "deployKeyId": 166534647,
+    "readOnly": false,
+    "secret": "ci-controller-006-trusted/inference-release-git",
+    "secretFields": [
+      "known_hosts",
+      "ssh-privatekey"
+    ],
+    "broadTokenEverInstalled": false,
+    "hostKeyFingerprints": {
+      "SHA256_ECDSA": "p2QAMXNIC1TJYWeIOttrVc98/R1BUFWu3/LiyKgUfQM",
+      "SHA256_ED25519": "+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU",
+      "SHA256_RSA": "uNiVztksCsDhcc0u9e8BujQXVUpKZIDTMczCvj3tD2s"
+    }
+  },
+  "preservedPredictorUID": "8ea6b4f6-987c-42cb-852d-ac47726506dd",
+  "stageReceipts": [
+    {
+      "jobUID": "38fea879-fbf1-4d1a-ab25-222527347fa3",
+      "releaseUID": "0cfce5c0-5ff0-4371-b252-f6a8265b2252",
+      "schemaVersion": 1,
+      "siteSha256": "a5566159d6d890bf216882022207f863a4e1666dcbc12b0496fdd75026c2b0eb",
+      "specSha256": "58230b08cf4b473984e3c78ea0fefc55ebd2844e6db1bd78ffd09f2f061b8dcf",
+      "stage": "model",
+      "stageReceiptSha256": "4ef688c2668ae2def412a046905f6466f4b8a2c5c2c1cd022ed4c80f4b4c3519",
+      "state": "ModelPublished"
+    },
+    {
+      "jobUID": "f36263e2-8fb4-4c8f-9ba3-8b420020294b",
+      "releaseUID": "0cfce5c0-5ff0-4371-b252-f6a8265b2252",
+      "schemaVersion": 1,
+      "siteSha256": "a5566159d6d890bf216882022207f863a4e1666dcbc12b0496fdd75026c2b0eb",
+      "specSha256": "58230b08cf4b473984e3c78ea0fefc55ebd2844e6db1bd78ffd09f2f061b8dcf",
+      "stage": "volumes",
+      "stageReceiptSha256": "68eb287e07124bf74a2fe6b0813a89163c1fe8ce8e8715fb055c61db2c4bf13b",
+      "state": "VolumesBound"
+    },
+    {
+      "jobUID": "9d10201a-cb20-4b2c-81dd-e5158f2e9800",
+      "releaseUID": "0cfce5c0-5ff0-4371-b252-f6a8265b2252",
+      "schemaVersion": 1,
+      "siteSha256": "a5566159d6d890bf216882022207f863a4e1666dcbc12b0496fdd75026c2b0eb",
+      "specSha256": "58230b08cf4b473984e3c78ea0fefc55ebd2844e6db1bd78ffd09f2f061b8dcf",
+      "stage": "measure",
+      "stageReceiptSha256": "f25680e0d9e446305465f0cc094e7bfb7e63c4f833a7a9c2500e754df470012e",
+      "state": "ReleaseMeasured"
+    },
+    {
+      "jobUID": "497085c0-e781-4c02-a9aa-7fca3a9cd69c",
+      "releaseUID": "0cfce5c0-5ff0-4371-b252-f6a8265b2252",
+      "schemaVersion": 1,
+      "siteSha256": "a5566159d6d890bf216882022207f863a4e1666dcbc12b0496fdd75026c2b0eb",
+      "specSha256": "58230b08cf4b473984e3c78ea0fefc55ebd2844e6db1bd78ffd09f2f061b8dcf",
+      "stage": "enroll",
+      "stageReceiptSha256": "58e39b53d2ae6ef1d7efdd17fcf09d71a563139038110f2efb81e2d6d225404f",
+      "state": "TrustReady"
+    },
+    {
+      "jobUID": "9b095ce5-2001-4ade-9c8f-98ad1c5c7bc5",
+      "releaseUID": "0cfce5c0-5ff0-4371-b252-f6a8265b2252",
+      "schemaVersion": 1,
+      "siteSha256": "a5566159d6d890bf216882022207f863a4e1666dcbc12b0496fdd75026c2b0eb",
+      "specSha256": "58230b08cf4b473984e3c78ea0fefc55ebd2844e6db1bd78ffd09f2f061b8dcf",
+      "stage": "deploy",
+      "stageReceiptSha256": "f8a9f08b70170b30c8ced8f5c8974b53624a3e7ab6468d7930f7bde873276299",
+      "state": "Serving"
+    },
+    {
+      "jobUID": "9aec0451-0aaa-4bdd-b709-cac7fabff24d",
+      "releaseUID": "0cfce5c0-5ff0-4371-b252-f6a8265b2252",
+      "schemaVersion": 1,
+      "siteSha256": "a5566159d6d890bf216882022207f863a4e1666dcbc12b0496fdd75026c2b0eb",
+      "specSha256": "58230b08cf4b473984e3c78ea0fefc55ebd2844e6db1bd78ffd09f2f061b8dcf",
+      "stage": "test-first",
+      "stageReceiptSha256": "74a11746530da62f2699775354a298089cac30e60ccafdaaac5c78853fda302d",
+      "state": "FirstBootPassed"
+    },
+    {
+      "jobUID": "6c806dbc-20ab-43e6-9595-676ff7946ea0",
+      "releaseUID": "0cfce5c0-5ff0-4371-b252-f6a8265b2252",
+      "schemaVersion": 1,
+      "siteSha256": "a5566159d6d890bf216882022207f863a4e1666dcbc12b0496fdd75026c2b0eb",
+      "specSha256": "58230b08cf4b473984e3c78ea0fefc55ebd2844e6db1bd78ffd09f2f061b8dcf",
+      "stage": "test-reopen",
+      "stageReceiptSha256": "4688ea9fcb68e6576dc2f31b469d311c2a73328a80a75576ceaa3c8f580b4c56",
+      "state": "FreshVMPersistencePassed"
+    },
+    {
+      "jobUID": "6ca77c9c-baa9-4a85-8ba0-ca390766909f",
+      "releaseUID": "0cfce5c0-5ff0-4371-b252-f6a8265b2252",
+      "schemaVersion": 1,
+      "siteSha256": "a5566159d6d890bf216882022207f863a4e1666dcbc12b0496fdd75026c2b0eb",
+      "specSha256": "58230b08cf4b473984e3c78ea0fefc55ebd2844e6db1bd78ffd09f2f061b8dcf",
+      "stage": "report",
+      "stageReceiptSha256": "b98d014da3b835528390c7a46e80eb7400844c7b510c4f166f6d8fc5b8d98274",
+      "state": "E2EPassed"
+    }
+  ],
+  "jobs": [
+    {
+      "name": "ir-0cfce5c05ff04371-0-ac1b5c09",
+      "uid": "38fea879-fbf1-4d1a-ab25-222527347fa3",
+      "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/inference-release-executor@sha256:d356b249ecea151463e558175d139aaae2ad3bf8b0146985190424198a455e10",
+      "conditions": [
+        {
+          "lastProbeTime": "2026-10-15T12:07:23Z",
+          "lastTransitionTime": "2026-10-15T12:07:23Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "SuccessCriteriaMet"
+        },
+        {
+          "lastProbeTime": "2026-10-15T12:07:23Z",
+          "lastTransitionTime": "2026-10-15T12:07:23Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "Complete"
+        }
+      ]
+    },
+    {
+      "name": "ir-0cfce5c05ff04371-1-ac1b5c09",
+      "uid": "f36263e2-8fb4-4c8f-9ba3-8b420020294b",
+      "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/inference-release-executor@sha256:d356b249ecea151463e558175d139aaae2ad3bf8b0146985190424198a455e10",
+      "conditions": [
+        {
+          "lastProbeTime": "2026-10-15T12:08:07Z",
+          "lastTransitionTime": "2026-10-15T12:08:07Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "SuccessCriteriaMet"
+        },
+        {
+          "lastProbeTime": "2026-10-15T12:08:07Z",
+          "lastTransitionTime": "2026-10-15T12:08:07Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "Complete"
+        }
+      ]
+    },
+    {
+      "name": "ir-0cfce5c05ff04371-2-ac1b5c09",
+      "uid": "9d10201a-cb20-4b2c-81dd-e5158f2e9800",
+      "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/inference-release-executor@sha256:d356b249ecea151463e558175d139aaae2ad3bf8b0146985190424198a455e10",
+      "conditions": [
+        {
+          "lastProbeTime": "2026-10-15T12:08:18Z",
+          "lastTransitionTime": "2026-10-15T12:08:18Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "SuccessCriteriaMet"
+        },
+        {
+          "lastProbeTime": "2026-10-15T12:08:18Z",
+          "lastTransitionTime": "2026-10-15T12:08:18Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "Complete"
+        }
+      ]
+    },
+    {
+      "name": "ir-0cfce5c05ff04371-3-ac1b5c09",
+      "uid": "497085c0-e781-4c02-a9aa-7fca3a9cd69c",
+      "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/inference-release-executor@sha256:d356b249ecea151463e558175d139aaae2ad3bf8b0146985190424198a455e10",
+      "conditions": [
+        {
+          "lastProbeTime": "2026-10-15T12:09:06Z",
+          "lastTransitionTime": "2026-10-15T12:09:06Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "SuccessCriteriaMet"
+        },
+        {
+          "lastProbeTime": "2026-10-15T12:09:07Z",
+          "lastTransitionTime": "2026-10-15T12:09:07Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "Complete"
+        }
+      ]
+    },
+    {
+      "name": "ir-0cfce5c05ff04371-4-ac1b5c09",
+      "uid": "9b095ce5-2001-4ade-9c8f-98ad1c5c7bc5",
+      "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/inference-release-executor@sha256:d356b249ecea151463e558175d139aaae2ad3bf8b0146985190424198a455e10",
+      "conditions": [
+        {
+          "lastProbeTime": "2026-10-15T12:12:36Z",
+          "lastTransitionTime": "2026-10-15T12:12:36Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "SuccessCriteriaMet"
+        },
+        {
+          "lastProbeTime": "2026-10-15T12:12:36Z",
+          "lastTransitionTime": "2026-10-15T12:12:36Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "Complete"
+        }
+      ]
+    },
+    {
+      "name": "ir-0cfce5c05ff04371-5-ac1b5c09",
+      "uid": "9aec0451-0aaa-4bdd-b709-cac7fabff24d",
+      "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/inference-release-executor@sha256:d356b249ecea151463e558175d139aaae2ad3bf8b0146985190424198a455e10",
+      "conditions": [
+        {
+          "lastProbeTime": "2026-10-15T12:12:47Z",
+          "lastTransitionTime": "2026-10-15T12:12:47Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "SuccessCriteriaMet"
+        },
+        {
+          "lastProbeTime": "2026-10-15T12:12:47Z",
+          "lastTransitionTime": "2026-10-15T12:12:47Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "Complete"
+        }
+      ]
+    },
+    {
+      "name": "ir-0cfce5c05ff04371-6-ac1b5c09",
+      "uid": "6c806dbc-20ab-43e6-9595-676ff7946ea0",
+      "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/inference-release-executor@sha256:d356b249ecea151463e558175d139aaae2ad3bf8b0146985190424198a455e10",
+      "conditions": [
+        {
+          "lastProbeTime": "2026-10-15T12:16:03Z",
+          "lastTransitionTime": "2026-10-15T12:16:03Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "SuccessCriteriaMet"
+        },
+        {
+          "lastProbeTime": "2026-10-15T12:16:03Z",
+          "lastTransitionTime": "2026-10-15T12:16:03Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "Complete"
+        }
+      ]
+    },
+    {
+      "name": "ir-0cfce5c05ff04371-7-ac1b5c09",
+      "uid": "6ca77c9c-baa9-4a85-8ba0-ca390766909f",
+      "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-006/inference-release-executor@sha256:d356b249ecea151463e558175d139aaae2ad3bf8b0146985190424198a455e10",
+      "conditions": [
+        {
+          "lastProbeTime": "2026-10-15T12:16:10Z",
+          "lastTransitionTime": "2026-10-15T12:16:10Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "SuccessCriteriaMet"
+        },
+        {
+          "lastProbeTime": "2026-10-15T12:16:10Z",
+          "lastTransitionTime": "2026-10-15T12:16:10Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "Complete"
+        }
+      ]
+    }
+  ],
+  "pythonTestsPassed": 144,
+  "qualificationNotes": [
+    "Eight initial stage Jobs; no retry annotation or manual stage commands.",
+    "Controller Pod UID, pinned image and zero restart count unchanged through acceptance.",
+    "Fresh-VM replacement is the automated acceptance stage, not an operator repair.",
+    "Failed attempts 002\u2013005 are retained separately and not counted as successful.",
+    "One-time administrator bootstrap remains required; lifecycle renewal, retirement and further hardware qualification remain open."
+  ]
+}

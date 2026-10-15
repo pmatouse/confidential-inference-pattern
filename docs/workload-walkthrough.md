@@ -9,8 +9,9 @@ Read this with the [component map](components.md). To deploy it, follow the
 [manual quickstart](demo/quickstart.md); its Make stages perform the trusted
 preparation steps described below. Applying the CRs alone is insufficient.
 The [controller path](demo/controller.md) uses the same operations as sequential Jobs
-after one-time bootstrap; its [independent E2E receipt](../tests/evidence/2026-10-15/controller-e2e.json)
-records first/fresh-VM inference, persistence, attestation and restart recovery.
+after one-time bootstrap; its [fresh E2E receipt](../tests/evidence/2026-10-15/controller-fresh-e2e.json)
+records all eight initial Jobs completing without manual fixes/retries, including
+first/fresh-VM inference, persistence, CPU/GPU attestation and exec denial.
 [Recorded E2E](../tests/evidence/2026-10-15/manual-quickstart-e2e.json) covers fresh
 add-on installation and two VMs on the [qualified stack](architecture.md#qualified-hardware-and-software).
 

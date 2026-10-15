@@ -16,11 +16,17 @@ not every possible clean-cluster dependency installation path.
 | Isolation | Unprivileged vLLM; raw devices/private CDH only in guest helper; administrator exec denied |
 | Reproducibility | `qs-*`, `quickstart-all` and resume; generated launch/policy/InitData, retained receipts, fresh-VM E2E |
 
-The independent [controller E2E receipt](../tests/evidence/2026-10-15/controller-e2e.json)
-qualifies the same model/storage/inference path through eight sequential release
-Jobs. The final status is `Ready / E2EPassed`; controller restart preserved the
-verified VM and claims. Initial qualification needed explicit fixes/retries, as
-recorded in the [controller runbook](demo/controller.md).
+The [fresh controller E2E receipt](../tests/evidence/2026-10-15/controller-fresh-e2e.json)
+qualifies `qwen-controller-006` from source `c273861`: six new first-attempt image
+builds and eight initial release Jobs reached `Ready / E2EPassed` without manual
+fixes, retries or controller restart. Both VMs passed real inference/chat,
+model hashes, CPU/GPU attestation and exec denial; the replacement preserved the
+same PVCs, RW canary and initialization history. One-time administrator bootstrap
+is still required. Compatible shared CRDs and the existing platform were reused.
+
+The [controller runbook](demo/controller.md) records the failed fresh attempts and
+fixes. Earlier [controller evidence](../tests/evidence/2026-10-15/controller-e2e.json)
+also covers restart recovery; that initial run required explicit fixes/retries.
 
 ## Remaining integration work
 

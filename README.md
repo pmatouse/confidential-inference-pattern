@@ -12,10 +12,13 @@ Trustee releases keys after CPU/GPU attestation and exact workload bindings.
 **Status:** the [manual Make quickstart](docs/demo/quickstart.md) passed fresh-add-on
 and fresh-VM E2E on AMD SEV-SNP + RTX PRO 6000 Blackwell Server Edition.
 [Manual evidence](tests/evidence/2026-10-15/manual-quickstart-e2e.json). The
-[controller path](docs/demo/controller.md) also reached `Ready / E2EPassed` through
-eight stage Jobs, with fresh-VM persistence and restart recovery
-([controller evidence](tests/evidence/2026-10-15/controller-e2e.json)). Full lifecycle GitOps,
-other hardware qualification and production credential/authority lifecycle remain open.
+[controller path](docs/demo/controller.md) passed a completely fresh add-on run:
+six first-attempt image builds, then `Ready / E2EPassed` through eight initial
+stage Jobs, with no manual fixes/retries and fresh-VM persistence
+([fresh controller evidence](tests/evidence/2026-10-15/controller-fresh-e2e.json)).
+The existing OpenShift + CoCo platform and compatible shared APIs were reused.
+Full lifecycle GitOps, other hardware qualification and production credential/authority
+lifecycle remain open.
 
 | Read | Contents |
 | --- | --- |

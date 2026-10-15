@@ -14,48 +14,50 @@ hardware E2E on the qualified AMD SEV-SNP/NVIDIA profile.
 
 ## Recorded validation
 
-[Controller E2E evidence](../../tests/evidence/2026-10-15/controller-e2e.json),
-2026-10-15: `qwen-controller-001` reached **Ready / E2EPassed**, with eight completed
-stage receipts. The run started with new add-on namespaces, encrypted model,
-keys, PVCs and authority history on an existing OpenShift + CoCo installation.
-Compatible shared dependencies were reused; the cluster was not reinstalled.
+[Fresh unattended E2E evidence](../../tests/evidence/2026-10-15/controller-fresh-e2e.json),
+2026-10-15: `qwen-controller-006` reached **Ready / E2EPassed** from source
+`c273861`. A single bootstrap invocation built six new images and installed the
+add-on in new namespaces. After applying one `InferenceRelease`, all eight
+first-attempt Jobs completed without manual fixes, retry annotations, per-stage
+Make commands or controller restarts.
+
+The starting platform was **OpenShift + CoCo already installed**. Compatible shared
+CRDs, KServe, Trustee and the cluster registry were reused. Model ciphertext,
+keys, claims, authority history and release state were new. This qualifies a fresh
+add-on installation on that platform, not an OpenShift/CoCo reinstall or every
+shared-dependency installation path.
 
 | Check | Observed result |
 | --- | --- |
-| Serving | Stock NVIDIA vLLM / Qwen3-0.6B through KServe; chat HTTP 200 and `7 plus 5 equals 12.` on both VMs |
-| RO model | OCI-populated encrypted Block PVC; producer file hashes verified; read-only `/model` |
-| RW data | Blank PVC initialized in the guest; canary survived a new VM/boot; same claims and initialization history |
-| Attestation | Standard Trustee CPU/GPU appraisal; both authority EAR markers affirming |
-| Isolation | CUDA on RTX PRO 6000 Blackwell Server Edition; unprivileged application; cluster-administrator exec blocked by guest policy |
-| Recovery | Explicit retry resumed the existing replacement VM; controller restart retained all stage Jobs/receipts and the tested predictor |
-| Git access | Repository-only SSH deploy key; strict host verification and in-cluster fetch/push dry-run passed; broad token removed |
+| Orchestration | Eight initial stage Jobs; one pinned executor image; zero failed stage Jobs; controller UID/image/restart count unchanged |
+| Serving | Stock vLLM / Qwen3-0.6B through KServe; real CUDA inference and chat HTTP 200 before and after VM replacement |
+| RO model | Newly encrypted OCI artifact → populated Block PVC → read-only `/model`; producer file hashes verified |
+| RW data | New blank PVC initialized in the guest; canary survived a different VM/boot; same claims and unchanged initialization history |
+| Attestation | Standard Trustee CPU/GPU appraisal; exact workload bindings; both authority EAR markers affirming |
+| Isolation | Unprivileged application; cluster-administrator exec denied by guest policy |
+| Git access | Dedicated write SSH deploy key limited to the Trustee owner repository; no broad token installed |
 | Other workloads | Separate `confidential-inference-demo` predictor UID unchanged |
 
-The initial qualification exposed integration bugs and required fixes plus explicit
-retries. Completed stages, keys and authority history were retained. Corrections
-covered Lease timestamps, scoped RBAC apply ordering, executor profile packaging,
-named Trustee Deployment reads, delayed Pod garbage collection and PVC alias
-resolution. The final executor passed persistence/report and restart checks;
-a second completely fresh release with that final image has not been run.
-139 Python tests pass. [Bootstrap evidence](../../tests/evidence/2026-10-15/controller-bootstrap.json)
-is the earlier intermediate snapshot, not the final outcome.
+The acceptance workflow intentionally replaces its own predictor once to test
+persistence. That replacement is an automated test stage, not an operator repair.
+All six builds also completed on their first attempts; no automatic transfer
+retry was needed. 144 Python tests and values/security validation pass.
 
-Fresh repetition `qwen-controller-002` exposed a shared-CRD ownership bug during
-bootstrap, before any release started ([failure record](../../tests/evidence/2026-10-15/controller-002-bootstrap-failed.json)).
-The installer now reuses the validated shared API without adopting it. Attempt
-`003` then passed fresh bootstrap, model publication, volume binding and measurement,
-but hit an enrollment readiness race during the owner-managed Trustee rollout
-([failure record](../../tests/evidence/2026-10-15/controller-003-enrollment-failed.json)).
-Enrollment now waits for a healthy Trustee and checks its exact resource hashes
-before deciding whether the authorized restart is needed. Neither failed attempt
-is counted as successful E2E. Attempt `004` stopped before image builds when the
-large stock-initrd `oc exec` transfer failed ([record](../../tests/evidence/2026-10-15/controller-004-bootstrap-failed.json)).
-Stock artifact acquisition now retries failed read-only transport at most three
-times, while a digest mismatch still fails immediately. A new installation must
-qualify these corrections. Attempt `005` reached successful compilation but failed
-while retrieving a compiled binary ([record](../../tests/evidence/2026-10-15/controller-005-bootstrap-failed.json));
-the existing hash-verified receive loop now also bounds transport exceptions.
-Neither transfer fix accepts partial or unverified artifacts.
+### Qualification history
+
+Fresh attempts `002`–`005` were retained as failures and never repaired or retried
+into a passing result. Each correction was committed and tested before a new attempt.
+
+| Attempt | Failure and correction | Evidence |
+| --- | --- | --- |
+| `001` | Initial integration qualification needed explicit fixes/retries; also tested controller restart recovery | [Earlier E2E](../../tests/evidence/2026-10-15/controller-e2e.json) |
+| `002` | Bootstrap tried to adopt an already validated shared release CRD; installer now reuses it | [Record](../../tests/evidence/2026-10-15/controller-002-bootstrap-failed.json) |
+| `003` | Enrollment raced the owner-managed Trustee rollout; wait for a unique healthy Pod and verify exact key hashes before any authorized restart | [Record](../../tests/evidence/2026-10-15/controller-003-enrollment-failed.json) |
+| `004` | Stock-initrd binary transfer failed; bounded read-only transport recovery preserves pinned-hash verification | [Record](../../tests/evidence/2026-10-15/controller-004-bootstrap-failed.json) |
+| `005` | Compiled-binary transfer failed; existing verified receive loop now also handles transport exceptions | [Record](../../tests/evidence/2026-10-15/controller-005-bootstrap-failed.json) |
+
+Transport recovery accepts only complete bytes matching the expected digest.
+A failed stage Job still blocks the release; it is never silently retried.
 
 ## Bootstrap once
 
@@ -134,11 +136,11 @@ supply exactly one credential type. The add-on does not mint or renew tokens.
 apiVersion: inference.confidentialcontainers.org/v1alpha1
 kind: InferenceRelease
 metadata:
-  name: qwen-controller-001
+  name: qwen-controller-006
   namespace: inference-trusted
 spec:
   siteConfigRef:
-    name: qwen-controller-001-site
+    name: qwen-controller-006-site
     key: values.json
     sha256: <canonical-merged-site-sha256>
   acceptance:
@@ -195,8 +197,8 @@ oc -n <workload-namespace> port-forward svc/<run>-chat 8766:8080 --address=127.0
 ```
 
 Use the configured chat Service port if it differs from `8080`. For the recorded
-run, namespaces are `ci-controller-001-trusted` / `ci-controller-001`, and the
-service is `qwen-controller-001-chat`. The final report is in the immutable
+run, namespaces are `ci-controller-006-trusted` / `ci-controller-006`, and the
+service is `qwen-controller-006-chat`. The final report is in the immutable
 ConfigMap named by the `report` stage's `receipt` field (`data.e2e-report.json`).
 `qs-chat` expects local manual-run receipts; use the direct Service port-forward
 for a controller-owned run. This endpoint remains localhost HTTP; it does not
