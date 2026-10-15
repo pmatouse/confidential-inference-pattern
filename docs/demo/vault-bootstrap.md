@@ -6,9 +6,10 @@ current lab's existing Trustee ExternalSecret extracts `secret/data/hub/modelKey
 its owner is the base CoCo `trustee` Argo Application. The add-on must not become
 a second owner of that Secret, ExternalSecret, resource policy or KbsConfig.
 
-Before enrolling a live release, configure a short-lived Vault identity. No Vault
-login or scoped enrollment identity was available in the implementation session.
-The following is an administrator bootstrap proposal, not an executed change:
+Before enrolling a live release, configure a short-lived Vault identity. The
+approved one-time bootstrap was completed on the edge cluster on 2026-10-15.
+Other installations must perform their own administrator bootstrap. The installed
+policy is:
 
 ```hcl
 # Allows JSON merge patch of the existing key record; no data read or deletion.
@@ -28,9 +29,10 @@ and corresponding owner-managed Trustee/ESO resource mapping is preferable for
 separated deployments; that owner integration is still pending. Do not grant this
 identity to the workload controller, importer, chat application or vLLM.
 
-Using an already authenticated Vault administrator, create the policy and bind it
-to a dedicated ServiceAccount in the trusted namespace. Substitute the existing
-auth mount and actual trusted namespace; the lab's mount is `hub`:
+For a new installation, using an already authenticated Vault administrator, create
+the policy and bind it to a dedicated ServiceAccount in the trusted namespace.
+Substitute the existing auth mount and actual trusted namespace; the lab's mount
+is `hub`:
 
 ```sh
 vault policy write confidential-inference-enroller enrollment-policy.hcl
@@ -56,10 +58,35 @@ Preserve all existing bindings and prove existing inference remains healthy.
 
 A production writer must use versioned CAS, refuse conflicting existing tags,
 recover uncertain writes without generating a replacement key, and keep key bytes
-in the trusted producer/backend only. The patch-only bootstrap proposal is not
+in the trusted producer/backend only. The patch-only bootstrap is not
 that complete writer. Live key enrollment, owner integration and these failure
 checks remain pending; do not treat an authority metadata enrollment as key
 provisioning.
+
+## Verified edge bootstrap
+
+The policy and role are both named `confidential-inference-enroller`, under the
+existing `hub` Kubernetes auth mount. The role is bound only to ServiceAccount
+`confidential-inference-enroller` in the new `confidential-inference-enrollment`
+namespace. That namespace enforces the restricted Pod Security profile. The
+ServiceAccount disables automatic token mounting; no Kubernetes RoleBinding or
+ClusterRoleBinding was added for it. A trusted runner must explicitly request a
+short-lived token with audience `vault`.
+
+Verification exercised a real Kubernetes TokenRequest and Vault login. The issued
+Vault token had only this policy, a 900-second initial TTL, and no default policy;
+the role limits token lifetime to 3,600 seconds. Capability checks confirmed
+`patch` on the shared key record, `read` on its version metadata, and denial for an
+unrelated secret, policy administration and role administration. The scoped token
+successfully read version metadata and was then revoked by the bootstrap session.
+No Vault token or administrator credential was saved in this repository.
+
+The model-key record remained at version 3 throughout. No model/storage key
+material was read or written. The original five protected Qwen, chat and authority
+pods retained their identities and Ready status. The public
+[bootstrap receipt](../../tests/evidence/2026-10-15/vault-bootstrap.json) records
+these checks. This completes authentication setup only: safe key publication,
+Trustee binding integration and fresh inference remain pending.
 
 References: [Vault KV v2 API](https://developer.hashicorp.com/vault/api-docs/secret/kv/kv-v2)
 and [Kubernetes authentication API](https://developer.hashicorp.com/vault/api-docs/auth/kubernetes).

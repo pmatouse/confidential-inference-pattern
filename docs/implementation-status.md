@@ -18,7 +18,8 @@ hardware evidence is not a new clean-install result.
 | Create-once authority history bootstrap | Implemented and tested; two-mode authority chart added; fresh bootstrap Job passed on a retained PVC; normal serving/backend integration pending |
 | Generic measured sidecar release renderer | New offline draft/package renderer added with synthetic contract tests; stock runtime profile and real-hardware qualification pending |
 | Trusted metadata enrollment and package generation | Implemented; multi-volume/retry/retained-owner tests pass; live enrollment pending |
-| Scoped key enrollment and Trustee owner integration | Pending; no root-token harvesting imported into installer |
+| Scoped Vault authentication | Approved one-time edge bootstrap completed; projected JWT login and least-privilege capability checks passed; no key records changed |
+| Scoped key enrollment and Trustee owner integration | Writer and owner integration pending; no root-token harvesting imported into installer |
 | Portable helper/populator/authority image release | New helper and authority images built in isolated project; stock protocol/no-CPU-fallback tests pass; guest qualification pending; edge override still uses existing lab artifacts |
 | Fresh model publication → population → guest mount | Population regression passed using an existing encrypted artifact; fresh publication and guest mount pending |
 | Blank RW first-format through stock sidecar → fresh VM reopen | Pending; cannot substitute prior reopened data for this gate |

@@ -90,9 +90,10 @@ identity, not deletion of retained claims.
 The [release renderer and metadata enrollment commands](../../components/inference-release/README.md)
 are implemented and contract tested. Qualified runtime profiles, scoped key
 enrollment, Trustee-owner integration and approval renewal are not wired into one
-command yet. The [Vault bootstrap proposal](vault-bootstrap.md) describes the
-remaining trusted-authentication prerequisite. The legacy `prepare-qwen.py` is retained as source provenance and
-is not a clean-install interface. Do not copy the old lab's prepared state to make
+command yet. The [Vault bootstrap guide](vault-bootstrap.md) describes the
+trusted-authentication prerequisite, now verified on the edge cluster; new sites
+must configure their own scoped identity. The legacy `prepare-qwen.py` is retained
+as source provenance and is not a clean-install interface. Do not copy the old lab's prepared state to make
 this stage pass.
 
 `components/confidential-storage-authority/bootstrap.py` creates a new authority

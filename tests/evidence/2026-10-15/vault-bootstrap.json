@@ -1,0 +1,38 @@
+{
+  "scope": "approved-one-time-vault-enrollment-bootstrap",
+  "timestamp": "2026-10-15T02:38:44.495124+00:00",
+  "namespace": "confidential-inference-enrollment",
+  "serviceAccount": "confidential-inference-enroller",
+  "authMount": "hub",
+  "role": "confidential-inference-enroller",
+  "policy": "confidential-inference-enroller",
+  "tokenTTLSeconds": 900,
+  "tokenMaxTTLSeconds": 3600,
+  "noDefaultPolicy": true,
+  "audience": "vault",
+  "capabilities": {
+    "secret/data/hub/modelKeys": [
+      "patch"
+    ],
+    "secret/metadata/hub/modelKeys": [
+      "read"
+    ],
+    "secret/data/hub/unrelated": [
+      "deny"
+    ],
+    "sys/policies/acl/confidential-inference-enroller": [
+      "deny"
+    ],
+    "auth/hub/role/confidential-inference-enroller": [
+      "deny"
+    ]
+  },
+  "projectedJWTLoginPassed": true,
+  "metadataReadPassed": true,
+  "verificationTokenRevoked": true,
+  "modelKeysVersionBefore": 3,
+  "modelKeysVersionAfter": 3,
+  "keyMaterialReadOrWritten": false,
+  "protectedWorkloadsUnchangedReady": true,
+  "confidentialGuestInference": false
+}
