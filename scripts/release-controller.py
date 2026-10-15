@@ -54,6 +54,11 @@ def install(r):
     # Explicit namespace scoping in the chart; never infer cluster scope from kind alone.
     objects=addon.helm(ROOT/'charts/inference-release-controller',cfg,r.trusted,'inference-release-controller')
     for obj in objects:
+        if obj['kind']=='CustomResourceDefinition':
+            # Helm includes crds/. The shared API was checked/created above;
+            # never adopt it again under this installation's owner or namespace.
+            require(obj['metadata']['name']==crd['metadata']['name'] and obj['spec']==crd['spec'],'unexpected release CRD in chart')
+            continue
         if obj['kind'] not in ('ClusterRole','ClusterRoleBinding'):
             obj.setdefault('metadata',{}).setdefault('namespace',r.trusted)
         r.apply(obj)

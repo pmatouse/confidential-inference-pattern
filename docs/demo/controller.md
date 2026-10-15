@@ -40,6 +40,11 @@ a second completely fresh release with that final image has not been run.
 139 Python tests pass. [Bootstrap evidence](../../tests/evidence/2026-10-15/controller-bootstrap.json)
 is the earlier intermediate snapshot, not the final outcome.
 
+Fresh repetition `qwen-controller-002` exposed a shared-CRD ownership bug during
+bootstrap, before any release started ([failure record](../../tests/evidence/2026-10-15/controller-002-bootstrap-failed.json)).
+The installer now reuses the validated shared API without adopting it. A new
+installation will qualify this correction; the failed attempt is not counted as E2E.
+
 ## Bootstrap once
 
 Use the [quickstart inputs](quickstart.md), but a new run and new namespaces.

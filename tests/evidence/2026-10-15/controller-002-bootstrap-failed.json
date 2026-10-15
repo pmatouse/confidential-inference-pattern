@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-15",
+  "state": "BootstrapFailed",
+  "hardwareE2EQualified": false,
+  "run": "qwen-controller-002",
+  "sourceCommit": "fe5f78c",
+  "releaseStarted": false,
+  "manualRetry": false,
+  "failure": "Installer re-applied compatible shared InferenceRelease CRD from Helm rendering under the new installation owner. Ownership check correctly refused it.",
+  "resolution": "Skip the already validated shared CRD in the namespaced installation apply loop; regression tests cover both absent and existing CRDs. Qualify using a new installation, not a retry.",
+  "executor": {
+    "build": "inference-release-executor-1",
+    "contextSha256": "5eb12fe5b71212928a43bb4fbb4dae8bbc13894dee8c7f83d259a569c3ad0885",
+    "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-002/inference-release-executor@sha256:8d23f258cd72ab0f404f54ccca6cf11e6490c14e7932dc8e89962fbc41ae98a7",
+    "namespace": "ci-controller-002"
+  },
+  "bootstrap": {
+    "approvalKeyId": "qwen-controller-002",
+    "authorityHostname": "qwen-controller-002-authority.ci-controller-002-trusted.svc",
+    "clusterUID": "fadcb17f-a77b-4eb0-8a78-a2c15ba6e25f",
+    "namespaces": {
+      "ci-controller-002": "1be98ebb-233a-4f15-9d4b-cda80bbd502e",
+      "ci-controller-002-trusted": "ef218308-9d9b-46d8-a80f-400a1e3e838a"
+    },
+    "state": "BootstrapReady"
+  }
+}

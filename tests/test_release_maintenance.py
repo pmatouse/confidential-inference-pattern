@@ -53,6 +53,25 @@ class MaintenanceTests(unittest.TestCase):
         self.assertEqual([json.loads(a[-1])['spec']['replicas'] for a in patches],[0,1])
 
 class BootstrapRBACChartTests(unittest.TestCase):
+    def test_bootstrap_reuses_shared_crd_and_creates_missing_crd_only_once(self):
+        import yaml
+        crd=yaml.safe_load((ROOT/'charts/inference-release-controller/crds/inferencereleases.yaml').read_text())
+        class BeforeSeed(Exception):pass
+        for existing in (False,True):
+            applied=[];old=copy.deepcopy(crd) if existing else None
+            if old:old['metadata']['labels']={m.addon.OWNER:'other-installation'}
+            r=SimpleNamespace(name='fresh',trusted='trusted',ns='work',require_stage=lambda stage:None,
+                receipt=lambda stage:None,get=lambda kind,*args:old if kind=='crd' else None,
+                apply=lambda obj:applied.append(copy.deepcopy(obj)),oc=lambda *args:None,
+                save=lambda *args:(_ for _ in ()).throw(BeforeSeed()))
+            docs=[copy.deepcopy(crd),{'kind':'Deployment','metadata':{'name':'controller'},'spec':{}}]
+            with patch.object(m,'configuration',return_value={'policy':{}}),patch.object(m.addon,'helm',return_value=docs):
+                with self.assertRaises(BeforeSeed):m.install(r)
+            crds=[o for o in applied if o['kind']=='CustomResourceDefinition']
+            self.assertEqual(len(crds),0 if existing else 1)
+            self.assertTrue(all('namespace' not in o['metadata'] for o in crds))
+            self.assertEqual(next(o for o in applied if o['kind']=='Deployment')['metadata']['namespace'],'trusted')
+
     def test_shared_trustee_deployment_read_is_named_and_read_only(self):
         site=m.addon.load(ROOT/'overrides/sites/edge-controller.yaml')
         policy={'namespace':site['quickstart']['trustedNamespace'],'workloadNamespace':site['installation']['namespace'],
