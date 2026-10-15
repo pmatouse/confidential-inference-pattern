@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-15",
+  "run": "qwen-controller-007",
+  "scope": "Live integration bootstrap on an existing CoCo cluster; not a fresh stock-chart E2E qualification",
+  "integration": {
+    "adapter": "ExistingCompatibleOwner",
+    "adminCredentialRetained": false,
+    "backendCreated": false,
+    "backendPath": "secret/data/hub/modelKeys",
+    "ownerCommit": "f92b306ce18fe17b58d7d7818e6f2f78edd07c12",
+    "role": "ci-controller-007-enroller",
+    "state": "IntegrationsReady"
+  },
+  "foundation": {
+    "approvalKeyId": "qwen-controller-007",
+    "authorityHostname": "qwen-controller-007-authority.ci-controller-007-trusted.svc",
+    "clusterUID": "fadcb17f-a77b-4eb0-8a78-a2c15ba6e25f",
+    "namespaces": {
+      "ci-controller-007": "b0f39c4c-cfb3-4cab-9b95-01103c9a365c",
+      "ci-controller-007-trusted": "cce0f959-6dfc-4151-a27d-0255d5a90ee2"
+    },
+    "state": "BootstrapReady"
+  },
+  "idempotence": {
+    "secondRunPassed": true,
+    "sameOwnerCommit": true,
+    "backendReinitialized": false
+  },
+  "validation": {
+    "unitTestsPassed": 159,
+    "opaCasesPassed": 17,
+    "kbsConfigIncludesModelKeys": true,
+    "adminTokenProvidedToFoundation": false
+  },
+  "remainingQualification": [
+    "Fresh stock chart conversion on a separate CoCo installation",
+    "New controller release after this bootstrap"
+  ]
+}

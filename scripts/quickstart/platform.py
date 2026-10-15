@@ -91,6 +91,7 @@ def preflight(r):
 
 def bootstrap(r):
     pre=r.require_stage('preflight')
+    if r.q.get('integrations',{}).get('enabled'):r.require_stage('integrations')
     vault=r.q['vault']
     require(r.get('serviceaccount',vault['serviceAccount'],vault['enrollmentNamespace']) is not None,'create the external scoped Vault enrollment identity described in quickstart.md before bootstrap')
     from types import SimpleNamespace
@@ -100,6 +101,8 @@ def bootstrap(r):
     adapter.login();adapter.token=None
     for ns in (r.ns,r.trusted):
         r.apply({'apiVersion':'v1','kind':'Namespace','metadata':{'name':ns}})
+    from .integrations import install_git_secret
+    install_git_secret(r)
     p=r.state/'authority'
     if not p.exists():
         spec=importlib.util.spec_from_file_location('quickstart_trust',ROOT/'components/inference-release/trust.py')

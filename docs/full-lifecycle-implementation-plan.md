@@ -14,6 +14,13 @@ An earlier qualification separately tested controller restart recovery.
 The [controller runbook](demo/controller.md) is the implemented API contract. Full
 foundation GitOps and lifecycle hardening below remain target work.
 
+The initial administrator integration bootstrap now has an implementation:
+[site YAML and credential-file workflow](demo/stock-bootstrap.md). It configures
+Vault enrollment and the Git-owned Trustee/ESO mapping; it does not move Vault
+administrator credentials into the release controller. Live bootstrap and scoped
+login passed using the existing compatible chart; conversion of a fresh stock
+chart has local/OPA coverage, with fresh stock-chart E2E qualification still open.
+
 ## Two required delivery paths
 
 | Path | User operation | Execution |

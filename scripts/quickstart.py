@@ -34,7 +34,7 @@ def main():
     r=Run(a.values,a.run,exclusive=a.stage not in ('status','chat'))
     handlers={name:getattr(platform,name) for name in ('tools','dependencies','preflight','bootstrap')}
     # All handlers use the same receipt and execution ownership contract.
-    for module_name in ('build','release','verify'):
+    for module_name in ('build','release','verify','integrations'):
         try:module=__import__('quickstart.'+module_name,fromlist=['HANDLERS'])
         except ModuleNotFoundError as error:
             if error.name!='quickstart.'+module_name:raise

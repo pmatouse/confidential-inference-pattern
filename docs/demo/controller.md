@@ -61,6 +61,11 @@ A failed stage Job still blocks the release; it is never silently retried.
 
 ## Bootstrap once
 
+For automatic Vault/ESO/Trustee setup, follow [stock-pattern bootstrap](stock-bootstrap.md)
+and run `make controller-demo` with external credential files. The explicit commands
+below remain available for installations with preconfigured integrations.
+
+
 Use the [quickstart inputs](quickstart.md), but a new run and new namespaces.
 Supply the existing scoped Vault identity and permission for exact Trustee-owner
 updates. The operator performs these steps once:

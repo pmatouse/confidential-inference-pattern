@@ -32,17 +32,21 @@ lifecycle remain open.
 | [Acceptance](docs/demo/acceptance.md) | Inference, fresh-VM persistence and negative checks |
 | [GitOps target](docs/automation.md) | One site YAML, Argo ownership, trusted release lifecycle and remaining work |
 | [Implementation plan](docs/full-lifecycle-implementation-plan.md) | Manual-first delivery, then controller/GitOps; shared operations and completion gates |
+| [Stock-pattern bootstrap](docs/demo/stock-bootstrap.md) | Site YAML + explicit credentials; automatic Vault/ESO/policy setup and controller submission |
 | [Controller release](docs/demo/controller.md) | One-time bootstrap, InferenceRelease API, sequential Jobs, retries and Argo health |
 | [Manual quickstart](docs/demo/quickstart.md) | Site inputs, image builds/pushes, all Make stages, expected results and recovery |
 | [Status](docs/implementation-status.md) | Verified result and open integration gaps |
 
-Start with OpenShift + CoCo installed. Follow the quickstart's platform/backend
-checks, copy `overrides/sites/quickstart.example.yaml`, then run:
+Start with OpenShift + CoCo installed. Configure the site YAML and explicit
+credentials in [stock-pattern bootstrap](docs/demo/stock-bootstrap.md), then run:
 
 ```sh
-make quickstart-all VALUES=overrides/sites/my-site.yaml
-make qs-chat VALUES=overrides/sites/my-site.yaml
+make controller-demo VALUES=overrides/sites/my-site.yaml PYTHON=python3
 ```
+
+For the stage-by-stage alternative, follow the [manual quickstart](docs/demo/quickstart.md).
+The new Vault/ESO bootstrap has live integration coverage; fresh stock-chart E2E
+qualification remains open.
 
 Keep kubeconfig, keys, credentials, retained authority state and approvals out of Git.
 The current HTTP chat frontend is outside the TEE; prompt TLS is a separate gap.

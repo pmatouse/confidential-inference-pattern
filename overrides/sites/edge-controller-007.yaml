@@ -1,0 +1,51 @@
+# Public inputs for automatic backend/owner bootstrap qualification.
+installation:
+  name: ci-controller-007
+  namespace: ci-controller-007
+  clusterIdentity: edge-rtx6k
+  profile: osc-snp-nvidia-x86_64-v1
+base:
+  storageClassName: lvms-vg1
+  trusteeName: kbsconfig
+registry:
+  origin: https://image-registry.openshift-image-registry.svc:5000
+  injectServiceCA: true
+demo:
+  name: qwen-controller-007
+  modelKeyResource: kbs:///default/model-keys/qwen-controller-007-model
+  dataKeyResource: kbs:///default/model-keys/qwen-controller-007-data
+  approvedManifestRef: qwen-controller-007-model
+chat:
+  enabled: true
+  serviceType: ClusterIP
+quickstart:
+  trustedNamespace: ci-controller-007-trusted
+  runtimeNode: 9c-63-c0-dd-06-52
+  allowReadOnlyHostArtifacts: true
+  allowTrusteeRestart: true
+  vault:
+    namespace: vault
+    pod: vault-0
+    enrollmentNamespace: ci-controller-007-enrollment
+    serviceAccount: ci-controller-007-enroller
+    authMount: hub
+    role: ci-controller-007-enroller
+    backendPath: secret/data/hub/modelKeys
+    externalSecret: model-keys-eso
+    projectionSecret: model-keys
+  trustee:
+    origin: https://kbs.apps.dell-rtx6kbse-3.bmas-001.lab.rdu2.dc.redhat.com
+    deployment: trustee-deployment
+    caSecret: kbs-https-certificate
+    signerSecret: attestation-cert
+    owner:
+      namespace: vp-gitops
+      application: trustee
+      repository: git@github.com:pmatouse/coco-pattern-edge-rtx6k.git
+      branch: codex/edge-rtx6k
+      valuesFile: overrides/values-trustee-gpu-model-keys.yaml
+  integrations:
+    enabled: true
+    topologyFile: values-baremetal.yaml
+    parentApplication: coco-pattern-baremetal
+    applicationKey: trustee

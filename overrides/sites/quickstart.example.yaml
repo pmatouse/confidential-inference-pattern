@@ -1,5 +1,4 @@
-# Public inputs only. Replace the marked site fields before the first target.
-# Existing CoCo CPU/GPU attestation, Vault/ESO and GitOps owner mappings are required.
+# Public inputs only. Credentials are external private files; see docs/demo/stock-bootstrap.md.
 installation:
   name: confidential-inference
   namespace: confidential-inference
@@ -23,7 +22,7 @@ quickstart:
   trustedNamespace: confidential-inference-trusted
   runtimeNode: replace-with-qualified-node
   allowReadOnlyHostArtifacts: true
-  allowTrusteeRestart: false
+  allowTrusteeRestart: true
   vault:
     namespace: vault
     pod: vault-0
@@ -42,8 +41,13 @@ quickstart:
     owner:
       namespace: vp-gitops
       application: trustee
-      repository: https://github.com/your-org/your-coco-pattern.git
+      repository: git@github.com:your-org/your-coco-pattern.git
       branch: main
-      valuesFile: overrides/values-trustee-gpu-model-keys.yaml
+      valuesFile: overrides/values-confidential-inference.yaml
   dependencies:
     installKServe: false
+  integrations:
+    enabled: true
+    topologyFile: values-baremetal.yaml
+    parentApplication: coco-pattern-baremetal
+    applicationKey: trustee

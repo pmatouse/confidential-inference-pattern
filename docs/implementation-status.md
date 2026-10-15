@@ -28,6 +28,19 @@ The [controller runbook](demo/controller.md) records the failed fresh attempts a
 fixes. Earlier [controller evidence](../tests/evidence/2026-10-15/controller-e2e.json)
 also covers restart recovery; that initial run required explicit fixes/retries.
 
+## Automatic integration bootstrap
+
+The new [stock-pattern bootstrap](demo/stock-bootstrap.md) configures the scoped
+Vault role/backend, Git-owned ESO resource mapping and Trustee model-key policy.
+It adds a pinned stock-chart adapter because the upstream chart has no per-model
+binding hook. Local owner-transformation/conflict tests and 17 OPA cases pass;
+the live `qwen-controller-007` bootstrap passed with a new scoped identity, preserved
+backend, exact Git/Argo policy convergence and Ready ESO. A repeat produced no new
+Git commit or backend initialization; scoped login and foundation bootstrap passed
+without the administrator token. This reused the existing compatible Trustee chart;
+fresh stock-chart E2E qualification remains open. See the
+[bootstrap receipt](../tests/evidence/2026-10-15/integration-bootstrap.json).
+
 ## Remaining integration work
 
 - **Release automation:** the initial [InferenceRelease controller](demo/controller.md)

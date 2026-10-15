@@ -387,6 +387,32 @@
           "required": [
             "installKServe"
           ]
+        },
+        "integrations": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "topologyFile": {
+              "type": "string",
+              "minLength": 1
+            },
+            "parentApplication": {
+              "type": "string",
+              "minLength": 1
+            },
+            "applicationKey": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "enabled",
+            "topologyFile",
+            "parentApplication"
+          ]
         }
       },
       "additionalProperties": false,

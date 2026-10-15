@@ -5,6 +5,10 @@ identity**. Run enrollment in a trusted namespace/administration environment.
 The current adapter uses the existing CoCo Trustee owner's ESO mapping from
 `secret/data/hub/modelKeys`; it does not own or replace that mapping.
 
+For automatic setup from site YAML and external credentials, use the
+[stock-pattern bootstrap](stock-bootstrap.md). The commands below are the manual
+alternative (`quickstart.integrations.enabled: false`).
+
 ## One-time administrator action
 
 Create this policy and bind a short-lived role to the dedicated enrollment

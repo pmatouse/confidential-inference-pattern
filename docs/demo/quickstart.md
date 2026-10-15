@@ -65,6 +65,12 @@ or an explicit retained-volume migration.
 
 ## One-time backend identity
 
+The current example enables [automatic integration bootstrap](stock-bootstrap.md).
+Provide its external credential files and run `make qs-integrations VALUES="$VALUES"`
+after `qs-preflight`; it creates the scoped identity and owner-managed ESO/policy
+configuration. The commands below are the alternative for `integrations.enabled: false`.
+
+
 If the CoCo administrator has not provided the scoped enrollment identity, run
 these commands once with an **already authenticated Vault administrator session**.
 They grant no Vault access to the workload namespace. Replace the auth mount and
@@ -108,6 +114,7 @@ retain its state and rerun that target after fixing the cause.
 | --- | --- | --- |
 | `make qs-dependencies` | `DependenciesReady` | Check existing CoCo, KServe and registry; refuse incompatible shared services |
 | `make qs-preflight` | `PlatformReady` | Record cluster/node/runtime/storage and namespace ownership; report GPU allocation |
+| `make qs-integrations` | `IntegrationsReady` (or `ExternalIntegrationsReused`) | Configure scoped Vault enrollment and Git-owned ESO/model policy when enabled |
 | `make qs-bootstrap` | `BootstrapReady` | Create isolated namespaces, scoped SAs, authority trust/signing material and registry CA references |
 | `make qs-build` | `BuildsComplete` | Fetch hash-pinned inputs; compile/test Rust and Go in a CPU-only pod; build five images using OpenShift binary builds |
 | `make qs-push` | `ImagesPinned` | Verify images pushed by OpenShift builds and resolve every add-on image to its digest |

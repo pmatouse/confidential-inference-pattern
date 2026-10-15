@@ -2,6 +2,11 @@
 
 ## Supply before starting
 
+The [automatic stock-pattern bootstrap](demo/stock-bootstrap.md) accepts the same
+site YAML plus external Git SSH and Vault administrator credential-file references.
+It establishes the previously manual Vault/ESO/Trustee integration. Administrator
+credentials are never retained by the release controller.
+
 For the manual Make path, copy [quickstart.example.yaml](../overrides/sites/quickstart.example.yaml).
 It merges over [values-global.yaml](../values-global.yaml) and covers public
 preparation, Trustee-owner and backend references in `quickstart.*`.
@@ -23,6 +28,7 @@ remains available for already-prepared artifacts. Full lifecycle GitOps remains 
 | Backend enrollment | Vault namespace/pod, Kubernetes auth mount/role/ServiceAccount, trusted namespace and ESO projection names: `quickstart.vault.*` (or direct `key_enrollment.py` arguments). Current adapter expects `secret/data/hub/modelKeys`; this is a site-specific integration. |
 | Release trust | Authority hostname/state claim and private Secret reference: `charts/storage-authority`. Approval signer stays in the trusted domain; its **public** key goes in `approvalKeys`. |
 | Exposure | `chat.enabled`, `serviceType`, `port`; explicit `nodePort` for VPN exposure. Default ClusterIP uses local port-forward. No automatic DNS, public ingress or TLS. |
+| Integration bootstrap | `quickstart.integrations`: enable, owner topology file, parent Argo application and application key; external `CI_GIT_SSH_KEY_FILE`, `CI_GIT_KNOWN_HOSTS_FILE`, `CI_VAULT_ADMIN_TOKEN_FILE` |
 | Controller Git credential | External `inference-release-git` Secret in the trusted namespace: repository-only SSH deploy key + pinned `known_hosts` (recommended), or repository-scoped HTTPS token. Used only by enrollment to update the existing Trustee owner repository; see [setup](demo/controller.md#repository-scoped-git-credential). |
 | GitOps | Current opt-in: `gitops.enabled`, repository and full commit; separately provision repository-scoped access. Bootstrap snapshots resolved values into the Application; `gitops.valuesFile` is not currently watched. Full lifecycle GitOps is the target default. |
 

@@ -15,7 +15,7 @@ import yaml
 import addon
 
 ROOT = Path(__file__).resolve().parents[2]
-STAGES = ('tools','dependencies','preflight','bootstrap','build','push','install','model',
+STAGES = ('tools','dependencies','preflight','integrations','bootstrap','build','push','install','model',
           'volumes','measure','enroll','deploy','test-first','test-reopen','report')
 
 

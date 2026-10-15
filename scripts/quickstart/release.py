@@ -279,12 +279,9 @@ def owner_bindings(r,runtime,tags):
         if tag in bindings:require(bindings[tag]==wanted,'existing resource tag has another binding')
         else:missing.append(tag)
     if missing:
-        marker='    modelKeyBindings:\n';require(text.count(marker)==1,'owner chart needs an explicit modelKeyBindings map')
-        addition=''.join('      '+tag+':\n        launchMeasurement: '+json.dumps(wanted['launchMeasurement'])+'\n        initData: '+json.dumps(wanted['initData'])+'\n' for tag in sorted(missing))
-        text=text.replace(marker,marker+addition)
-        parsed=yaml.load(text,Loader=addon.UniqueLoader)
         expected=copy.deepcopy(values);expected['kbs']['resourcePolicy']['modelKeyBindings'].update({t:wanted for t in missing})
-        require(parsed==expected,'owner edit changed unrelated configuration')
+        text=yaml.safe_dump(expected,sort_keys=False)
+        require(yaml.load(text,Loader=addon.UniqueLoader)==expected,'owner edit changed unrelated configuration')
         target.write_text(text)
     if r.command(['git','-C',checkout,'status','--porcelain']).strip():
         r.command(['git','-C',checkout,'add','--',str(path)])
