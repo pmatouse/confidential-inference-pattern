@@ -1,9 +1,8 @@
 # Manual E2E quickstart: implementation specification
 
-**Planned deliverable; the `qs-*` targets below do not exist yet.** Implement this
-before the release controller. Current executable commands remain in
-[setup](setup.md) and [fresh release preparation](fresh-release.md); those guides
-still require manual integration and are not the finished quickstart.
+**Acceptance specification for the implemented manual path.** Use the
+[executable quickstart](quickstart.md) for current commands, qualification and limits.
+The release-controller path remains separate work.
 
 ## Starting and finishing states
 
@@ -42,8 +41,8 @@ ignored by Git. Keys/signers also retain their required durable backend identity
 
 ## Operator command sequence
 
-The finished how-to must provide these commands and checks. Names below specify
-**targets to implement**; success messages are acceptance contracts, not current output.
+The finished how-to must provide these commands and checks. Names below record the original acceptance contract; the executable guide lists
+the implemented result names.
 All targets take `VALUES=overrides/sites/my-site.yaml RUN=qwen-demo-001`.
 
 | Command | Must do | Expected result / follow-up |

@@ -1,6 +1,8 @@
 # Repeatable encrypted Qwen acceptance test
 
-Start from [fresh release preparation](fresh-release.md). Use a new demo identity,
+The Make-driven path runs these checks with `qs-test-first`, `qs-test-reopen` and
+`qs-report`; see the [quickstart](quickstart.md). For direct invocation, start from
+[fresh release preparation](fresh-release.md). Use a new demo identity,
 model publication, model/data keys, model PVC and **blank** data PVC. Retain the
 same authority history and scoped platform configuration for subsequent runs.
 Do not reuse old signed deployment approvals or copy an old initialization journal.

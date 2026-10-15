@@ -47,3 +47,11 @@ class AuthorityChartTests(unittest.TestCase):
     def test_existing_claim_is_reused(self):
         docs=self.render(extra=['--set','state.existingClaim=retained-authority'])
         self.assertFalse(any(x['kind']=='PersistentVolumeClaim' for x in docs))
+
+    def test_public_config_changes_rollout_but_preserve_retained_volume(self):
+        first=self.render('serve',['--set','publicConfigMap=release-1','--set','credentialsSecret=authority-keys','--set','publicConfigSha256='+'a'*64])
+        second=self.render('serve',['--set','publicConfigMap=release-1','--set','credentialsSecret=authority-keys','--set','publicConfigSha256='+'b'*64])
+        a=next(x for x in first if x['kind']=='Deployment')['spec']['template']
+        b=next(x for x in second if x['kind']=='Deployment')['spec']['template']
+        self.assertNotEqual(a['metadata']['annotations'],b['metadata']['annotations'])
+        self.assertEqual(a['spec'],b['spec'])

@@ -25,8 +25,8 @@ existing identities/receipts and explicitly transfer orchestration ownership.
 The [manual quickstart specification](demo/quickstart-implementation-plan.md)
 defines all Make targets, expected outputs, follow-ups and image-build requirements.
 The agreed starting platform is OpenShift + CoCo already installed.
-Those targets are planned, not present-day commands. Both paths must pass independently
-from empty add-on state; writing a how-to alone is not completion.
+The manual `qs-*` targets now exist; see the [executable quickstart](demo/quickstart.md).
+The release-controller path remains planned and must pass its own independent E2E test.
 
 ## Scope and decisions
 

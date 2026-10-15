@@ -9,10 +9,10 @@ populator, ConfidentialVolume/workload controller, privileged guest storage
 sidecar, lifecycle authority, trusted release tools and chat frontend. Standard
 Trustee releases keys after CPU/GPU attestation and exact workload bindings.
 
-**Status:** fresh resources and two-VM E2E passed on the tested AMD SEV-SNP +
-RTX PRO 6000 Blackwell Server Edition configuration. [Evidence](tests/evidence/2026-10-15/fresh-qwen-e2e.json).
-This is a staged, reproducible workflow on installed CoCo; **not yet a one-command
-unattended demo**, a cross-hardware qualification, or an official VP support tier.
+**Status:** the [manual Make quickstart](docs/demo/quickstart.md) passed fresh-add-on
+and fresh-VM E2E on AMD SEV-SNP + RTX PRO 6000 Blackwell Server Edition.
+[Evidence](tests/evidence/2026-10-15/manual-quickstart-e2e.json). Full lifecycle GitOps,
+other hardware qualification and production credential/authority lifecycle remain open.
 
 | Read | Contents |
 | --- | --- |
@@ -22,17 +22,17 @@ unattended demo**, a cross-hardware qualification, or an official VP support tie
 | [Acceptance](docs/demo/acceptance.md) | Inference, fresh-VM persistence and negative checks |
 | [GitOps target](docs/automation.md) | One site YAML, Argo ownership, trusted release lifecycle and remaining work |
 | [Implementation plan](docs/full-lifecycle-implementation-plan.md) | Manual-first delivery, then controller/GitOps; shared operations and completion gates |
-| [Quickstart specification](docs/demo/quickstart-implementation-plan.md) | Planned Make targets, image builds/pushes, command outputs and full E2E gates |
+| [Manual quickstart](docs/demo/quickstart.md) | Site inputs, image builds/pushes, all Make stages, expected results and recovery |
 | [Status](docs/implementation-status.md) | Verified result and open integration gaps |
 
-Start by filling site values, then run:
+Start with OpenShift + CoCo installed. Follow the quickstart's platform/backend
+checks, copy `overrides/sites/quickstart.example.yaml`, then run:
 
 ```sh
-./pattern.sh make demo-preflight VALUES=overrides/sites/my-site.yaml
-./pattern.sh make install-addon VALUES=overrides/sites/my-site.yaml
+make quickstart-all VALUES=overrides/sites/my-site.yaml
+make qs-chat VALUES=overrides/sites/my-site.yaml
 ```
 
-These commands install the foundation; follow the release sequence to deploy Qwen.
 Keep kubeconfig, keys, credentials, retained authority state and approvals out of Git.
 The current HTTP chat frontend is outside the TEE; prompt TLS is a separate gap.
 

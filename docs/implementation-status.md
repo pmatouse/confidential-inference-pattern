@@ -1,8 +1,10 @@
 # Status and gaps
 
-[Fresh E2E receipt](../tests/evidence/2026-10-15/fresh-qwen-e2e.json), 2026-10-15:
-new encrypted Qwen publication, keys, PVCs and authority history on an **existing**
-CoCo cluster. No cluster reinstall. Original Qwen remained healthy and unchanged.
+[Manual quickstart E2E receipt](../tests/evidence/2026-10-15/manual-quickstart-e2e.json), 2026-10-15:
+new add-on namespaces, five image builds, encrypted Qwen publication, keys, PVCs
+and authority history on an **existing** CoCo cluster. Compatible shared CRDs were
+reused; no cluster reinstall. Original Qwen and its paired chat were retired with
+user authorization; the separate `qwen-demo-003` installation was preserved.
 
 | Area | Result |
 | --- | --- |
@@ -12,13 +14,13 @@ CoCo cluster. No cluster reinstall. Original Qwen remained healthy and unchanged
 | Inference | Stock vLLM/Qwen via KServe; CUDA and chat succeeded before/after VM replacement |
 | Trust | Standard Trustee CPU/GPU appraisal; exact launch/InitData bindings; scoped Vault/ESO enrollment |
 | Isolation | Unprivileged vLLM; raw devices/private CDH only in guest helper; administrator exec denied |
-| Reproducibility | Pinned builds, public profile template, staged release tools and executable acceptance checks |
+| Reproducibility | `qs-*`, `quickstart-all` and resume; generated launch/policy/InitData, retained receipts, fresh-VM E2E |
 
 ## Remaining integration work
 
 - **Full lifecycle GitOps:** Argo currently owns the foundation. Watched site YAML,
-  a trusted release reconciler, expected launch measurement, publication/enrollment,
-  signing and acceptance health gates remain to be integrated.
+  a trusted release reconciler and integration of the existing measurement, publication,
+  enrollment, signing and acceptance operations remain to be implemented.
 - **Portability:** publish portable images; qualify additional hardware/runtime/CSI
   profiles. Only the tested OSC SNP/NVIDIA configuration is qualified.
 - **Credential lifecycle:** automate helper pull-token, approval and certificate

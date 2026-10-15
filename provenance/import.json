@@ -912,6 +912,16 @@
       "source": "components/encrypted-model-populator/third_party/lib-volume-populator/upstream-source-lock.json",
       "path": "components/encrypted-model-populator/third_party/lib-volume-populator/upstream-source-lock.json",
       "sha256": "73e4c321122e439f767cf9488db65b15bbda589f7ec3a1e17eec0dd0aa695f60"
+    },
+    {
+      "source": "tests/confidential-storage/downstream-guest/bundle-tools.py",
+      "path": "components/model-publisher/bundle-tools.py",
+      "sha256": "9de7e940619c49894eb0c2cab60ac754037aafe030cc12e6986c3a566b5a9b83"
+    },
+    {
+      "source": "tests/confidential-storage/downstream-guest/tools-inventory.json",
+      "path": "components/model-publisher/tools-inventory.json",
+      "sha256": "0d42268e91410e6befd0b0638fe1e4bad25e45fde8efbda766474db9eefc9750"
     }
   ]
 }

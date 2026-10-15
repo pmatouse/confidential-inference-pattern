@@ -1,0 +1,49 @@
+# Public inputs only. Replace the marked site fields before the first target.
+# Existing CoCo CPU/GPU attestation, Vault/ESO and GitOps owner mappings are required.
+installation:
+  name: confidential-inference
+  namespace: confidential-inference
+  clusterIdentity: replace-with-stable-cluster-id
+  profile: osc-snp-nvidia-x86_64-v1
+base:
+  storageClassName: replace-with-block-storage-class
+  trusteeName: kbsconfig
+registry:
+  origin: https://image-registry.openshift-image-registry.svc:5000
+  injectServiceCA: true
+demo:
+  name: qwen-demo-001
+  modelKeyResource: kbs:///default/model-keys/qwen-demo-001-model
+  dataKeyResource: kbs:///default/model-keys/qwen-demo-001-data
+  approvedManifestRef: qwen-demo-001-model
+chat:
+  enabled: true
+  serviceType: ClusterIP
+quickstart:
+  trustedNamespace: confidential-inference-trusted
+  runtimeNode: replace-with-qualified-node
+  allowReadOnlyHostArtifacts: true
+  allowTrusteeRestart: false
+  vault:
+    namespace: vault
+    pod: vault-0
+    enrollmentNamespace: confidential-inference-enrollment
+    serviceAccount: confidential-inference-enroller
+    authMount: hub
+    role: confidential-inference-enroller
+    backendPath: secret/data/hub/modelKeys
+    externalSecret: model-keys-eso
+    projectionSecret: model-keys
+  trustee:
+    origin: https://kbs.apps.example.internal
+    deployment: trustee-deployment
+    caSecret: kbs-https-certificate
+    signerSecret: attestation-cert
+    owner:
+      namespace: vp-gitops
+      application: trustee
+      repository: https://github.com/your-org/your-coco-pattern.git
+      branch: main
+      valuesFile: overrides/values-trustee-gpu-model-keys.yaml
+  dependencies:
+    installKServe: false

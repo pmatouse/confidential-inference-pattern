@@ -29,3 +29,5 @@ enable-gitops:
 
 demo-chat:
 	$(PYTHON) scripts/addon.py demo-chat --values $(VALUES)
+
+include make/quickstart.mk

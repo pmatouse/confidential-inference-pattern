@@ -9,3 +9,5 @@ values-secret.yaml
 *.pem
 *.kubeconfig
 **/target/
+
+.venv-quickstart/

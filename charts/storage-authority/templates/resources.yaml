@@ -73,6 +73,10 @@ spec:
   template:
     metadata:
       labels: {app.kubernetes.io/instance: {{ .Release.Name }}}
+      {{- with .Values.publicConfigSha256 }}
+      annotations:
+        checksum/public-config: {{ . | quote }}
+      {{- end }}
     spec:
       serviceAccountName: {{ .Release.Name }}
       automountServiceAccountToken: false

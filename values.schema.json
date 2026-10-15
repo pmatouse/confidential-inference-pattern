@@ -245,6 +245,159 @@
         "serviceType",
         "nodePort"
       ]
+    },
+    "quickstart": {
+      "type": "object",
+      "properties": {
+        "trustedNamespace": {
+          "type": "string"
+        },
+        "runtimeNode": {
+          "type": "string"
+        },
+        "allowReadOnlyHostArtifacts": {
+          "type": "boolean"
+        },
+        "allowTrusteeRestart": {
+          "type": "boolean"
+        },
+        "vault": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "namespace": {
+              "type": "string",
+              "minLength": 1
+            },
+            "pod": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enrollmentNamespace": {
+              "type": "string",
+              "minLength": 1
+            },
+            "serviceAccount": {
+              "type": "string",
+              "minLength": 1
+            },
+            "authMount": {
+              "type": "string",
+              "minLength": 1
+            },
+            "role": {
+              "type": "string",
+              "minLength": 1
+            },
+            "backendPath": {
+              "type": "string",
+              "minLength": 1
+            },
+            "externalSecret": {
+              "type": "string",
+              "minLength": 1
+            },
+            "projectionSecret": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "namespace",
+            "pod",
+            "enrollmentNamespace",
+            "serviceAccount",
+            "authMount",
+            "role",
+            "backendPath",
+            "externalSecret",
+            "projectionSecret"
+          ]
+        },
+        "trustee": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "origin": {
+              "type": "string",
+              "minLength": 1
+            },
+            "deployment": {
+              "type": "string",
+              "minLength": 1
+            },
+            "caSecret": {
+              "type": "string",
+              "minLength": 1
+            },
+            "signerSecret": {
+              "type": "string",
+              "minLength": 1
+            },
+            "owner": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "application": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "repository": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "branch": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "valuesFile": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "namespace",
+                "application",
+                "repository",
+                "branch",
+                "valuesFile"
+              ]
+            }
+          },
+          "required": [
+            "origin",
+            "deployment",
+            "caSecret",
+            "signerSecret",
+            "owner"
+          ]
+        },
+        "dependencies": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "installKServe": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "installKServe"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "trustedNamespace",
+        "runtimeNode",
+        "allowReadOnlyHostArtifacts",
+        "allowTrusteeRestart",
+        "vault",
+        "trustee"
+      ]
     }
   },
   "additionalProperties": false,

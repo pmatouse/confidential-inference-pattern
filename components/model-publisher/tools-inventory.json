@@ -1,0 +1,32 @@
+{
+  "purpose": "isolated-lab-userspace",
+  "files": {
+    "bin/blkid": "ab10c6b429da2e2f490bec27f2cab23aa7bd8a2d143c0271ac0350b3febe732a",
+    "bin/busybox": "3d9f2889d6782537624a4e1a10e68a2ddd53e0ee8bac02676f27308f42ec6bf6",
+    "bin/cryptsetup": "f9e46303b0bded0078ffd1af3e5e651f5ed59f977f3474ce027081b299d485fc",
+    "bin/dmsetup": "bdfbee7c5a3095adc48898d6420098adac8561354dea78e3f427bf63eabd0bbc",
+    "bin/integritysetup": "f27bb4d5b35bb5833d9944f50853d84b81f877f5f12f9406883cc0e4e063418a",
+    "bin/mkfs.ext4": "86706a8f295ffc70ff52d2510decc49c15e91144622b17d02916e50d37187c7c",
+    "bin/setpriv": "d5839b20edb0d77222b1e11be7d155c7122d381dbfad40876b0def7dd710f5bd",
+    "bin/veritysetup": "726de0f6079cfbe2745a5c8f430cc5f5c3286ce97aeae737d7d1159a0bdda5ee",
+    "etc/mke2fs.conf": "e4fc6a645c530a04e834025b3705b80c6a0694f3c83872bf2c1d4dbd9cd6ce17",
+    "lib/ld-linux-x86-64.so.2": "593bb1d5355658e645f36e6b1f49832691b24e177209765914e4cce51499dbb4",
+    "lib/libargon2.so.1": "090f9d048e21e57434dd81e38e725142c5d5f51853a504381d09f32e635dfae7",
+    "lib/libblkid.so.1": "cc3d6ca965cab25eacb8d7d98f0b13be7c94a19583983fb864ba10163e5536b0",
+    "lib/libc.so.6": "bff8750fe719e6000791b88b11747dce8772c37118d0b2348044b70819d13835",
+    "lib/libcap-ng.so.0": "4949e728b2cd55408af7cdbf4702e53d3cab89a27b72f5514d1d05feb8d23882",
+    "lib/libcom_err.so.2": "857baae57e13a2e8aab83e0c29f660e28a9e1c209bf0ac277edccdedb29fab38",
+    "lib/libcrypto.so.3": "7978b587159688ca171bdeef6eb9b26d04cb60204b0e102fa8aa34f955745753",
+    "lib/libcryptsetup.so.12": "29dff16aa21306b4d0fec5975d2ff032a0cd5354fec678f8dba2a9beb0813b88",
+    "lib/libdevmapper.so.1.02.1": "6d41985d056cabf61efcc4f9db491a7f69b56666e5eb8959d6078611b94167a0",
+    "lib/libe2p.so.2": "25b38000a5f4b9b7bec9b354697a5c8d7581822228fc894d2142fe4dcfd90a9f",
+    "lib/libext2fs.so.2": "dc840deeb5e4348fc46b8390527359309b230b53329cae237d2cc95f77699380",
+    "lib/libjson-c.so.5": "c149286f60f117d20b27502902d3d386658ae90ef764f59261cf88354f1f4205",
+    "lib/libm.so.6": "7f2ca87f652f56b094462474b076749e90e689d0ecb9cb63c7679820b271b4e7",
+    "lib/libpcre2-8.so.0": "19c626251526131ac9340826c8f7bcb693c6ceb9d5da55919c3aa45d972b704f",
+    "lib/libpopt.so.0": "532959dab80154db4a0d1184a44b73f2a4304966c3559057527b848363f53649",
+    "lib/libselinux.so.1": "0207e4908ea384e186c75925b0e56996a3eccecd48c99252aeb757d0d3451c93",
+    "lib/libudev.so.1": "66f0b3dc089f17f0d46c68a17a305cfe7905c03e30c4a1167dc41623f0679782",
+    "lib/libuuid.so.1": "94176513740e4b8d24a68e6c37a43986b488f2910c9eaa34f69bd7ba8c49307d"
+  }
+}

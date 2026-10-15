@@ -1,0 +1,113 @@
+"""Quickstart safety boundaries that do not require cluster access."""
+import copy
+import importlib.util
+import json
+import os
+from pathlib import Path
+import sys
+import tarfile
+import tempfile
+import unittest
+
+ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT/'scripts'))
+from quickstart.core import write, sha
+from quickstart.build import archive
+from quickstart.verify import validate_authority, compare_authority
+
+
+class QuickstartTests(unittest.TestCase):
+    def test_public_build_archive_is_reproducible_and_binary_executable(self):
+        with tempfile.TemporaryDirectory() as d:
+            a,b=Path(d)/'a.gz',Path(d)/'b.gz'
+            entries={'encrypted-model-populator':b'binary','Containerfile':b'FROM scratch'}
+            archive(a,entries);archive(b,entries)
+            self.assertEqual(a.read_bytes(),b.read_bytes())
+            with tarfile.open(a) as t:self.assertEqual(t.getmember('encrypted-model-populator').mode,0o755)
+
+    def test_failed_archive_read_never_publishes_partial_context(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as d, patch('quickstart.build.time.sleep'):
+            output=Path(d)/'context.gz'
+            with self.assertRaises(OSError):archive(output,{'absent':Path(d)/'absent'})
+            self.assertFalse(output.exists())
+
+    def test_private_write_rejects_symlink_and_uses_private_mode(self):
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d)/'key';write(p,b'private')
+            self.assertEqual(p.stat().st_mode&0o777,0o600)
+            link=Path(d)/'link';link.symlink_to(p)
+            with self.assertRaises(ValueError):write(link,b'changed')
+            self.assertEqual(p.read_bytes(),b'private')
+
+    def test_loaded_keys_hash_flattened_paths_without_returning_key_bytes(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from quickstart.release import verify_loaded_keys
+        values={'model':b'example-model-key','data':b'example-data-key'}
+        calls=[]
+        def oc(*args,**kwargs):
+            calls.append((args,kwargs))
+            return ''.join(sha(values[k])+'  -\n' for k in sorted(values))
+        r=SimpleNamespace(v={'base':{'trusteeNamespace':'trustee'}},oc=oc)
+        with patch('quickstart.release.trustee_pod',return_value={'metadata':{'name':'kbs'}}):
+            self.assertTrue(verify_loaded_keys(r,values))
+        self.assertTrue(calls[0][1]['sensitive'])
+        self.assertIn(r'/opt/confidential-containers/storage/repository/default\x2Fmodel-keys\x2Fdata',calls[0][0])
+        self.assertNotIn(b'example-data-key',calls[0][0])
+
+    def test_completed_pending_build_is_recovered_without_second_submission(self):
+        from types import SimpleNamespace
+        from quickstart.build import image_build
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);out=root/'out';out.mkdir();state=root/'state';state.mkdir()
+            context=root/'context';context.write_bytes(b'public-source')
+            write(state/'pending-build-example.json',{'build':'example-1','contextSha256':sha(context.read_bytes())})
+            obj={'status':{'phase':'Complete','output':{'to':{'imageDigest':'sha256:'+'a'*64}}}}
+            def unexpected(*args,**kwargs):self.fail('must not submit a second build')
+            r=SimpleNamespace(out=out,state=state,ns='test',v={'registry':{'origin':'https://registry'}},
+                get=lambda *args:obj,apply=lambda obj:None,oc=unexpected,
+                wait=lambda description,check,**kwargs:check(),save=lambda name,data:write(out/name,data))
+            result=image_build(r,'example',context)
+            self.assertEqual(result['build'],'example-1')
+            obj['status']['phase']='Failed'
+            with self.assertRaises(ValueError):image_build(r,'example',context)
+
+    def test_first_stage_receipt_is_preserved_on_retry(self):
+        from quickstart.core import Run
+        with tempfile.TemporaryDirectory() as directory:
+            r=Run.__new__(Run);r.out=Path(directory);r.name='demo';r.identity={'siteSha256':'a'*64}
+            r.save=lambda name,obj:write(r.out/name,obj)
+            r.finish('example',{'state':'first'})
+            r.finish('example',{'state':'retry'})
+            self.assertEqual(json.loads((r.out/'first-receipts/example.json').read_text())['result']['state'],'first')
+            self.assertEqual(json.loads((r.out/'receipts/example.json').read_text())['result']['state'],'retry')
+
+    def snapshot(self):
+        base={'state':'Ready','revoked':False,'policy_sha256':'a'*64,'header_sha256':'b'*64,
+              'manifest_sha256':'c'*64,'owner':{'session_sha256':'old'},'generation':1,'profile_sha256':'d'*64}
+        ro=dict(base,volume_id='model')
+        rw=dict(base,volume_id='data',initialization_approval={'plan':{}},initialization_steps=[
+            {'step':s,'step_id':str(i),'status':'Complete'} for i,s in enumerate(
+            ('luks-format','integrity-initialize','filesystem-create','durability-barrier'))])
+        return {'records':[ro,rw],'operationCounts':{'model':1,'data':1}}
+
+    def test_reopen_requires_new_session_and_closed_old_owner(self):
+        first=self.snapshot();validate_authority(first,'a'*64)
+        with self.assertRaises(ValueError):compare_authority(first,first)
+        later=copy.deepcopy(first)
+        for record in later['records']:
+            record['last_closed']=record['owner'];record['owner']={'session_sha256':'new'}
+            later['operationCounts'][record['volume_id']]+=1
+        compare_authority(first,later)
+        later['records'][1]['initialization_steps'][0]['step_id']='reformatted'
+        with self.assertRaises(ValueError):compare_authority(first,later)
+
+    def test_first_run_rejects_incomplete_initialization_and_wrong_policy(self):
+        snapshot=self.snapshot()
+        with self.assertRaises(ValueError):validate_authority(snapshot,'e'*64)
+        snapshot['records'][1]['initialization_steps'][-1]['status']='Started'
+        with self.assertRaises(ValueError):validate_authority(snapshot,'a'*64)
+
+
+if __name__=='__main__':unittest.main()

@@ -1,0 +1,8 @@
+-r requirements.txt
+attrs==26.1.0
+cffi==2.1.1
+jsonschema-specifications==2025.9.1
+pycparser==3.11
+referencing==0.37.0
+rpds-py==2026.9.1
+sev-snp-measure==0.0.13

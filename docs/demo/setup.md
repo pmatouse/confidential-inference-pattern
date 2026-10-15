@@ -4,6 +4,9 @@
 RO `/model` and persistent encrypted RW `/data`. Start with the [inputs](../inputs.md)
 and [qualified stack](../architecture.md#qualified-hardware-and-software).
 
+For the complete Make-driven path, start with the [manual quickstart](quickstart.md).
+The steps below describe lower-level operations for an already-prepared release.
+
 ## One-time setup
 
 1. Install/configure CoCo VP's stock CPU/GPU runtime and standard Trustee. Provide

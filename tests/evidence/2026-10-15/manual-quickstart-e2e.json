@@ -1,0 +1,234 @@
+{
+  "first": {
+    "applicationImage": "nvcr.io/nvidia/vllm@sha256:15f380ad9c32f0ac57ac16e4b778c6f733c88b9ffe3a936035d0a59ad17b1aab",
+    "boot": "709100a2-dd5f-476f-95c8-7cd44b64966e",
+    "chatResponse": "<think>\n\n</think>\n\n7 plus 5 equals 12.",
+    "chatStatus": 200,
+    "execDenied": true,
+    "gpu": {
+      "cuda": "13.0",
+      "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "event": "CUDA_GPU_PROBE_PASS",
+      "torch": "2.9.0a0+50eac811a6.nv25.09"
+    },
+    "initDataSha256": "e0e3752cbd6167dcb9e5de504c575eb0df2177f961a58eb205707880ccd288eb",
+    "model": "qwen3-0.6b",
+    "modelHashesVerified": true,
+    "namespace": "ci-quickstart-001",
+    "phase": "first",
+    "pod": "qwen-quickstart-001-predictor-9b9674748-8tszj",
+    "podUid": "ad4b53eb-3f27-4ab2-891c-adcc5ac4b000",
+    "pvcUids": {
+      "data": "5f039729-22b9-49c1-868a-748afe138d8a",
+      "model": "457be22c-c308-486b-834a-1ca4102323aa"
+    },
+    "scope": "application, persistence, chat and exec checks; authority evidence separate",
+    "workload": "qwen-quickstart-001"
+  },
+  "images": {
+    "authority": {
+      "build": "confidential-storage-authority-2",
+      "contextSha256": "722011a23a42a3f2dab8ff3782cab642c7816e83ca34c3da80d111b678a2e9eb",
+      "image": "image-registry.openshift-image-registry.svc:5000/ci-quickstart-001/confidential-storage-authority@sha256:a7eeca4265a838f66d6974626c3d4dc78b0049b010f53739dd22ecf20d9d3e77",
+      "namespace": "ci-quickstart-001"
+    },
+    "controller": {
+      "build": "confidential-volume-controller-2",
+      "contextSha256": "7889060e3c7888923371f74789abb15f42825f29d004b1da0b5d1abf3882699e",
+      "image": "image-registry.openshift-image-registry.svc:5000/ci-quickstart-001/confidential-volume-controller@sha256:2844f9af4e05ff6b1193af7b4faeaf8ec346bfd15dce1ea8b6735d34859f3dbe",
+      "namespace": "ci-quickstart-001"
+    },
+    "populator": {
+      "build": "encrypted-model-populator-1",
+      "contextSha256": "bce3077b7f33753303b769ee4234344a56de3f56b079966d72875e0785d2644f",
+      "image": "image-registry.openshift-image-registry.svc:5000/ci-quickstart-001/encrypted-model-populator@sha256:bf1eb8233e61edfd46e04a3675fb40968bdfe259249179cd75cb7e1b64149004",
+      "namespace": "ci-quickstart-001"
+    },
+    "preparation": {
+      "build": "inference-preparation-1",
+      "contextSha256": "db0d418e32f6a19b2f96f84a7790745197989b4fdd3d46ae69007be4e5d1b8a3",
+      "image": "image-registry.openshift-image-registry.svc:5000/ci-quickstart-001/inference-preparation@sha256:8fdfbd95fe86f8843bc7dcf2f7ef544a3a3ccd4dde08e316caf28d92101e33df",
+      "namespace": "ci-quickstart-001"
+    },
+    "sidecar": {
+      "build": "confidential-storage-sidecar-1",
+      "contextSha256": "af5c1618b5d1466020e05f4826fcee5db0018b14ec0a55c95685013ed214a6be",
+      "image": "image-registry.openshift-image-registry.svc:5000/ci-quickstart-001/confidential-storage-sidecar@sha256:78b359eeca29639fc8d6e82b1a87f0ca7dfdfa994c24bb72ae8b97427f8473b6",
+      "namespace": "ci-quickstart-001"
+    }
+  },
+  "limitations": [
+    "Qualified OSC SNP/NVIDIA profile only",
+    "Chat proxy HTTP outside TEE; localhost port-forward",
+    "Retained authority is trusted; full RW snapshot rollback resistance is not claimed"
+  ],
+  "namespace": "ci-quickstart-001",
+  "reopen": {
+    "applicationImage": "nvcr.io/nvidia/vllm@sha256:15f380ad9c32f0ac57ac16e4b778c6f733c88b9ffe3a936035d0a59ad17b1aab",
+    "boot": "6f739b86-4962-4c48-a09f-a4e21d5b1bb9",
+    "chatResponse": "<think>\n\n</think>\n\n7 plus 5 equals 12.",
+    "chatStatus": 200,
+    "execDenied": true,
+    "gpu": {
+      "cuda": "13.0",
+      "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "event": "CUDA_GPU_PROBE_PASS",
+      "torch": "2.9.0a0+50eac811a6.nv25.09"
+    },
+    "initDataSha256": "e0e3752cbd6167dcb9e5de504c575eb0df2177f961a58eb205707880ccd288eb",
+    "model": "qwen3-0.6b",
+    "modelHashesVerified": true,
+    "namespace": "ci-quickstart-001",
+    "phase": "reopen",
+    "pod": "qwen-quickstart-001-predictor-9b9674748-qsxkb",
+    "podUid": "6595c3f7-5d8a-4677-a42e-b41e8bfb85c4",
+    "pvcUids": {
+      "data": "5f039729-22b9-49c1-868a-748afe138d8a",
+      "model": "457be22c-c308-486b-834a-1ca4102323aa"
+    },
+    "scope": "application, persistence, chat and exec checks; authority evidence separate",
+    "workload": "qwen-quickstart-001"
+  },
+  "run": "qwen-quickstart-001",
+  "source": {
+    "diskBytes": 2147483648,
+    "diskDigest": "sha256:4265a38f922c9998441491f36983c5e30aa20b03836b463fc45530a892c55334",
+    "format": "luks-verity-v1",
+    "manifestDigest": "sha256:901c54776d3b2439050095843c8b506fabbf28b6d76719a4aca7c24fec85b58b",
+    "repository": "ci-quickstart-001/qwen-quickstart-001-model"
+  },
+  "state": "E2EPassed",
+  "testBoundary": {
+    "existingOpenShiftAndCoCo": true,
+    "newInstallationNamespaces": true,
+    "newBuildsAndEncryptedModel": true,
+    "newKeysAndClaims": true,
+    "newAuthorityHistory": true,
+    "compatibleSharedCRDsReused": true,
+    "clusterReinstalled": false
+  },
+  "authority": {
+    "firstOperationCounts": {
+      "v-iyaii52ykixx72hwtwfjt7tmylfqucyfgykbrhpkt42nmxjjw7aa": 1,
+      "v-tuhho4ah7yfzz5lscuol3ey4ko3nx53vw2codcm5su6ngsht4mvq": 2
+    },
+    "reopenOperationCounts": {
+      "v-iyaii52ykixx72hwtwfjt7tmylfqucyfgykbrhpkt42nmxjjw7aa": 2,
+      "v-tuhho4ah7yfzz5lscuol3ey4ko3nx53vw2codcm5su6ngsht4mvq": 3
+    },
+    "attestationMarkers": [
+      "STORAGE_EAR submod=cpu0 status=affirming hardware=2 configuration=3 executables=3",
+      "STORAGE_EAR submod=gpu0 status=affirming hardware=2 configuration=3 executables=3"
+    ],
+    "initializationUnchanged": true,
+    "records": [
+      {
+        "volumeId": "v-tuhho4ah7yfzz5lscuol3ey4ko3nx53vw2codcm5su6ngsht4mvq",
+        "state": "Ready",
+        "headerSha256": "e885078df34bc83cc266a3ed3773c95eedfc86e2c311e2e31f6d4bfdf671fcfe",
+        "manifestSha256": "774047d11b14758de8263fe243b6056ffd14212e794bfa19e3e53dbab57c61f3",
+        "initializationSteps": [
+          {
+            "evidence_sha256": "9c307d425f0bd48d9ad70880eb938bba0597bbf13b884b14bad2840a30f96077",
+            "result": {
+              "header_sha256": "e885078df34bc83cc266a3ed3773c95eedfc86e2c311e2e31f6d4bfdf671fcfe"
+            },
+            "status": "Complete",
+            "step": "luks-format",
+            "step_id": "c35288ef-e25e-4175-b387-8b7b94311e47"
+          },
+          {
+            "evidence_sha256": "090616756593b7b0b567d28541bd8360435ffa5e4fc5658a13d50c3df58d8cac",
+            "result": {
+              "header_sha256": "e885078df34bc83cc266a3ed3773c95eedfc86e2c311e2e31f6d4bfdf671fcfe",
+              "stack_sha256": "7cb86955af00375cc8abbf3bf272ff78113b14d00284ca751435c056085b9eb8"
+            },
+            "status": "Complete",
+            "step": "integrity-initialize",
+            "step_id": "cccd756f-f62d-455d-9f52-ad491664d6d0"
+          },
+          {
+            "evidence_sha256": "cc60b95a9bb4e03ad2c34450e425a060e0dbbda9e4a8203afc3cffae7a5ac2b7",
+            "result": {
+              "filesystem_uuid": "f7912394-bb66-5694-be41-f1443f19d452",
+              "header_sha256": "e885078df34bc83cc266a3ed3773c95eedfc86e2c311e2e31f6d4bfdf671fcfe"
+            },
+            "status": "Complete",
+            "step": "filesystem-create",
+            "step_id": "44c3ebfc-f44a-46a4-8484-c2fda07b6206"
+          },
+          {
+            "evidence_sha256": "68996880a9d57d541c4b310f3417a84b034936c55d3bf22330d07148bdf933e2",
+            "result": {
+              "header_sha256": "e885078df34bc83cc266a3ed3773c95eedfc86e2c311e2e31f6d4bfdf671fcfe",
+              "manifest_sha256": "774047d11b14758de8263fe243b6056ffd14212e794bfa19e3e53dbab57c61f3"
+            },
+            "status": "Complete",
+            "step": "durability-barrier",
+            "step_id": "64668992-e9e1-4868-b3e4-e5b6bcc1fff5"
+          }
+        ]
+      },
+      {
+        "volumeId": "v-iyaii52ykixx72hwtwfjt7tmylfqucyfgykbrhpkt42nmxjjw7aa",
+        "state": "Ready",
+        "headerSha256": "d1170f2160560a4422cb5036a1534f88487151fd6b020be6f3ab026a699d1ce9",
+        "manifestSha256": "eaabbab3524da384c15fb74b0438080e08c01913b8500bcfdf5dc9a1aa3785e5",
+        "initializationSteps": []
+      }
+    ]
+  },
+  "runtime": {
+    "guestImageSha256": "abd755287282a268578687137bf437caeda6139c1a654f18d13f8a72a68892ca",
+    "initDataSha256": "e0e3752cbd6167dcb9e5de504c575eb0df2177f961a58eb205707880ccd288eb",
+    "launchMeasurement": "be2e11ecce7f8fedf0ab8fe056b927c5508557c5e57279f70c6e43ab6b3c3afcb10da6982a6e5f5bcf1069ec8a664818",
+    "runtimeClassName": "kata-cc-nvidia-gpu"
+  },
+  "trusteeOwner": {
+    "application": "trustee",
+    "commit": "06bb7df8a0d83d7230bfc11ab72d21e478d8595e",
+    "policySha256": "0c3c62ed03779a53b8023b54e0ad7459b60ec20943c9286fe6531877e8e01eb0",
+    "tags": [
+      "qwen-quickstart-001-model",
+      "qwen-quickstart-001-data",
+      "qwen-quickstart-001-registry"
+    ]
+  },
+  "shutdownMarkers": [
+    "SIDECAR_STOCK_AA_INITDATA_PASS",
+    "SIDECAR_STOCK_AA_INITDATA_AND_PRIVATE_CDH_PASS",
+    "SIDECAR_GUEST_STORAGE_MODULES_READY",
+    "SIDECAR_PRIVATE_STORAGE_SERVICE_READY",
+    "SIDECAR_ATTESTED_STORAGE_MOUNTED",
+    "SIDECAR_STOPPING_CONSUMER",
+    "SIDECAR_CONSUMER_MOUNTS_REMOVED",
+    "SIDECAR_STORAGE_CLOSED"
+  ],
+  "originalServiceRetirement": {
+    "repository": "pmatouse/coco-pattern-edge-rtx6k",
+    "inferenceCommit": "2eacf9d4140317f46257b03e1e0abd9d38662296",
+    "chatCommit": "04f4fdfeb2058ae5209499f6e70f121051f6163d",
+    "otherDemoPreserved": "confidential-inference-demo/qwen-demo-003"
+  },
+  "keyEnrollment": {
+    "state": "verified",
+    "beforeVersion": 4,
+    "afterVersion": 5
+  },
+  "recoveryExercised": [
+    "Interrupted public build-context creation; incomplete archive never submitted",
+    "Failed unscheduled bootstrap Job recreated with same retained authority claim",
+    "Concurrent executor rejected by run lock",
+    "Enrollment verification interrupted after publication; resumed without key rotation or second Trustee restart",
+    "Single binding writer after duplicate-create race; original claim UIDs preserved"
+  ],
+  "rerunVerification": {
+    "allApplicableStageTargetsPassed": true,
+    "quickstartAllPassed": true,
+    "quickstartResumePassed": true,
+    "statusNext": null,
+    "sameReopenPodUID": "6595c3f7-5d8a-4677-a42e-b41e8bfb85c4",
+    "keyBackendVersionUnchanged": 5,
+    "initializationUnchanged": true
+  }
+}

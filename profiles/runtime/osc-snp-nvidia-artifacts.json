@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "profile": "osc-snp-nvidia-x86_64-v1",
+  "files": {
+    "ovmf": {"path":"/usr/share/edk2/ovmf/OVMF.amdsev.fd","sha256":"1aa196fe94e56809aa668fc4eabfc50923131288e018bcf0c6ab4dd3581bd850"},
+    "kernel": {"path":"/usr/share/kata-containers/osbuilder-images/6.12.0-211.16.1.el10_2.x86_64/vmlinuz","sha256":"0317da8a23853124ed4e4da6c56254f40a741ff4507e1afbbcb7f32e5c097206"},
+    "initrd": {"path":"/usr/share/kata-containers/osbuilder-images/6.12.0-211.16.1.el10_2.x86_64/kata-cc-nvidia-gpu-595.58.03.initrd","sha256":"abd755287282a268578687137bf437caeda6139c1a654f18d13f8a72a68892ca"}
+  },
+  "kernelModulesRPM": {
+    "url":"https://download.devel.redhat.com/brewroot/packages/kernel/6.12.0/211.16.1.el10_2/data/signed/release4,release2,ima/x86_64/kernel-modules-core-6.12.0-211.16.1.el10_2.x86_64.rpm",
+    "sha256":"6b4db27a280ce40f8d9c2ecefc0c5eb4222a75c61d964ca55e35bf4700d4eed9"
+  },
+  "modules": {
+    "dm-integrity":"b39f3b16639012e3e76f500ef84ae66b4c68e6885547bdf5bd945aa0cbf9691c",
+    "async_tx":"f1e7207addd9501f2c107b69a1f34405ec75189daf4b30428c9e60cfd4025254",
+    "async_xor":"f2a8294ef05e53d85232e56e880a1dea802510c5eb45d3857569727608fe83f0",
+    "xor":"0ec8d0b5885d37c809d49a36846a13ca4293dbaa3cfce6c8f74ae8cc7995ae73"
+  },
+  "vcpuSignature":"EPYC-v4",
+  "guestFeatures":1,
+  "vcpus":8,
+  "append":"tsc=reliable no_timer_check rcupdate.rcu_expedited=1 i8042.direct=1 i8042.dumbkbd=1 i8042.nopnp=1 i8042.noaux=1 noreplace-smp reboot=k cryptomgr.notests net.ifnames=0 pci=lastbus=0 console=hvc0 console=hvc1 debug panic=1 nr_cpus=8 selinux=0 scsi_mod.scan=none agent.launch_process_timeout=15 cgroup_no_v1=all pci=realloc pci=nocrs pci=assign-busses nvrc.smi.srs=1 agent.log=warn agent.guest_components_procs=confidential-data-hub"
+}

@@ -2,13 +2,13 @@
 
 ## Supply before starting
 
-Copy [the input template](../overrides/sites/demo-inputs.example.yaml) to a site
-override; it merges over [values-global.yaml](../values-global.yaml). These are the
-**current** input locations; there is not yet a single file covering trusted preparation.
-Names, resource URIs and public digests may go in Git. Credentials and key bytes may not.
-You supply authentication/authorization; the demo generates its own encryption keys.
-The [target GitOps workflow](automation.md) consolidates public inputs into one
-site YAML tracked in Git; credentials remain external references.
+For the manual Make path, copy [quickstart.example.yaml](../overrides/sites/quickstart.example.yaml).
+It merges over [values-global.yaml](../values-global.yaml) and covers public
+preparation, Trustee-owner and backend references in `quickstart.*`.
+The [quickstart](demo/quickstart.md) generates images, keys, measurements and release
+artifacts. Authentication remains external; never put tokens, keys or kubeconfig in YAML.
+The lower-level [demo-inputs template](../overrides/sites/demo-inputs.example.yaml)
+remains available for already-prepared artifacts. Full lifecycle GitOps remains planned.
 
 | Input | Location / requirement |
 | --- | --- |
@@ -16,11 +16,11 @@ site YAML tracked in Git; credentials remain external references.
 | Installation identity | `installation.name`, `.namespace`, `.clusterIdentity`; stable and unique. Do not change identity when reopening retained volumes. |
 | Hardware profile | `installation.profile`; currently only `osc-snp-nvidia-x86_64-v1`. CoCo CPU/GPU attestation must already work. |
 | Existing platform | `base.*`: RuntimeClass/handler, GPU resource, raw Block StorageClass, KServe version/location, Trustee name/namespace, GitOps namespace. Defaults require verification. |
-| Images | `images.controller`, `.populator`, `.sidecar`; application/Python defaults are pinned. Authority image and trusted preparation image are separate chart values. Build/publish for your registry; edge internal URLs are not portable. |
+| Images | `images.controller`, `.populator`, `.sidecar`; application/Python defaults are pinned. `qs-build` builds all five add-on images; `qs-push` resolves their digests automatically. Edge internal URLs are not portable. |
 | Registry | `registry.origin` HTTPS endpoint and CA (`injectServiceCA` for OpenShift). Model repository must be in the workload namespace. Scoped publisher push and helper pull identities are required. |
 | Demo choice | `demo.name`, PVC sizes, `/model` and `/data`, served model name, distinct model/data KBS resource URIs, manifest reference. Fetcher uses a pinned Qwen source manifest. |
 | Trustee integration | Trusted operator supplies KBS URL/CA, AS signing certificate, approved CPU/GPU reference values and access to the existing policy owner. Registry credential gets a third KBS URI. |
-| Backend enrollment | Vault namespace/pod, Kubernetes auth mount/role/ServiceAccount, trusted namespace and ESO projection names: `key_enrollment.py` arguments. Current adapter expects `secret/data/hub/modelKeys`; this is a site-specific integration. |
+| Backend enrollment | Vault namespace/pod, Kubernetes auth mount/role/ServiceAccount, trusted namespace and ESO projection names: `quickstart.vault.*` (or direct `key_enrollment.py` arguments). Current adapter expects `secret/data/hub/modelKeys`; this is a site-specific integration. |
 | Release trust | Authority hostname/state claim and private Secret reference: `charts/storage-authority`. Approval signer stays in the trusted domain; its **public** key goes in `approvalKeys`. |
 | Exposure | `chat.enabled`, `serviceType`, `port`; explicit `nodePort` for VPN exposure. Default ClusterIP uses local port-forward. No automatic DNS, public ingress or TLS. |
 | GitOps | Current opt-in: `gitops.enabled`, repository and full commit; separately provision repository-scoped access. Bootstrap snapshots resolved values into the Application; `gitops.valuesFile` is not currently watched. Full lifecycle GitOps is the target default. |
@@ -42,10 +42,10 @@ registry and required attestation/certificate services, or equivalent approved m
 | Signed deployment approval | Trusted signer after Trustee bindings and enrollment are verified; controller consumes it |
 | Registry reader token | Scoped identity; kept as a Trustee resource, renewal currently manual |
 
-Current manual runtime inputs: reviewed stock initrd hash, expected SNP launch
-measurement for the exact boot configuration, Kubernetes Service IP, image/build
-metadata and the [compatibility profile](../profiles/README.md). Packaging computes
-InitData; **the installer does not yet discover or calculate the launch measurement**.
+`qs-build` verifies installed stock firmware/kernel/initrd against the reviewed
+artifact lock. `qs-measure` calculates the expected SNP launch measurement and
+resolves Service IP/build metadata; `qs-enroll` packages the exact InitData.
+This calculation is qualified only for the pinned [runtime profile](../profiles/README.md).
 Authority TLS defaults to a 30-day certificate; certificate/approval/credential
 renewal is an operational input, not an automatic feature.
 
@@ -53,8 +53,9 @@ renewal is an operational input, not an automatic feature.
 
 - **Demonstrated:** fresh encryption, keys, claims and authority state on an existing
   CoCo cluster; inference and persistence across two VMs. The cluster itself was not reinstalled.
-- **Repeatable today:** staged commands with matching pinned artifacts and trusted
-  inputs. Manual orchestration remains; installation alone does not produce a chat endpoint.
+- **Manual path:** `qs-*` targets or `quickstart-all` run preparation, installation
+  and verification from the public site YAML and external access. Argo release
+  orchestration and credential renewal remain separate work.
 - **Expected differences:** fresh keys, UUIDs, ciphertext/OCI digests, PVC UIDs and
   InitData. Reproducibility means the same verified behavior, not identical ciphertext.
 - **Preserve on retry:** keys, authority history, claim UIDs, enrollment journal and
