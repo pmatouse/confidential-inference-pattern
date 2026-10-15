@@ -1,0 +1,6 @@
+# Administrator-owned grant. All images and site inputs must be pinned at bootstrap.
+policy: {}
+site: {}
+stateSize: 20Gi
+storageClassName: ''
+createIntent: false

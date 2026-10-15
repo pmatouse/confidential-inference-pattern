@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "state": "ControllerBootstrapReady",
+  "hardwareE2EQualified": false,
+  "releaseStarted": false,
+  "pending": "ExternalGitCredential",
+  "run": "qwen-controller-001",
+  "namespace": "ci-controller-001-trusted",
+  "executor": {
+    "build": "inference-release-executor-3",
+    "contextSha256": "465191b8cbba06081b3e26fe635aea643b243f1d2bf767d632c3255b1ddb21c4",
+    "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-001/inference-release-executor@sha256:a97e5245cc081efa2b9312c3d15a8d9ed11a7fd79dbf86a5483e75bd34e84ba9",
+    "namespace": "ci-controller-001"
+  },
+  "bootstrap": {
+    "executorImage": "image-registry.openshift-image-registry.svc:5000/ci-controller-001/inference-release-executor@sha256:a97e5245cc081efa2b9312c3d15a8d9ed11a7fd79dbf86a5483e75bd34e84ba9",
+    "run": "qwen-controller-001",
+    "siteSha256": "50459cc7c1c8d1321252ffbace3f343c33bc6b56125c7281c307eae168e95aeb"
+  },
+  "controllerPodUID": "fa307869-288f-4865-b11f-42d9c40f654e",
+  "controllerSCC": "restricted-v2",
+  "retainedStatePVCUID": "1f7b70dd-e390-4ee4-93c3-b041a572085e",
+  "preservedPredictorUID": "8ea6b4f6-987c-42cb-852d-ac47726506dd",
+  "tests": {
+    "pythonTestsPassed": 131,
+    "serverCRDAndIntentDryRun": true,
+    "executorLinuxClientsAndImports": true
+  }
+}

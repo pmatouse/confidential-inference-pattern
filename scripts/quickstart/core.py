@@ -62,8 +62,8 @@ class Run:
         require(self.trusted != self.ns and re.fullmatch(addon.NAME,self.trusted),'separate trusted namespace required')
         self.cache = Path(os.environ.get('QUICKSTART_CACHE',str(ROOT/'.cache/quickstart'))).resolve()/name
         self.cache.mkdir(mode=0o700,parents=True,exist_ok=True)
-        self.state = ROOT/'.private/quickstart'/name
-        self.out = ROOT/'output/quickstart'/name
+        self.state = Path(os.environ.get('QUICKSTART_STATE_ROOT',str(ROOT/'.private/quickstart')))/name
+        self.out = Path(os.environ.get('QUICKSTART_OUTPUT_ROOT',str(ROOT/'output/quickstart')))/name
         self.state.mkdir(mode=0o700,parents=True,exist_ok=True)
         self.out.mkdir(mode=0o700,parents=True,exist_ok=True)
         require(not self.state.is_symlink() and self.state.stat().st_mode&0o077==0,'private run directory required')
@@ -71,6 +71,10 @@ class Run:
         try:
             if exclusive:fcntl.flock(self.lock, fcntl.LOCK_EX|fcntl.LOCK_NB)
         except BlockingIOError: raise ValueError('another executor owns this run') from None
+        owner=self.state/'executor-owner.json'
+        if exclusive and owner.exists():
+            require(json.loads(owner.read_text())['executor']==os.environ.get('QUICKSTART_EXECUTOR','manual'),
+                    'orchestration ownership differs; explicit handover required')
         self.identity = {'run':name,'siteSha256':sha(canonical(self.v)), 'namespace':self.ns,
                          'installation':self.installation,'schemaVersion':1}
         p=self.state/'identity.json'

@@ -31,3 +31,13 @@ demo-chat:
 	$(PYTHON) scripts/addon.py demo-chat --values $(VALUES)
 
 include make/quickstart.mk
+
+.PHONY: release-controller-image release-controller-install release-controller-start release-controller-status
+release-controller-image:
+	$(PYTHON) scripts/release-controller.py image --values $(VALUES)
+release-controller-install:
+	$(PYTHON) scripts/release-controller.py install --values $(VALUES)
+release-controller-start:
+	$(PYTHON) scripts/release-controller.py start --values $(VALUES)
+release-controller-status:
+	$(PYTHON) scripts/release-controller.py status --values $(VALUES)

@@ -1,0 +1,13 @@
+FROM quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:58e37785e922707a6f47cdbd415dbfa3ffa33c657a6e807aadacc9bc7ed2e0cd AS cli
+FROM registry.access.redhat.com/ubi9/python-312@sha256:56fad467cb1e41666f0028b7fd71107df0556bcc9ecfc577597858c85618f55c
+USER 0
+COPY --from=cli /usr/bin/oc /usr/local/bin/oc
+RUN command -v git && command -v curl && command -v tar
+RUN curl -fsSL https://get.helm.sh/helm-v3.22.0-linux-amd64.tar.gz -o /tmp/helm.tgz && echo '1e4ab49e429626cf6c6958d914248b78c9730803c2751b87627e171dc800e7bb  /tmp/helm.tgz' | sha256sum -c - && tar xzf /tmp/helm.tgz -C /tmp && install -m 755 /tmp/linux-amd64/helm /usr/local/bin/helm && rm -rf /tmp/helm.tgz /tmp/linux-amd64
+COPY source /opt/pattern
+RUN python3 -m pip install --no-cache-dir -r /opt/pattern/requirements-quickstart.txt && python3 -m pip check && chmod 755 /opt/pattern/components/inference-release-controller/git-askpass.py && chmod -R a+rX /opt/pattern
+ENV PYTHONDONTWRITEBYTECODE=1
+WORKDIR /opt/pattern
+RUN oc version --client=true && helm version --short && python3 -c "import sys; sys.path.insert(0, '/opt/pattern/components/inference-release-controller'); import worker; [worker.release.module(x) for x in ('profile', 'render', 'enroll')]"
+USER 1001
+ENTRYPOINT ["python3", "/opt/pattern/components/inference-release-controller/controller.py"]

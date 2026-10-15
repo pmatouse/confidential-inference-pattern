@@ -18,9 +18,11 @@ not every possible clean-cluster dependency installation path.
 
 ## Remaining integration work
 
-- **Full lifecycle GitOps:** Argo currently owns the foundation. Watched site YAML,
-  a trusted release reconciler and integration of the existing measurement, publication,
-  enrollment, signing and acceptance operations remain to be implemented.
+- **Release automation:** the initial [InferenceRelease controller](demo/controller.md)
+  now integrates publication, binding, measurement, enrollment, signing and acceptance
+  as sequential Jobs. Independent controller-driven hardware qualification is pending.
+- **Full lifecycle GitOps:** administrator bootstrap, mutable retained-volume upgrades,
+  renewal and retirement are not reconciled by the initial immutable release API.
 - **Portability:** publish portable images; qualify additional hardware/runtime/CSI
   profiles. Only the tested OSC SNP/NVIDIA configuration is qualified.
 - **Credential lifecycle:** automate helper pull-token, approval and certificate

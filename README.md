@@ -24,6 +24,7 @@ other hardware qualification and production credential/authority lifecycle remai
 | [Acceptance](docs/demo/acceptance.md) | Inference, fresh-VM persistence and negative checks |
 | [GitOps target](docs/automation.md) | One site YAML, Argo ownership, trusted release lifecycle and remaining work |
 | [Implementation plan](docs/full-lifecycle-implementation-plan.md) | Manual-first delivery, then controller/GitOps; shared operations and completion gates |
+| [Controller release](docs/demo/controller.md) | One-time bootstrap, InferenceRelease API, sequential Jobs, retries and Argo health |
 | [Manual quickstart](docs/demo/quickstart.md) | Site inputs, image builds/pushes, all Make stages, expected results and recovery |
 | [Status](docs/implementation-status.md) | Verified result and open integration gaps |
 

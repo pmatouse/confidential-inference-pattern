@@ -1,0 +1,125 @@
+{{- $p := .Values.policy -}}
+{{- $policyName := printf "%s-policy-%s" .Release.Name (toJson $p | sha256sum | trunc 12) -}}
+{{- if not (regexMatch "^[^[:space:]@]+@sha256:[a-f0-9]{64}$" (required "policy.image required" $p.image)) }}{{ fail "pin controller/runner image" }}{{ end }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $policyName }}
+immutable: true
+data:
+  policy.json: {{ $p | toJson | quote }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $p.siteConfigMap }}
+immutable: true
+data:
+  values.json: {{ .Values.site | toJson | quote }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $p.stateClaim }}
+  annotations:
+    helm.sh/resource-policy: keep
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: {{ required "storage class required" .Values.storageClassName | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.stateSize | quote }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata: {name: {{ .Release.Name }}}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata: {name: {{ $p.stageServiceAccount }}}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata: {name: {{ .Release.Name }}}
+rules:
+  - apiGroups: [inference.confidentialcontainers.org]
+    resources: [inferencereleases]
+    resourceNames: [{{ $p.releaseName }}]
+    verbs: [get]
+  - apiGroups: [inference.confidentialcontainers.org]
+    resources: [inferencereleases/status]
+    resourceNames: [{{ $p.releaseName }}]
+    verbs: [get, update]
+  - apiGroups: [""]
+    resources: [configmaps]
+    verbs: [get]
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [get, list, delete]
+  - apiGroups: [batch]
+    resources: [jobs]
+    verbs: [get, list, create]
+  - apiGroups: [coordination.k8s.io]
+    resources: [leases]
+    verbs: [get, create, update]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata: {name: {{ .Release.Name }}}
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: Role, name: {{ .Release.Name }}}
+subjects:
+  - {kind: ServiceAccount, name: {{ .Release.Name }}, namespace: {{ .Release.Namespace }}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: {{ .Release.Name }}}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {app: {{ .Release.Name }}}
+  template:
+    metadata:
+      labels: {app: {{ .Release.Name }}, coco.io/skip-initdata: "true"}
+      annotations: {openshift.io/required-scc: restricted-v2}
+    spec:
+      serviceAccountName: {{ .Release.Name }}
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: controller
+          image: {{ $p.image | quote }}
+          command: [python3, /opt/pattern/components/inference-release-controller/controller.py]
+          env:
+            - name: POD_UID
+              valueFrom: {fieldRef: {fieldPath: metadata.uid}}
+            - {name: PYTHONDONTWRITEBYTECODE, value: "1"}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          resources:
+            requests: {cpu: 25m, memory: 64Mi}
+            limits: {cpu: 250m, memory: 256Mi}
+          volumeMounts:
+            - {name: configuration, mountPath: /configuration, readOnly: true}
+      volumes:
+        - name: configuration
+          configMap: {name: {{ $policyName }}}
+---
+{{- if .Values.createIntent }}
+apiVersion: inference.confidentialcontainers.org/v1alpha1
+kind: InferenceRelease
+metadata:
+  name: {{ $p.releaseName }}
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  siteConfigRef:
+    name: {{ $p.siteConfigMap }}
+    key: values.json
+    sha256: {{ $p.siteSha256 | quote }}
+  acceptance: {mode: FreshDemo, allowTestVMReplacement: true}
+{{- end }}

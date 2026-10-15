@@ -1,0 +1,117 @@
+{{- $p := .Values.policy -}}
+{{- range $ns := list $p.namespace $p.workloadNamespace }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $p.releaseName }}-release-executor
+  namespace: {{ $ns }}
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: ClusterRole, name: admin}
+subjects:
+  - {kind: ServiceAccount, name: {{ $p.stageServiceAccount }}, namespace: {{ $p.namespace }}}
+---
+{{- end }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata: {name: {{ $p.releaseName }}-release-observer}
+rules:
+  - {apiGroups: [""], resources: [namespaces, nodes, pods, services], verbs: [get, list]}
+  - {apiGroups: [config.openshift.io], resources: [clusterversions], verbs: [get]}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata: {name: {{ $p.releaseName }}-release-observer}
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: ClusterRole, name: {{ $p.releaseName }}-release-observer}
+subjects:
+  - {kind: ServiceAccount, name: {{ $p.stageServiceAccount }}, namespace: {{ $p.namespace }}}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $p.releaseName }}-trustee-enrollment
+  namespace: {{ .Values.site.base.trusteeNamespace }}
+rules:
+  - {apiGroups: [""], resources: [pods], verbs: [get, list, delete]}
+  - {apiGroups: [""], resources: [pods/exec], verbs: [create, get]}
+  - {apiGroups: [""], resources: [configmaps], resourceNames: [resource-policy], verbs: [get]}
+  - apiGroups: [""]
+    resources: [secrets]
+    resourceNames: [{{ .Values.site.quickstart.trustee.caSecret }}, {{ .Values.site.quickstart.trustee.signerSecret }}, {{ .Values.site.quickstart.vault.projectionSecret }}]
+    verbs: [get]
+  - {apiGroups: [external-secrets.io], resources: [externalsecrets], resourceNames: [{{ .Values.site.quickstart.vault.externalSecret }}], verbs: [get]}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata: {name: {{ $p.releaseName }}-trustee-enrollment, namespace: {{ .Values.site.base.trusteeNamespace }}}
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: Role, name: {{ $p.releaseName }}-trustee-enrollment}
+subjects:
+  - {kind: ServiceAccount, name: {{ $p.stageServiceAccount }}, namespace: {{ $p.namespace }}}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata: {name: {{ $p.releaseName }}-vault-exec, namespace: {{ .Values.site.quickstart.vault.namespace }}}
+rules:
+  - {apiGroups: [""], resources: [pods], resourceNames: [{{ .Values.site.quickstart.vault.pod }}], verbs: [get]}
+  - {apiGroups: [""], resources: [pods/exec], resourceNames: [{{ .Values.site.quickstart.vault.pod }}], verbs: [create, get]}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata: {name: {{ $p.releaseName }}-vault-exec, namespace: {{ .Values.site.quickstart.vault.namespace }}}
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: Role, name: {{ $p.releaseName }}-vault-exec}
+subjects:
+  - {kind: ServiceAccount, name: {{ $p.stageServiceAccount }}, namespace: {{ $p.namespace }}}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata: {name: {{ $p.releaseName }}-vault-login, namespace: {{ .Values.site.quickstart.vault.enrollmentNamespace }}}
+rules:
+  - {apiGroups: [""], resources: [serviceaccounts/token], resourceNames: [{{ .Values.site.quickstart.vault.serviceAccount }}], verbs: [create]}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata: {name: {{ $p.releaseName }}-vault-login, namespace: {{ .Values.site.quickstart.vault.enrollmentNamespace }}}
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: Role, name: {{ $p.releaseName }}-vault-login}
+subjects:
+  - {kind: ServiceAccount, name: {{ $p.stageServiceAccount }}, namespace: {{ $p.namespace }}}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata: {name: {{ $p.releaseName }}-trustee-owner, namespace: {{ .Values.site.quickstart.trustee.owner.namespace }}}
+rules:
+  - {apiGroups: [argoproj.io], resources: [applications], resourceNames: [{{ .Values.site.quickstart.trustee.owner.application }}], verbs: [get, patch]}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata: {name: {{ $p.releaseName }}-trustee-owner, namespace: {{ .Values.site.quickstart.trustee.owner.namespace }}}
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: Role, name: {{ $p.releaseName }}-trustee-owner}
+subjects:
+  - {kind: ServiceAccount, name: {{ $p.stageServiceAccount }}, namespace: {{ $p.namespace }}}
+---
+{{- range $ns := list $p.namespace $p.workloadNamespace }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata: {name: {{ $p.releaseName }}-release-apis, namespace: {{ $ns }}}
+rules:
+  - {apiGroups: [storage.confidentialcontainers.org], resources: [encryptedmodelsources, confidentialvolumes, confidentialworkloads], verbs: [get, list, create, patch, update]}
+  - {apiGroups: [serving.kserve.io], resources: [inferenceservices], verbs: [get, list]}
+  - {apiGroups: [inference.confidentialcontainers.org], resources: [inferencereleases], verbs: [get]}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata: {name: {{ $p.releaseName }}-release-apis, namespace: {{ $ns }}}
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: Role, name: {{ $p.releaseName }}-release-apis}
+subjects:
+  - {kind: ServiceAccount, name: {{ $p.stageServiceAccount }}, namespace: {{ $p.namespace }}}
+---
+{{- end }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata: {name: {{ $p.releaseName }}-release-health, namespace: {{ $p.workloadNamespace }}}
+rules:
+  - {apiGroups: [""], resources: [pods, persistentvolumeclaims], verbs: [get]}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata: {name: {{ $p.releaseName }}-release-health, namespace: {{ $p.workloadNamespace }}}
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: Role, name: {{ $p.releaseName }}-release-health}
+subjects:
+  - {kind: ServiceAccount, name: inference-release-controller, namespace: {{ $p.namespace }}}

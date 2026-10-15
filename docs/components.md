@@ -2,7 +2,7 @@
 
 Start with the [workload walkthrough](workload-walkthrough.md) for declarations,
 sequence diagrams, disk layouts and failure handling. This page maps repository
-directories to **running processes**: eleven source directories do not mean eleven
+directories to **running processes**: twelve source directories do not mean twelve
 services. Most storage libraries compile into one executable inside the sidecar.
 
 ## Deployment map
@@ -10,7 +10,8 @@ services. Most storage libraries compile into one executable inside the sidecar.
 ```mermaid
 flowchart TB
   subgraph Prep[Trusted preparation: CLI / temporary Jobs]
-    Q[Make quickstart]
+    Q[Make quickstart or trusted release stage Jobs]
+    RC[InferenceRelease controller] --> Q
     P[model-publisher tools + encrypted-model-populator publisher]
     R[inference-release tools]
     Q --> P
@@ -52,7 +53,9 @@ flowchart TB
 
 The chat proxy is one additional Pod outside the VM. Steady state therefore has
 two controllers, authority, predictor and chat; build, publisher, binding and
-enrollment Jobs are temporary. Existing platform services are additional.
+enrollment Jobs are temporary. Controller-driven installations add one release
+controller Pod and a separate retained orchestration PVC; stage Jobs are temporary.
+Existing platform services are additional.
 
 ## Source directory roles
 
@@ -64,6 +67,7 @@ Paths below are under [`components/`](../components/).
 | [confidential-volume-controller](../components/confidential-volume-controller/) | Namespace controller; discovers declarations, verifies approval and reconciles permitted KServe targets | Kubernetes API, public Ed25519 verifier, immutable request/approval artifacts; no signer or storage keys |
 | [encrypted-model-populator](../components/encrypted-model-populator/) | Go controller + temporary importer; handles prime PVC population/rebind. Python publisher programs also live here | OCI ciphertext/digests and raw import device; importer has no decryption key. Publisher is a separate trusted role |
 | [model-publisher](../components/model-publisher/) | Pinned userspace/tool and kernel-module preparation for publisher/helper builds | Public source locks and verified binaries; `charts/model-publisher` runs the trusted preparation Job |
+| [inference-release-controller](../components/inference-release-controller/) | Trusted reconciler + sequential stage Jobs; exact site grant, deterministic Jobs, durable receipts, explicit retry | Retained orchestration PVC holds signer/key state; workers receive scoped external credentials. [Bootstrap and lifecycle](demo/controller.md) |
 | [inference-release](../components/inference-release/) | Trusted offline/Job tooling; render policy, enroll authority metadata/resources, create public measured package | Request/profile/descriptors in; package out. Enrollment/signing steps use separately scoped private credentials |
 | [confidential-storage-sidecar](../components/confidential-storage-sidecar/) | Python supervisor in privileged guest container; private process startup, app authentication, mount transfer, shutdown | Local rendezvous and root-private service socket; owns namespace descriptors and guest storage privileges |
 | [confidential-storage-service](../components/confidential-storage-service/) | Rust daemon child of supervisor; coordinates all volumes and reservations | Private `activate-many`/`close` RPC; calls the three libraries below; never exposes a network key API |
@@ -90,7 +94,7 @@ kernel modules are loaded inside the guest; compatibility is profile-specific.
 | Existing CSI | Allocate/attach raw blocks; sees encrypted bytes, never gets a LUKS credential |
 | KServe | Reconcile InferenceService into predictor compute/Service and readiness; does not decrypt weights |
 | OpenShift registry | Store pinned add-on images and encrypted model OCI artifact as distinct objects |
-| Argo CD | Existing platform/foundation ownership and Trustee values synchronization; full add-on release reconciliation is not yet implemented |
+| Argo CD | Existing platform/foundation ownership and Trustee values synchronization; may own the immutable InferenceRelease intent after administrator bootstrap; full foundation lifecycle and renewal remain open |
 
 ## Installer and chart entry points
 
@@ -119,5 +123,5 @@ kernel modules are loaded inside the guest; compatibility is profile-specific.
 | Guest P-256 session key | Ephemeral private guest memory; proves possession for challenge-bound authority requests |
 | InitData, manifests, profiles and OCI digests | Public authenticated configuration; identities, not credentials |
 
-The registry/importer/controller never need a volume key. The authority needs
+The registry/importer/CV controller never need a volume key. Trusted release workers prepare and provision keys, so their retained orchestration state is sensitive. The authority needs
 trusted metadata and signing credentials, but does not hold the volume key.

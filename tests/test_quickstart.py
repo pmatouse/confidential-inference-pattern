@@ -17,6 +17,24 @@ from quickstart.verify import validate_authority, compare_authority
 
 
 class QuickstartTests(unittest.TestCase):
+    def test_controller_owned_state_blocks_manual_mutations(self):
+        from unittest.mock import patch
+        from quickstart.core import Run
+        values={'demo':{'name':'demo'},'installation':{'name':'demo','namespace':'work'},'quickstart':{'trustedNamespace':'trusted'}}
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            env={'QUICKSTART_STATE_ROOT':str(root/'private'),'QUICKSTART_OUTPUT_ROOT':str(root/'public'),'QUICKSTART_CACHE':str(root/'cache'),'QUICKSTART_EXECUTOR':'manual'}
+            with patch.dict(os.environ,env),patch('addon.load',return_value=values),patch('addon.Cluster'):
+                run=Run(root/'site.yaml','demo')
+                write(run.state/'executor-owner.json',{'executor':'controller'})
+                run.lock.close()
+                with self.assertRaisesRegex(ValueError,'ownership differs'):
+                    Run(root/'site.yaml','demo')
+                with patch.dict(os.environ,{'QUICKSTART_EXECUTOR':'controller'}):
+                    worker=Run(root/'site.yaml','demo')
+                    self.assertEqual(worker.state,root/'private/demo')
+                    worker.lock.close()
+
     def test_public_build_archive_is_reproducible_and_binary_executable(self):
         with tempfile.TemporaryDirectory() as d:
             a,b=Path(d)/'a.gz',Path(d)/'b.gz'

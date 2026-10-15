@@ -4,7 +4,10 @@
 then supply one public site-values YAML in Git. Argo CD reconciles the add-on and
 release intent; trusted controllers/Jobs prepare, enroll, sign and verify the demo.
 Routine deployment requires no manual `oc apply`, signing or enrollment commands.
-**Full lifecycle reconciliation is not implemented yet.**
+**Initial release reconciliation is implemented:** after administrator foundation
+bootstrap, `InferenceRelease` drives publication through fresh-VM acceptance as
+Jobs. See the [controller runbook](demo/controller.md). Full foundation GitOps,
+renewal and multi-release lifecycle management remain open.
 
 Implementation sequence and acceptance gates: [full lifecycle plan](full-lifecycle-implementation-plan.md).
 
@@ -39,7 +42,7 @@ provides the application hierarchy; its root configuration is administrator-cont
 | Owner | Desired state / responsibility |
 | --- | --- |
 | Argo CD | Add-on controllers, authority service, preparation services, chat, credential references and declarative release intent |
-| Proposed trusted release reconciler | Durable preparation/enrollment Jobs and receipts; derived model descriptor, volume/workload requests, measured package and signed approval |
+| Trusted release reconciler | Durable preparation/enrollment Jobs and receipts; derived model descriptor, volume/workload requests, measured package and signed approval |
 | Volume populator | Ciphertext import Jobs, prime PVC and populated claim binding |
 | ConfidentialVolume/workload controller | Bound volume identities, verified deployment package, public InitData and KServe InferenceService |
 | KServe | Predictor Deployments/Pods and serving lifecycle |
@@ -60,7 +63,7 @@ flowchart TD
     Argo --> Foundation[Controllers / authority / trusted preparation services]
     Argo --> Intent[Declarative release intent]
     Argo --> Chat[Chat frontend]
-    Foundation --> Release[Proposed trusted release reconciler]
+    Foundation --> Release[Trusted release reconciler]
     Intent --> Release
     Release --> Prepare[Verify profile / encrypt and publish OCI model]
     Prepare --> Volumes[Model source / RO and blank RW PVCs / workload request]
@@ -79,7 +82,9 @@ Use [sync waves](https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/
 for infrastructure ordering, with explicit health checks for child Applications
 and release resources. Waves alone do not prove enrollment or inference. The
 release reconciler waits on durable conditions before each dependent operation.
-Its release API and Argo health mapping still need implementation.
+The initial release API and Argo health mapping are provided by
+`charts/inference-release-controller`; integration into the existing Argo owner
+and full watched-site foundation graph remain separate bootstrap work.
 
 Run destructive acceptance actions, including graceful test-VM replacement, once
 per explicitly requested test release/generation; never on every Argo resync or

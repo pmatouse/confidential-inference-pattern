@@ -1,0 +1,4 @@
+apiVersion: v2
+name: inference-release-controller
+version: 0.1.0
+type: application

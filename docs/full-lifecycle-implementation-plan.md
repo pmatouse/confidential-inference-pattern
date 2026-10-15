@@ -6,8 +6,10 @@ chat demo with an OCI-populated encrypted RO `/model` and guest-initialized,
 persistent encrypted RW `/data`. No manual per-release key enrollment, package
 signing, manifest copying or acceptance commands.
 
-**Status:** proposed work, not an implemented API. The existing staged demo passed
-hardware E2E; [automation.md](automation.md) describes today's boundary.
+**Status:** the manual path is qualified. The initial `InferenceRelease` controller
+and stage-Job runner are implemented; independent hardware E2E is in progress.
+The [controller runbook](demo/controller.md) is the implemented API contract. Full
+foundation GitOps and lifecycle hardening below remain target work.
 
 ## Two required delivery paths
 
@@ -26,7 +28,7 @@ The [manual quickstart specification](demo/quickstart-implementation-plan.md)
 defines all Make targets, expected outputs, follow-ups and image-build requirements.
 The agreed starting platform is OpenShift + CoCo already installed.
 The manual `qs-*` targets now exist; see the [executable quickstart](demo/quickstart.md).
-The release-controller path remains planned and must pass its own independent E2E test.
+The initial release-controller path now exists and must pass its independent E2E test.
 
 ## Scope and decisions
 
@@ -47,7 +49,9 @@ The release-controller path remains planned and must pass its own independent E2
 Extend the current site-values schema rather than creating another input file.
 Preserve existing `installation`, `base`, `images`, `registry` and `chat` fields.
 Add trusted-integration references and declarative release intent. Example fragment
-below is **proposed**, not accepted by today's installer:
+below is the **future consolidated interface**. The initial controller instead
+references an immutable ConfigMap containing the existing public site values;
+see the controller runbook for its accepted schema:
 
 ```yaml
 trusted:

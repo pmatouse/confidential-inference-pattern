@@ -52,10 +52,11 @@ The authority/publisher/enrollment environment is trusted. Colocation on the dem
 cluster does not protect their credentials or history from that cluster's administrator.
 The inference host and storage backend are treated as untrusted for workload data.
 
-The [target GitOps control path](automation.md) adds Argo-managed release intent
-and a trusted release reconciler around these components. Current Argo ownership
-covers the controller foundation; full preparation/enrollment/acceptance automation
-remains to be implemented.
+The [release controller](demo/controller.md) adds immutable release intent and
+sequential publication, binding, measurement, enrollment, approval and acceptance
+Jobs. Argo may own that intent after administrator bootstrap. This initial path
+is implemented and undergoing independent hardware qualification; full foundation
+lifecycle, renewal and retained-volume upgrades remain open.
 
 ## Data protection
 

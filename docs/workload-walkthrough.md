@@ -8,6 +8,8 @@ filesystem initialized inside the guest and retained across VM replacement.
 Read this with the [component map](components.md). To deploy it, follow the
 [manual quickstart](demo/quickstart.md); its Make stages perform the trusted
 preparation steps described below. Applying the CRs alone is insufficient.
+The [controller path](demo/controller.md) uses the same operations as sequential Jobs
+after one-time bootstrap; its independent hardware qualification is pending.
 [Recorded E2E](../tests/evidence/2026-10-15/manual-quickstart-e2e.json) covers fresh
 add-on installation and two VMs on the [qualified stack](architecture.md#qualified-hardware-and-software).
 
@@ -457,7 +459,7 @@ prompt transport. Encrypted weights do not imply confidential network prompts.
 | Workload API | KServe Standard deployment and Service | CV/CW CRDs, binding Job, signed-package controller, security guard and renderer |
 | Guest storage | Kernel device-mapper and namespace APIs | Sidecar supervisor plus storage service/client/key/crypto libraries; stock CoCo does not manage this multi-volume lifecycle |
 | Lifecycle trust | Trustee attests the guest | Separate retained authority owns initialization, generation and exclusive owner decisions; production fencing/backup/rollback protection remain |
-| Release operations | Helm and existing Argo ownership | Manual Make path builds, publishes, measures, enrolls, signs and tests. Full trusted release reconciliation/renewal is still planned |
+| Release operations | Helm and existing Argo ownership | Manual Make path builds, publishes, measures, enrolls, signs and tests. The initial InferenceRelease controller runs model-through-report as Jobs after bootstrap; renewal remains planned |
 
 Only the current SNP/NVIDIA, single-replica, RWOP/Immediate storage profile is
 qualified. The generic declarations do not establish support for TDX, other GPUs,
