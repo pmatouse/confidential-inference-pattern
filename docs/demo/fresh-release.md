@@ -27,7 +27,9 @@ other hardware profiles require their own qualification.
    the bootstrap guide. The controller and populator receive no key provisioning
    credential. Establish repository-scoped GitOps access if using the private repo.
 5. Bootstrap retained authority history once using the storage-authority chart.
-   Use fresh TLS, receipt-signing and approval identities. `trust.py` separates
+   Use a separate CA and CA-signed server leaf, plus fresh receipt-signing and
+   approval identities. The guest pins the CA; do not serve the CA certificate
+   itself as the server leaf, which Rust TLS verification rejects. `trust.py` separates
    public pins from private files. Keep the same history and namespace ownership
    range on subsequent starts. The authority is an add-on; it does not replace
    Trustee or hold the volume decryption keys.

@@ -46,6 +46,8 @@ def storage_diagnostic():
     with path.open("rb") as stream:
         lines = stream.read(65536).decode(errors="replace").splitlines()
     for line in lines[-16:]:
+        if re.fullmatch(r"STORAGE_SERVICE volume_denied stage=[a-z0-9-]{1,48}", line):
+            print(line, flush=True)
         if re.fullmatch(
             r"STORAGE_SERVICE denied_state_retained stage=[a-z0-9-]{1,48} "
             r"category=(authority-config|authority-transport|authority-binding|"
@@ -539,6 +541,8 @@ if __name__ == "__main__":
                 pass
         storage_diagnostic()
         # Fixed local diagnostic labels only. Child logs remain root-private.
+        if isinstance(error, OSError):
+            print("SIDECAR_OS_ERROR errno=" + str(error.errno), flush=True)
         print(
             "SIDECAR_FAILED: "
             + (str(error) if isinstance(error, RuntimeError) else type(error).__name__),

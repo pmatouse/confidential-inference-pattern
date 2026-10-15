@@ -28,3 +28,9 @@ No application container or attested guest key-delivery implementation is suppli
 by this component. A Bound PVC and unsigned publisher descriptor do not authorize
 decryption or establish model freshness. Never package a publisher key, plaintext
 filesystem or key-bearing initramfs into the registry layer.
+
+The standalone `Containerfile` builds a static controller/importer from this source
+with a digest-pinned Go 1.25.5 builder and verified `go.sum` dependencies. Its final
+image contains only the binary and public CA roots. Use this build in a new site's
+registry; the old lab namespace is not an installation prerequisite. The same
+image runs both roles, selected by `--mode` and their separate service accounts.

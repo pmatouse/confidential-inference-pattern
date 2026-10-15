@@ -16,14 +16,29 @@ def create(private, public, hostname, identity):
         raise ValueError('invalid authority identity')
     os.umask(0o077)
     private.mkdir(mode=0o700);public.mkdir(mode=0o755)
-    keys={'tls':ec.generate_private_key(ec.SECP256R1()),'receipt':ed25519.Ed25519PrivateKey.generate(),'approval':ed25519.Ed25519PrivateKey.generate()}
+    keys={'ca':ec.generate_private_key(ec.SECP256R1()),'tls':ec.generate_private_key(ec.SECP256R1()),'receipt':ed25519.Ed25519PrivateKey.generate(),'approval':ed25519.Ed25519PrivateKey.generate()}
     for name,key in keys.items():
         with (private/(name+'.key')).open('xb') as f:f.write(key.private_bytes(ser.Encoding.PEM,ser.PrivateFormat.PKCS8,ser.NoEncryption()))
     name=x509.Name([x509.NameAttribute(NameOID.COMMON_NAME,hostname)])
     now=dt.datetime.now(dt.timezone.utc)
-    cert=(x509.CertificateBuilder().subject_name(name).issuer_name(name).public_key(keys['tls'].public_key()).serial_number(x509.random_serial_number()).not_valid_before(now-dt.timedelta(minutes=5)).not_valid_after(now+dt.timedelta(days=30)).add_extension(x509.SubjectAlternativeName([x509.DNSName(hostname)]),critical=False).add_extension(x509.BasicConstraints(ca=True,path_length=0),critical=True).add_extension(x509.ExtendedKeyUsage([ExtendedKeyUsageOID.SERVER_AUTH]),critical=False).sign(keys['tls'],hashes.SHA256()))
+    ca_name=x509.Name([x509.NameAttribute(NameOID.COMMON_NAME,identity+' authority CA')])
+    def builder(subject,issuer,key):
+        return (x509.CertificateBuilder().subject_name(subject).issuer_name(issuer)
+                .public_key(key.public_key()).serial_number(x509.random_serial_number())
+                .not_valid_before(now-dt.timedelta(minutes=5)).not_valid_after(now+dt.timedelta(days=30)))
+    ca=(builder(ca_name,ca_name,keys['ca'])
+        .add_extension(x509.BasicConstraints(ca=True,path_length=0),critical=True)
+        .add_extension(x509.KeyUsage(False,False,False,False,False,True,True,None,None),critical=True)
+        .sign(keys['ca'],hashes.SHA256()))
+    cert=(builder(name,ca_name,keys['tls'])
+          .add_extension(x509.SubjectAlternativeName([x509.DNSName(hostname)]),critical=False)
+          .add_extension(x509.BasicConstraints(ca=False,path_length=None),critical=True)
+          .add_extension(x509.KeyUsage(True,False,False,False,False,False,False,None,None),critical=True)
+          .add_extension(x509.ExtendedKeyUsage([ExtendedKeyUsageOID.SERVER_AUTH]),critical=False)
+          .sign(keys['ca'],hashes.SHA256()))
+    (public/'ca.pem').write_bytes(ca.public_bytes(ser.Encoding.PEM))
     (public/'tls.pem').write_bytes(cert.public_bytes(ser.Encoding.PEM))
-    pins={'trustee_rcar':True,'audience':'https://'+hostname+':8443/v1','certificate_der':list(cert.public_bytes(ser.Encoding.DER)),'address':None,'receipt_public_key':list(keys['receipt'].public_key().public_bytes_raw()),'receipt_issuer':identity,'receipt_key_id':'receipt-v1'}
+    pins={'trustee_rcar':True,'audience':'https://'+hostname+':8443/v1','certificate_der':list(ca.public_bytes(ser.Encoding.DER)),'address':None,'receipt_public_key':list(keys['receipt'].public_key().public_bytes_raw()),'receipt_issuer':identity,'receipt_key_id':'receipt-v1'}
     (public/'authority.json').write_text(json.dumps(pins,indent=2)+'\n')
     (public/'approval-keys.json').write_text(json.dumps({identity:keys['approval'].public_key().public_bytes_raw().hex()},indent=2)+'\n')
     return pins
