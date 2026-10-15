@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Administrator bootstrap for the trusted release controller; stage execution is in Jobs."""
 import argparse
-import copy
+import fcntl
 import io
 import json
 import os
@@ -11,17 +11,15 @@ import sys
 import tarfile
 import yaml
 import addon
-from quickstart.core import ROOT, Run, require, write, sha
-from quickstart.build import archive, image_build, send
-sys.path.insert(0,str(ROOT/'components/inference-release-controller'))
-from controller import digest
+from quickstart.core import ROOT, Run, require, write
+from quickstart.build import archive, image_build
 
 
 def image(r):
     r.require_stage('install')
     roots=['scripts','charts','profiles','prerequisites','values-global.yaml','values.schema.json','requirements-quickstart.txt','requirements.txt',
         'components/inference-release','components/confidential-volume-controller','components/confidential-volume-contract',
-        'components/confidential-storage-authority','components/confidential-storage-sidecar']
+        'components/confidential-storage-authority','components/confidential-storage-sidecar','components/confidential-storage-guest/profiles']
     paths=subprocess.check_output(['git','-C',str(ROOT),'ls-files','-z','--',*roots],text=True).split('\0')
     extras=[p for folder in ('components/inference-release-controller','charts/inference-release-controller') for p in (ROOT/folder).rglob('*') if p.is_file() and '__pycache__' not in p.parts]
     entries={'source/'+name:ROOT/name for name in paths if name and (ROOT/name).is_file() and not (ROOT/name).is_symlink()}
@@ -110,14 +108,44 @@ def install(r):
     r.save('inference-release.json',intent)
 
 
+def upgrade(r):
+    """Explicit operator image maintenance; never seed, delete history or retry a Job."""
+    require((r.out/'controller-bootstrap.json').is_file(),'bootstrap receipt missing')
+    cfg=configuration(r);deployment=r.get('deployment','inference-release-controller',r.trusted)
+    require(deployment and deployment['metadata'].get('labels',{}).get(addon.OWNER)==r.installation,'foreign controller')
+    current_cm=next(v['configMap']['name'] for v in deployment['spec']['template']['spec']['volumes'] if v['name']=='configuration')
+    current=json.loads(r.get('configmap',current_cm,r.trusted)['data']['policy.json'])
+    require({k:v for k,v in current.items() if k!='image'}=={k:v for k,v in cfg['policy'].items() if k!='image'},'image maintenance cannot change site or grants')
+    r.oc('patch','deployment/inference-release-controller','-n',r.trusted,'--type=merge','--field-manager=confidential-inference-quickstart','-p',json.dumps({'spec':{'replicas':0}}))
+    r.wait('controller stopped',lambda:not [p for p in r.get('pods',ns=r.trusted)['items'] if p['metadata'].get('labels',{}).get('app')=='inference-release-controller'],timeout=120)
+    jobs=[j for j in r.get('jobs',ns=r.trusted)['items'] if j['metadata'].get('labels',{}).get('inference.confidentialcontainers.org/release-uid')]
+    require(not any(j.get('status',{}).get('active',0) for j in jobs),'stage still active; controller remains paused; retry maintenance after it finishes')
+    uids={j['metadata']['uid'] for j in jobs}
+    require(not any(p.get('status',{}).get('phase') not in ('Succeeded','Failed') and any(o['uid'] in uids for o in p['metadata'].get('ownerReferences',[])) for p in r.get('pods',ns=r.trusted)['items']),'stage Pod still active; controller remains paused')
+    objects=addon.helm(ROOT/'charts/inference-release-controller',cfg,r.trusted,'inference-release-controller')
+    # Only the content-addressed grant and controller Deployment change in maintenance.
+    for obj in objects:
+        if obj['kind']=='Deployment' or (obj['kind']=='ConfigMap' and 'policy.json' in obj.get('data',{})):
+            if obj['kind']=='Deployment':obj['spec']['replicas']=0
+            obj.setdefault('metadata',{}).setdefault('namespace',r.trusted);r.apply(obj)
+    r.oc('patch','deployment/inference-release-controller','-n',r.trusted,'--type=merge','--field-manager=confidential-inference-quickstart','-p',json.dumps({'spec':{'replicas':1}}))
+    r.oc('rollout','status','deployment/inference-release-controller','-n',r.trusted,'--timeout=180s',timeout=210)
+    r.save('controller-upgrade-'+cfg['policy']['image'].split(':')[-1][:12]+'.json',{'previousImage':current['image'],'image':cfg['policy']['image'],'siteSha256':current['siteSha256'],'stateClaim':current['stateClaim']})
+    print('ControllerImageUpdated; retained state unchanged; failed stages require explicit retry')
+
+
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('action',choices=['image','install','start','status'])
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('action',choices=['image','install','upgrade','start','status'])
     parser.add_argument('--values',type=Path,required=True);args=parser.parse_args()
-    values=addon.load(args.values);r=Run(args.values,values['demo']['name'],exclusive=args.action in ('image','install'))
+    values=addon.load(args.values);r=Run(args.values,values['demo']['name'],exclusive=args.action=='install')
+    if args.action in ('image','upgrade'):
+        maintenance=(r.state/'release-maintenance.lock').open('a')
+        fcntl.flock(maintenance,fcntl.LOCK_EX|fcntl.LOCK_NB)
     if args.action=='image':image(r)
+    elif args.action=='upgrade':upgrade(r)
     elif args.action=='install':install(r)
     elif args.action=='start':
-        require(r.get('secret','inference-release-git',r.trusted) is not None,'create external inference-release-git Secret with token key in trusted namespace before starting the release')
+        require(r.get('secret','inference-release-git',r.trusted) is not None,'create external inference-release-git Secret with SSH deploy key and known_hosts, or scoped token, before starting the release')
         require((r.out/'controller-bootstrap.json').is_file(),'bootstrap receipt missing')
         r.apply(r.read('inference-release.json'))
     else:

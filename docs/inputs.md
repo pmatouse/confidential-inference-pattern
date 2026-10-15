@@ -23,6 +23,7 @@ remains available for already-prepared artifacts. Full lifecycle GitOps remains 
 | Backend enrollment | Vault namespace/pod, Kubernetes auth mount/role/ServiceAccount, trusted namespace and ESO projection names: `quickstart.vault.*` (or direct `key_enrollment.py` arguments). Current adapter expects `secret/data/hub/modelKeys`; this is a site-specific integration. |
 | Release trust | Authority hostname/state claim and private Secret reference: `charts/storage-authority`. Approval signer stays in the trusted domain; its **public** key goes in `approvalKeys`. |
 | Exposure | `chat.enabled`, `serviceType`, `port`; explicit `nodePort` for VPN exposure. Default ClusterIP uses local port-forward. No automatic DNS, public ingress or TLS. |
+| Controller Git credential | External `inference-release-git` Secret in the trusted namespace: repository-only SSH deploy key + pinned `known_hosts` (recommended), or repository-scoped HTTPS token. Used only by enrollment to update the existing Trustee owner repository; see [setup](demo/controller.md#repository-scoped-git-credential). |
 | GitOps | Current opt-in: `gitops.enabled`, repository and full commit; separately provision repository-scoped access. Bootstrap snapshots resolved values into the Application; `gitops.valuesFile` is not currently watched. Full lifecycle GitOps is the target default. |
 
 Tooling: Python 3.12+, pinned `requirements.txt`, Helm 3 and `oc`.

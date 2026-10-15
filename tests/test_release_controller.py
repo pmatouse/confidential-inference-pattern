@@ -25,6 +25,9 @@ class Fake:
         obj=copy.deepcopy(obj)
         if path.endswith('/status'):
             parent=path[:-7];self.items[parent]['status']=obj['status'];return obj
+        if '/leases' in path:
+            import datetime
+            datetime.datetime.strptime(obj['spec']['renewTime'],'%Y-%m-%dT%H:%M:%S.%fZ')
         if method=='POST':
             path+='/'+obj['metadata']['name']
             if path in self.items:raise m.Conflict()
@@ -53,8 +56,8 @@ class ReleaseControllerTests(unittest.TestCase):
         cm={'immutable':True,'data':{'receipt.json':json.dumps(receipt)}}
         if stage=='report':
             cm['data']['e2e-report.json']=json.dumps({'reopen':{'pod':'predictor','podUid':'pod-uid','pvcUids':{'model':'m','data':'d'}}})
-            self.api.items[m.core('work','pods','predictor')]={'metadata':{'uid':'pod-uid'},'status':{'containerStatuses':[{'ready':True}]}}
-            for name,uid in [('model','m'),('data','d')]:self.api.items[m.core('work','persistentvolumeclaims',name)]={'metadata':{'uid':uid}}
+            self.api.items[m.core('work','pods','predictor')]={'metadata':{'uid':'pod-uid'},'spec':{'volumes':[{'name':alias,'persistentVolumeClaim':{'claimName':alias+'-pvc'}} for alias in ('model','data')]},'status':{'containerStatuses':[{'ready':True}]}}
+            for name,uid in [('model','m'),('data','d')]:self.api.items[m.core('work','persistentvolumeclaims',name+'-pvc')]={'metadata':{'uid':uid}}
         self.api.items[m.core('trusted','configmaps',m.job_name(release,stage,retry)+'-receipt')]=cm
     def test_worker_can_load_shared_renderers_without_controller_name_collision(self):
         code="""import sys
@@ -109,6 +112,13 @@ for name in ('profile','render','enroll'):
         self.api.items[m.core('work','pods','predictor')]['metadata']['uid']='replacement'
         self.assertEqual(self.reconcile()['reason'],'VerifiedPredictorReplaced')
         self.assertEqual(count,len(self.api.created))
+    def test_readiness_resolves_volume_aliases_and_rejects_replaced_claim(self):
+        self.reconcile()
+        for stage in m.STAGES:self.finish(stage);status=self.reconcile()
+        self.assertEqual(status['phase'],'Ready')
+        self.api.items[m.core('work','persistentvolumeclaims','model-pvc')]['metadata']['uid']='new-claim'
+        self.assertEqual(self.reconcile()['reason'],'VerifiedClaimReplaced')
+
     def test_success_without_bound_receipt_never_advances(self):
         self.reconcile();self.finish('model');name=m.job_name(self.release,'model','initial')
         self.api.items[m.core('trusted','configmaps',name+'-receipt')]['data']['receipt.json']='{}'
@@ -142,7 +152,7 @@ for name in ('profile','render','enroll'):
         with self.assertRaises(ValueError):m.validate(r,site,self.policy)
         with self.assertRaises(ValueError):m.validate(self.release,site,dict(self.policy,image='mutable:latest'))
     def test_job_has_no_inline_credentials_or_host_privileges(self):
-        j=m.job(self.release,self.policy,'model','initial');p=j['spec']['template']['spec'];c=p['containers'][0]
+        j=m.job(self.release,self.policy,'enroll','initial');p=j['spec']['template']['spec'];c=p['containers'][0]
         self.assertEqual(j['spec']['template']['metadata']['annotations']['openshift.io/required-scc'],'restricted-v2')
         self.assertEqual(j['spec']['backoffLimit'],0)
         self.assertFalse(c['securityContext']['allowPrivilegeEscalation'])
@@ -150,6 +160,9 @@ for name in ('profile','render','enroll'):
         self.assertFalse(any('hostPath' in v for v in p['volumes']))
         self.assertEqual([v['secret']['secretName'] for v in p['volumes'] if 'secret' in v],['git'])
         self.assertNotIn('GITHUB_TOKEN',json.dumps(j))
+        for stage in set(m.STAGES)-{'enroll'}:
+            pod=m.job(self.release,self.policy,stage,'initial')['spec']['template']['spec']
+            self.assertFalse(any('secret' in v for v in pod['volumes']))
     def test_job_completed_but_controller_status_lost_recovers(self):
         self.reconcile();self.finish('model');self.api.items[self.rpath].pop('status',None)
         self.assertEqual(self.reconcile()['currentStage'],'volumes')

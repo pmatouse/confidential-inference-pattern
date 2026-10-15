@@ -13,10 +13,24 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'scripts'))
 from quickstart.core import write, sha
 from quickstart.build import archive
-from quickstart.verify import validate_authority, compare_authority
+from quickstart.verify import validate_authority, compare_authority, gracefully_terminated
 
 
 class QuickstartTests(unittest.TestCase):
+    def test_stopped_vm_does_not_depend_on_api_garbage_collection(self):
+        pod={'metadata':{'uid':'old','deletionTimestamp':'time'},'spec':{'containers':[{'name':'app'},{'name':'sidecar'}]},
+             'status':{'phase':'Succeeded','containerStatuses':[{'name':name,'state':{'terminated':{'exitCode':0}}} for name in ('app','sidecar')]}}
+        self.assertTrue(gracefully_terminated(None,'old'))
+        self.assertTrue(gracefully_terminated(pod,'old'))
+        self.assertFalse(gracefully_terminated(pod,'different'))
+        for mutation in ('live','failed','missing','not-deleting'):
+            changed=copy.deepcopy(pod)
+            if mutation=='live':changed['status']['containerStatuses'][1]['state']={'running':{}}
+            if mutation=='failed':changed['status']['containerStatuses'][1]['state']['terminated']['exitCode']=1
+            if mutation=='missing':changed['status']['containerStatuses'].pop()
+            if mutation=='not-deleting':changed['metadata'].pop('deletionTimestamp')
+            self.assertFalse(gracefully_terminated(changed,'old'),mutation)
+
     def test_controller_owned_state_blocks_manual_mutations(self):
         from unittest.mock import patch
         from quickstart.core import Run

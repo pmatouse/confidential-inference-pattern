@@ -114,10 +114,19 @@ def test_first(r):
     return {'state':'FirstBootPassed','podUID':result['podUid'],'pvcUIDs':result['pvcUids'],'cpuGpuAttestation':True,'chatStatus':result['chatStatus']}
 
 
+def gracefully_terminated(pod,uid):
+    """API garbage collection may lag a fully stopped VM; never accept a live Pod."""
+    if pod is None:return True
+    if pod['metadata']['uid']!=uid or not pod['metadata'].get('deletionTimestamp') or pod.get('status',{}).get('phase')!='Succeeded':return False
+    expected={c['name'] for c in pod['spec']['containers']+pod['spec'].get('initContainers',[])}
+    statuses=pod['status'].get('containerStatuses',[])+pod['status'].get('initContainerStatuses',[])
+    return bool(expected) and {c['name'] for c in statuses}==expected and all(c.get('state',{}).get('terminated',{}).get('exitCode')==0 for c in statuses)
+
+
 def test_reopen(r):
     r.require_stage('test-first');baseline=r.read('application-first.json')
     old=r.get('pod',baseline['pod'],r.ns)
-    if old:
+    if old and not gracefully_terminated(old,baseline['podUid']):
         require(old['metadata']['uid']==baseline['podUid'],'refusing replacement Pod with reused name')
         # Persist the intent before deleting. A retry waits for the replacement; it never
         # deletes another VM or clears a stuck authority owner.
@@ -128,12 +137,13 @@ def test_reopen(r):
             try:
                 time.sleep(2)
                 r.oc('delete','pod',baseline['pod'],'-n',r.ns,'--wait=false')
-                r.wait('old predictor terminated',lambda:r.get('pod',baseline['pod'],r.ns) is None,timeout=600,interval=5)
+                r.wait('old predictor terminated',lambda:gracefully_terminated(r.get('pod',baseline['pod'],r.ns),baseline['podUid']),timeout=600,interval=5)
             finally:
                 if stream.poll() is None:stream.terminate()
                 try:stream.wait(timeout=10)
                 except subprocess.TimeoutExpired:stream.kill();stream.wait()
     require((r.state/'reopen-intent.json').exists(),'no recorded controlled replacement; preserve state and investigate')
+    require(json.loads((r.state/'reopen-intent.json').read_text())=={'pod':baseline['pod'],'uid':baseline['podUid']},'replacement intent identity differs')
     pod=r.wait('fresh confidential predictor',lambda:predictor(r),timeout=1800,interval=10)
     require(pod['metadata']['uid']!=baseline['podUid'],'replacement UID must differ')
     result=application_test(r,'reopen');snapshot=authority_snapshot(r)

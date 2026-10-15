@@ -16,11 +16,18 @@ not every possible clean-cluster dependency installation path.
 | Isolation | Unprivileged vLLM; raw devices/private CDH only in guest helper; administrator exec denied |
 | Reproducibility | `qs-*`, `quickstart-all` and resume; generated launch/policy/InitData, retained receipts, fresh-VM E2E |
 
+The independent [controller E2E receipt](../tests/evidence/2026-10-15/controller-e2e.json)
+qualifies the same model/storage/inference path through eight sequential release
+Jobs. The final status is `Ready / E2EPassed`; controller restart preserved the
+verified VM and claims. Initial qualification needed explicit fixes/retries, as
+recorded in the [controller runbook](demo/controller.md).
+
 ## Remaining integration work
 
 - **Release automation:** the initial [InferenceRelease controller](demo/controller.md)
   now integrates publication, binding, measurement, enrollment, signing and acceptance
-  as sequential Jobs. Independent controller-driven hardware qualification is pending.
+  as sequential Jobs and passed hardware E2E on the qualified profile. One immutable
+  fresh demo per installation is supported; general lifecycle reconciliation is not.
 - **Full lifecycle GitOps:** administrator bootstrap, mutable retained-volume upgrades,
   renewal and retirement are not reconciled by the initial immutable release API.
 - **Portability:** publish portable images; qualify additional hardware/runtime/CSI

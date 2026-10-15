@@ -11,7 +11,10 @@ Trustee releases keys after CPU/GPU attestation and exact workload bindings.
 
 **Status:** the [manual Make quickstart](docs/demo/quickstart.md) passed fresh-add-on
 and fresh-VM E2E on AMD SEV-SNP + RTX PRO 6000 Blackwell Server Edition.
-[Evidence](tests/evidence/2026-10-15/manual-quickstart-e2e.json). Full lifecycle GitOps,
+[Manual evidence](tests/evidence/2026-10-15/manual-quickstart-e2e.json). The
+[controller path](docs/demo/controller.md) also reached `Ready / E2EPassed` through
+eight stage Jobs, with fresh-VM persistence and restart recovery
+([controller evidence](tests/evidence/2026-10-15/controller-e2e.json)). Full lifecycle GitOps,
 other hardware qualification and production credential/authority lifecycle remain open.
 
 | Read | Contents |

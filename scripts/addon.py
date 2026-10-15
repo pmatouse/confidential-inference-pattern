@@ -231,9 +231,17 @@ def apply_objects(objects,v,api):
                             break
                         time.sleep(1)
                     else:raise Invalid('admission not checked; no SCC permission granted')
-    # Dry-run all remaining resources before granting permissions or starting controllers.
+    # A scoped executor cannot dry-run a binding whose new referenced Role does
+    # not exist yet. Validate non-bindings, install Role definitions, then validate
+    # bindings before creating claims/workloads. Never bypass RBAC escalation checks.
+    bindings={'RoleBinding','ClusterRoleBinding'}
     for i,obj in enumerate(todo):
-        if i not in done:api.apply(obj,dry=True)
+        if i not in done and obj['kind'] not in bindings:api.apply(obj,dry=True)
+    for i,obj in enumerate(todo):
+        if i not in done and obj['kind'] in ('Role','ClusterRole'):
+            api.apply(obj);done.add(i)
+    for i,obj in enumerate(todo):
+        if i not in done and obj['kind'] in bindings:api.apply(obj,dry=True)
     for i,obj in enumerate(todo):
         if i not in done:api.apply(obj)
 

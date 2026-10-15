@@ -9,21 +9,36 @@ approval and acceptance. Kata, vLLM and shared CoCo services stay stock.
 builds/installs the foundation and seeds verified stock artifacts and trust state.
 Applying one release intent then runs the eight remaining stages without Make
 or a local process. This is not yet automatic renewal, arbitrary retained-volume
-upgrades, or full foundation lifecycle GitOps. Hardware qualification is pending
-until the controller's own E2E evidence is recorded.
+upgrades, or full foundation lifecycle GitOps. The controller-driven path passed
+hardware E2E on the qualified AMD SEV-SNP/NVIDIA profile.
 
 ## Recorded validation
 
-[Bootstrap evidence](../../tests/evidence/2026-10-15/controller-bootstrap.json),
-2026-10-15: fresh isolated foundation and executor images built; controller Running
-under `restricted-v2`; retained orchestration PVC seeded; CRD and release intent
-accepted by API server dry-run; the other Qwen predictor retained its original UID.
-131 Python tests cover contracts, ownership, failed Jobs, identity checks and
-lost-acknowledgement recovery. Linux image build checks `oc`, Helm and shared imports.
+[Controller E2E evidence](../../tests/evidence/2026-10-15/controller-e2e.json),
+2026-10-15: `qwen-controller-001` reached **Ready / E2EPassed**, with eight completed
+stage receipts. The run started with new add-on namespaces, encrypted model,
+keys, PVCs and authority history on an existing OpenShift + CoCo installation.
+Compatible shared dependencies were reused; the cluster was not reinstalled.
 
-The release has **not started**: the external Git credential Secret is pending.
-No controller-driven encrypted-model/inference/persistence E2E result is claimed.
-The manual quickstart's existing qualification does not substitute for this test.
+| Check | Observed result |
+| --- | --- |
+| Serving | Stock NVIDIA vLLM / Qwen3-0.6B through KServe; chat HTTP 200 and `7 plus 5 equals 12.` on both VMs |
+| RO model | OCI-populated encrypted Block PVC; producer file hashes verified; read-only `/model` |
+| RW data | Blank PVC initialized in the guest; canary survived a new VM/boot; same claims and initialization history |
+| Attestation | Standard Trustee CPU/GPU appraisal; both authority EAR markers affirming |
+| Isolation | CUDA on RTX PRO 6000 Blackwell Server Edition; unprivileged application; cluster-administrator exec blocked by guest policy |
+| Recovery | Explicit retry resumed the existing replacement VM; controller restart retained all stage Jobs/receipts and the tested predictor |
+| Git access | Repository-only SSH deploy key; strict host verification and in-cluster fetch/push dry-run passed; broad token removed |
+| Other workloads | Separate `confidential-inference-demo` predictor UID unchanged |
+
+The initial qualification exposed integration bugs and required fixes plus explicit
+retries. Completed stages, keys and authority history were retained. Corrections
+covered Lease timestamps, scoped RBAC apply ordering, executor profile packaging,
+named Trustee Deployment reads, delayed Pod garbage collection and PVC alias
+resolution. The final executor passed persistence/report and restart checks;
+a second completely fresh release with that final image has not been run.
+139 Python tests pass. [Bootstrap evidence](../../tests/evidence/2026-10-15/controller-bootstrap.json)
+is the earlier intermediate snapshot, not the final outcome.
 
 ## Bootstrap once
 
@@ -35,9 +50,10 @@ updates. The operator performs these steps once:
 export KUBECONFIG=/private/path/cluster.kubeconfig
 export VALUES=overrides/sites/my-controller.yaml
 make qs-tools qs-dependencies qs-preflight qs-bootstrap qs-build qs-push qs-install VALUES="$VALUES"
-# Existing, repository-scoped credential; never put its value into YAML or arguments.
+# Register a repository-only deploy key using the commands below, then:
 oc -n <trusted-namespace> create secret generic inference-release-git \
-  --from-file=token=/private/path/git-token
+  --from-file=ssh-privatekey=/private/path/deploy-key \
+  --from-file=known_hosts=/private/path/known_hosts
 make release-controller-image VALUES="$VALUES"
 make release-controller-install VALUES="$VALUES"
 # The credential Secret is required before start; install can seed state without it.
@@ -58,6 +74,42 @@ The executor image contains public source and pinned Linux clients, not those
 secrets. The local run is marked controller-owned after transfer: ordinary
 mutating Make stages refuse it. A serving manual release cannot be adopted through
 this initial bootstrap path.
+
+## Repository-scoped Git credential
+
+The enrollment Job writes exact attestation bindings to the **existing Trustee
+owner repository**, then asks Argo to refresh it. This is not the add-on source
+repository. Keys and credentials never enter either repository.
+
+For GitHub, create a dedicated write deploy key. GitHub restricts it to that one
+repository; it can write any permitted branch in that repository, so branch
+protection still matters. Register the public key using a repository administrator
+session; only the new private key goes into the cluster Secret above.
+
+```sh
+export TRUSTEE_REPO=<owner/repository>
+umask 077
+mkdir -p /private/path
+ssh-keygen -q -t ed25519 -N '' -C inference-release -f /private/path/deploy-key
+jq -n --rawfile key /private/path/deploy-key.pub \
+  '{title:"inference-release",key:$key,read_only:false}' |
+  gh api --method POST "repos/$TRUSTEE_REPO/keys" --input - \
+    --jq '{id,title,read_only}'
+# Retrieve host keys over authenticated HTTPS; SSH fails closed on a mismatch.
+gh api meta --jq '.ssh_keys[] | "github.com " + .' > /private/path/known_hosts
+```
+
+Expected: a deploy-key ID and `read_only: false`. Record the ID for revocation.
+The Secret contains `ssh-privatekey` and `known_hosts`, **no token**. For rotation,
+register a new key, replace those Secret fields, verify access, then revoke the
+old deploy-key ID. Do not run Git maintenance while an enrollment Job is active.
+
+Only `enroll` mounts the credential. The worker copies the key into its ephemeral
+`/tmp` with mode `0600` (OpenShift Secret mounts may be group-readable), disables
+ambient credential helpers and requires pinned SSH host verification. The private
+copy disappears with the worker Pod. Trusted-namespace administrators can read
+the Secret. Repository-scoped HTTPS tokens remain an alternative (`token` field);
+supply exactly one credential type. The add-on does not mint or renew tokens.
 
 ## API and execution
 
@@ -115,6 +167,24 @@ sequenceDiagram
 | `test-reopen` | Replace only this test predictor once; repeat inference/persistence checks | `FreshVMPersistencePassed` |
 | `report` | Verify retained claims/history and current replacement | `E2EPassed` |
 
+## Observe and use the result
+
+```sh
+oc -n <trusted-namespace> get inferencerelease <run>
+# Inspect current phase/reason and the eight completed receipt references:
+oc -n <trusted-namespace> get inferencerelease <run> -o jsonpath='{.status}'
+oc -n <workload-namespace> port-forward svc/<run>-chat 8766:8080 --address=127.0.0.1
+# Open http://127.0.0.1:8766/ and send a prompt.
+```
+
+Use the configured chat Service port if it differs from `8080`. For the recorded
+run, namespaces are `ci-controller-001-trusted` / `ci-controller-001`, and the
+service is `qwen-controller-001-chat`. The final report is in the immutable
+ConfigMap named by the `report` stage's `receipt` field (`data.e2e-report.json`).
+`qs-chat` expects local manual-run receipts; use the direct Service port-forward
+for a controller-owned run. This endpoint remains localhost HTTP; it does not
+provide TLS inside the confidential VM.
+
 ## Ownership and retries
 
 The controller uses a per-release Kubernetes Lease. Job names are deterministic;
@@ -136,12 +206,36 @@ oc -n <trusted-namespace> annotate inferencerelease <run> \
   inference.confidentialcontainers.org/retry=retry-1 --overwrite
 ```
 
-The reconciler waits for the previous attempt's active Pods to finish. It never
+The reconciler waits for the previous attempt's active Pods to finish.
+The fresh-VM test accepts deletion of the old Pod or a terminating `Succeeded`
+Pod with the exact old UID and every container exited successfully; delayed API
+garbage collection alone does not block it. A different VM/boot, persistent
+canary, unchanged initialization history and closed old authority owner are
+still mandatory. It never
 clears authority ownership or discards disk/initialization history. Keep failure
 logs private; the API exposes bounded reason codes, not raw subprocess errors.
+Worker exceptions are retained at `/state/private/<run>/worker-<job>.error.log`,
+alongside private stage logs; inspect them through an authorized operator session.
 A controller restart/resync does not replace the VM again. Ready checks continue
 to compare the tested Pod/PVC identities and Pod readiness; replacement loses
 Ready and needs a deliberate validation workflow.
+
+## Executor image maintenance
+
+For a reviewed fix, rebuild and explicitly upgrade the orchestrator:
+
+```sh
+make release-controller-image VALUES="$VALUES"
+make release-controller-upgrade VALUES="$VALUES"
+```
+
+Maintenance verifies the existing grant; only the pinned executor image may change.
+It stops this controller and refuses to proceed while any stage worker remains
+active. If refused, it stays paused: let the stage finish, inspect its result, then
+repeat the upgrade. It installs a new immutable grant and restarts the controller,
+retaining the same intent, PVCs, keys, receipts and authority history. Failed stages
+still require the explicit retry annotation above. This does not upgrade a running
+confidential workload, rotate credentials or re-seed retained state.
 
 ## Privilege and trusted-service boundary
 

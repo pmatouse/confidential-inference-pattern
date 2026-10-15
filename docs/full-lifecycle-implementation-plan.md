@@ -7,7 +7,8 @@ persistent encrypted RW `/data`. No manual per-release key enrollment, package
 signing, manifest copying or acceptance commands.
 
 **Status:** the manual path is qualified. The initial `InferenceRelease` controller
-and stage-Job runner are implemented; independent hardware E2E is in progress.
+and stage-Job runner passed independent hardware E2E, including fresh-VM
+persistence and controller restart. See the [recorded evidence](../tests/evidence/2026-10-15/controller-e2e.json).
 The [controller runbook](demo/controller.md) is the implemented API contract. Full
 foundation GitOps and lifecycle hardening below remain target work.
 
@@ -28,7 +29,8 @@ The [manual quickstart specification](demo/quickstart-implementation-plan.md)
 defines all Make targets, expected outputs, follow-ups and image-build requirements.
 The agreed starting platform is OpenShift + CoCo already installed.
 The manual `qs-*` targets now exist; see the [executable quickstart](demo/quickstart.md).
-The initial release-controller path now exists and must pass its independent E2E test.
+The initial release-controller path passed its independent E2E qualification;
+full foundation and multi-release lifecycle steps below remain open.
 
 ## Scope and decisions
 

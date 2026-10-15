@@ -1,5 +1,6 @@
 """Trusted sequential release orchestration; no key bytes in API status or logs."""
 import copy
+import datetime
 import hashlib
 import json
 import os
@@ -67,12 +68,10 @@ def job(release,policy,stage,retry):
         'STAGE':stage,'JOB_NAME':name,'QUICKSTART_STATE_ROOT':'/state/private',
         'QUICKSTART_OUTPUT_ROOT':'/state/output','QUICKSTART_CACHE':'/state/cache',
         'QUICKSTART_EXECUTOR':'controller','PYTHONDONTWRITEBYTECODE':'1','HOME':'/tmp',
-        'GIT_ASKPASS':'/opt/pattern/components/inference-release-controller/git-askpass.py','GIT_TERMINAL_PROMPT':'0',
-        'GIT_CONFIG_COUNT':'2','GIT_CONFIG_KEY_0':'url.https://github.com/.insteadOf',
-        'GIT_CONFIG_VALUE_0':'git@github.com:','GIT_CONFIG_KEY_1':'credential.helper','GIT_CONFIG_VALUE_1':'',
+        'GIT_TERMINAL_PROMPT':'0',
         'GIT_AUTHOR_NAME':'Confidential inference release','GIT_AUTHOR_EMAIL':'inference-release@localhost',
         'GIT_COMMITTER_NAME':'Confidential inference release','GIT_COMMITTER_EMAIL':'inference-release@localhost'}.items()]
-    return {'apiVersion':'batch/v1','kind':'Job','metadata':{'name':name,'namespace':ns,
+    result={'apiVersion':'batch/v1','kind':'Job','metadata':{'name':name,'namespace':ns,
         'labels':{'inference.confidentialcontainers.org/release-uid':release['metadata']['uid']}},
         'spec':{'backoffLimit':0,'activeDeadlineSeconds':14400,'template':{'metadata':{'annotations':{'openshift.io/required-scc':'restricted-v2'},'labels':{'coco.io/skip-initdata':'true'}},'spec':{
         'serviceAccountName':policy['stageServiceAccount'],'restartPolicy':'Never',
@@ -86,6 +85,11 @@ def job(release,policy,stage,retry):
             {'name':'site','configMap':{'name':policy['siteConfigMap']}},
             {'name':'git','secret':{'secretName':policy['gitCredentialsSecret'],'defaultMode':288}},
             {'name':'tmp','emptyDir':{}}]}}}}
+    if stage!='enroll':
+        pod=result['spec']['template']['spec']
+        pod['volumes']=[v for v in pod['volumes'] if v['name']!='git']
+        pod['containers'][0]['volumeMounts']=[v for v in pod['containers'][0]['volumeMounts'] if v['name']!='git']
+    return result
 
 def valid_receipt(cm,release,stage,site_sha,jobobj):
     require(cm and cm.get('immutable') is True,'MissingStageReceipt')
@@ -104,11 +108,10 @@ class Reconciler:
         old=self.api.call('GET',path+'/'+name);now=time.time()
         if old:
             spec=old['spec'];stamp=spec.get('renewTime','1970-01-01T00:00:00Z')
-            import datetime
             renewed=datetime.datetime.fromisoformat(stamp.replace('Z','+00:00')).timestamp()
             if spec['holderIdentity']!=self.identity and renewed+spec['leaseDurationSeconds']>now:return False
         obj={'apiVersion':'coordination.k8s.io/v1','kind':'Lease','metadata':{'name':name,'namespace':ns},
-            'spec':{'holderIdentity':self.identity,'leaseDurationSeconds':30,'renewTime':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime(now))}}
+            'spec':{'holderIdentity':self.identity,'leaseDurationSeconds':30,'renewTime':datetime.datetime.fromtimestamp(now,datetime.timezone.utc).isoformat(timespec='microseconds').replace('+00:00','Z')}}
         if old:obj['metadata']['resourceVersion']=old['metadata']['resourceVersion']
         try:self.api.call('PUT' if old else 'POST',path+'/'+name if old else path,obj)
         except Conflict:return False
@@ -167,8 +170,11 @@ class Reconciler:
             require(pod and pod['metadata']['uid']==evidence['podUid'],'VerifiedPredictorReplaced')
             ready=pod.get('status',{}).get('containerStatuses',[])
             require(not pod['metadata'].get('deletionTimestamp') and ready and all(c['ready'] for c in ready),'PredictorNotReady')
+            # Verifier receipts key PVC UIDs by Pod volume alias, not claim name.
+            claims={v['name']:v['persistentVolumeClaim']['claimName'] for v in pod['spec']['volumes'] if 'persistentVolumeClaim' in v}
+            require(claims and set(claims)==set(evidence['pvcUids']),'VerifiedClaimMappingChanged')
             for name,uid in evidence['pvcUids'].items():
-                claim=self.api.call('GET',core(self.policy['workloadNamespace'],'persistentvolumeclaims',name))
+                claim=self.api.call('GET',core(self.policy['workloadNamespace'],'persistentvolumeclaims',claims[name]))
                 require(claim and claim['metadata']['uid']==uid,'VerifiedClaimReplaced')
             self.status(release,'Ready','E2EPassed',completed)
         except (ValueError,KeyError,TypeError,AttributeError) as e:

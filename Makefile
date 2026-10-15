@@ -32,7 +32,7 @@ demo-chat:
 
 include make/quickstart.mk
 
-.PHONY: release-controller-image release-controller-install release-controller-start release-controller-status
+.PHONY: release-controller-image release-controller-install release-controller-start release-controller-status release-controller-upgrade
 release-controller-image:
 	$(PYTHON) scripts/release-controller.py image --values $(VALUES)
 release-controller-install:
@@ -41,3 +41,6 @@ release-controller-start:
 	$(PYTHON) scripts/release-controller.py start --values $(VALUES)
 release-controller-status:
 	$(PYTHON) scripts/release-controller.py status --values $(VALUES)
+
+release-controller-upgrade:
+	$(PYTHON) scripts/release-controller.py upgrade --values $(VALUES)

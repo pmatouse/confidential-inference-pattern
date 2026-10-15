@@ -3,6 +3,10 @@ import json
 import os
 from pathlib import Path
 import sys
+import re
+import traceback
+import shlex
+import tempfile
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'scripts'))
 from quickstart.core import Run, write, require
 from quickstart import release, verify
@@ -12,6 +16,28 @@ import importlib.util
 _spec=importlib.util.spec_from_file_location('inference_release_reconciler',Path(__file__).with_name('controller.py'))
 _reconciler=importlib.util.module_from_spec(_spec);_spec.loader.exec_module(_reconciler)
 API,releases,jobs,core,digest,STAGES=(_reconciler.API,_reconciler.releases,_reconciler.jobs,_reconciler.core,_reconciler.digest,_reconciler.STAGES)
+
+
+def configure_git(credentials=Path('/credentials')):
+    """Use exactly one external credential; SSH deploy keys are repository-scoped."""
+    ssh=(credentials/'ssh-privatekey').is_file();token=(credentials/'token').is_file()
+    require(ssh!=token,'provide exactly one Git credential: SSH deploy key or scoped token')
+    settings={'credential.helper':''}
+    os.environ.pop('GIT_ASKPASS',None);os.environ.pop('GIT_SSH_COMMAND',None)
+    if ssh:
+        require((credentials/'known_hosts').is_file(),'SSH requires pinned known_hosts')
+        # OpenShift mounts group-readable Secrets; OpenSSH requires a private copy.
+        directory=Path(tempfile.mkdtemp(prefix='release-git-'))
+        key=directory/'key';write(key,(credentials/'ssh-privatekey').read_text())
+        os.environ['GIT_SSH_COMMAND']='ssh -F /dev/null -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile='+shlex.quote(str(credentials/'known_hosts'))+' -i '+shlex.quote(str(key))
+        settings['url.git@github.com:.insteadOf']='https://github.com/'
+    else:
+        os.environ['GIT_ASKPASS']=str(Path(__file__).with_name('git-askpass.py'))
+        settings['url.https://github.com/.insteadOf']='git@github.com:'
+    os.environ['GIT_TERMINAL_PROMPT']='0'
+    os.environ['GIT_CONFIG_COUNT']=str(len(settings))
+    for i,(key,value) in enumerate(settings.items()):
+        os.environ['GIT_CONFIG_KEY_'+str(i)]=key;os.environ['GIT_CONFIG_VALUE_'+str(i)]=value
 
 
 def main():
@@ -37,6 +63,7 @@ def main():
         require(saved['siteSha256']==r.identity['siteSha256'],'stale receipt')
         result=saved['result']
     else:
+        if stage=='enroll':configure_git()
         handler={**release.HANDLERS,**verify.HANDLERS}[stage]
         result=handler(r);r.finish(stage,result)
     jobobj=api.call('GET',jobs(ns,os.environ['JOB_NAME']))
@@ -53,5 +80,12 @@ def main():
 if __name__=='__main__':
     try:main()
     except Exception:
+        # Keep diagnostics in the trusted retained state, never in API status or Pod logs.
+        try:
+            run=os.environ['RELEASE_NAME'];job_name=os.environ['JOB_NAME']
+            require(re.fullmatch('[a-z0-9-]+',run) and re.fullmatch('[a-z0-9-]+',job_name),'invalid diagnostic identity')
+            directory=Path(os.environ['QUICKSTART_STATE_ROOT'])/run
+            if directory.is_dir():write(directory/('worker-'+job_name+'.error.log'),traceback.format_exc())
+        except Exception:pass
         print('RELEASE_STAGE_FAILED: inspect retained private stage log; explicit retry required',flush=True)
         sys.exit(1)

@@ -30,6 +30,7 @@ metadata:
   name: {{ $p.releaseName }}-trustee-enrollment
   namespace: {{ .Values.site.base.trusteeNamespace }}
 rules:
+  - {apiGroups: [apps], resources: [deployments], resourceNames: [{{ .Values.site.quickstart.trustee.deployment }}], verbs: [get]}
   - {apiGroups: [""], resources: [pods], verbs: [get, list, delete]}
   - {apiGroups: [""], resources: [pods/exec], verbs: [create, get]}
   - {apiGroups: [""], resources: [configmaps], resourceNames: [resource-policy], verbs: [get]}

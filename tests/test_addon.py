@@ -64,6 +64,18 @@ class AddonTests(unittest.TestCase):
         objs=[{'apiVersion':'v1','kind':'ConfigMap','metadata':{'name':n,'namespace':'test'}} for n in ['new','other']]
         with self.assertRaises(addon.Invalid):addon.apply_objects(objs,self.v,api)
         self.assertEqual(api.mutations,[])
+    def test_scoped_binding_validation_sees_persisted_role_before_workload(self):
+        api=FakeCluster(self.v);events=[];roles=set()
+        def apply(obj,dry=False):
+            kind=obj['kind'];events.append((kind,dry))
+            if kind=='RoleBinding':self.assertIn('binder',roles)
+            if kind=='Role' and not dry:roles.add(obj['metadata']['name'])
+        api.apply=apply
+        objs=[{'kind':kind,'metadata':{'name':'binder','namespace':'test'}} for kind in ['RoleBinding','Job','Role']]
+        addon.apply_objects(objs,self.v,api)
+        self.assertLess(events.index(('Role',False)),events.index(('RoleBinding',True)))
+        self.assertLess(events.index(('RoleBinding',True)),events.index(('Job',False)))
+
     def test_foundation_does_not_render_platform_owners(self):
         docs=addon.foundation(self.v)
         forbidden={'KataConfig','KbsConfig','ClusterPolicy','InferenceService','Secret','Subscription'}
