@@ -174,13 +174,25 @@ class TransportTests(unittest.TestCase):
             }
         )
 
-    def wire(self, raw):
+    def wire(self, raw, *, abort_expected=False):
         sock = socket.create_connection(self.server.server_address, timeout=3)
         with self.context.wrap_socket(sock, server_hostname="localhost") as tls:
             self.assertEqual(tls.version(), "TLSv1.3")
             tls.sendall(raw)
             chunks = []
-            while data := tls.recv(4096):
+            while True:
+                try:
+                    data = tls.recv(4096)
+                except (ssl.SSLError, ConnectionResetError):
+                    # A hard deadline abort can surface as an OpenSSL error on
+                    # Linux instead of EOF. Only the deliberate incomplete-body
+                    # test permits this, after TLS verification/handshake. Keep
+                    # any received bytes so its no-response assertion still holds.
+                    if not abort_expected:
+                        raise
+                    break
+                if not data:
+                    break
                 chunks.append(data)
             return b"".join(chunks)
 
@@ -294,7 +306,8 @@ class TransportTests(unittest.TestCase):
         start = time.monotonic()
         response = self.wire(
             b"POST /v1/challenge HTTP/1.1\r\nHost: localhost\r\n"
-            b"Content-Type: application/json\r\nContent-Length: 8000\r\n\r\n{"
+            b"Content-Type: application/json\r\nContent-Length: 8000\r\n\r\n{",
+            abort_expected=True,
         )
         self.assertEqual(response, b"")
         self.assertLess(time.monotonic() - start, 2.5)

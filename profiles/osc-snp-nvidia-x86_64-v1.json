@@ -1,0 +1,945 @@
+{
+  "pause": {
+    "image": "pause",
+    "args": [
+      "/usr/bin/pod"
+    ],
+    "uid": 0,
+    "gid": 0,
+    "additionalGroups": [
+      []
+    ],
+    "noNewPrivileges": false,
+    "readonlyRoot": true,
+    "environment": [
+      "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "TERM=xterm"
+    ],
+    "requiredEnvironment": [
+      "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "TERM=xterm"
+    ],
+    "capabilities": [
+      "CAP_CHOWN",
+      "CAP_DAC_OVERRIDE",
+      "CAP_FOWNER",
+      "CAP_FSETID",
+      "CAP_KILL",
+      "CAP_NET_BIND_SERVICE",
+      "CAP_SETGID",
+      "CAP_SETPCAP",
+      "CAP_SETUID"
+    ],
+    "mounts": [
+      {
+        "destination": "/proc",
+        "options": [
+          "nosuid",
+          "noexec",
+          "nodev"
+        ],
+        "source": "proc",
+        "type_": "proc"
+      },
+      {
+        "destination": "/dev",
+        "options": [
+          "nosuid",
+          "strictatime",
+          "mode=755",
+          "size=65536k"
+        ],
+        "source": "tmpfs",
+        "type_": "tmpfs"
+      },
+      {
+        "destination": "/dev/pts",
+        "options": [
+          "nosuid",
+          "noexec",
+          "newinstance",
+          "ptmxmode=0666",
+          "mode=0620",
+          "gid=5"
+        ],
+        "source": "devpts",
+        "type_": "devpts"
+      },
+      {
+        "destination": "/dev/mqueue",
+        "options": [
+          "nosuid",
+          "noexec",
+          "nodev"
+        ],
+        "source": "mqueue",
+        "type_": "mqueue"
+      },
+      {
+        "destination": "/sys",
+        "options": [
+          "nosuid",
+          "noexec",
+          "nodev",
+          "ro"
+        ],
+        "source": "sysfs",
+        "type_": "sysfs"
+      },
+      {
+        "destination": "/etc/resolv.conf",
+        "options": [
+          "ro",
+          "bind",
+          "nodev",
+          "nosuid",
+          "noexec"
+        ],
+        "source": "shared:resolv\\.conf",
+        "type_": "bind"
+      },
+      {
+        "destination": "/dev/shm",
+        "options": [
+          "rbind"
+        ],
+        "source": "/run/kata-containers/sandbox/shm",
+        "type_": "bind"
+      },
+      {
+        "destination": "/etc/hostname",
+        "options": [
+          "ro",
+          "bind",
+          "nodev",
+          "nosuid",
+          "noexec"
+        ],
+        "source": "shared:hostname",
+        "type_": "bind"
+      }
+    ],
+    "ephemeralStorages": [],
+    "rawDevices": []
+  },
+  "helper": {
+    "image": "",
+    "args": [],
+    "uid": 0,
+    "gid": 0,
+    "additionalGroups": [
+      [
+        0,
+        1001
+      ],
+      [
+        1001,
+        0
+      ],
+      [
+        1001
+      ]
+    ],
+    "noNewPrivileges": false,
+    "readonlyRoot": false,
+    "environment": [
+      "container=oci",
+      "STI_SCRIPTS_URL=image:///usr/libexec/s2i",
+      "STI_SCRIPTS_PATH=/usr/libexec/s2i",
+      "APP_ROOT=/opt/app-root",
+      "HOME=/opt/app-root/src",
+      "PLATFORM=el9",
+      "NODEJS_VER=22",
+      "PYTHON_VERSION=3.12",
+      "PATH=/opt/app-root/src/.local/bin/:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "PYTHONIOENCODING=UTF-8",
+      "LC_ALL=en_US.UTF-8",
+      "LANG=en_US.UTF-8",
+      "CNB_STACK_ID=com.redhat.stacks.ubi9-python-312",
+      "CNB_USER_ID=1001",
+      "CNB_GROUP_ID=0",
+      "PIP_NO_CACHE_DIR=off",
+      "SUMMARY=Platform for building and running Python 3.12 applications",
+      "DESCRIPTION=Python 3.12 available as container is a base platform for building and running various Python 3.12 applications and frameworks. Python is an easy to learn, powerful programming language. It has efficient high-level data structures and a simple but effective approach to object-oriented programming. Python's elegant syntax and dynamic typing, together with its interpreted nature, make it an ideal language for scripting and rapid application development in many areas on most platforms.",
+      "BASH_ENV=/opt/app-root/bin/activate",
+      "ENV=/opt/app-root/bin/activate",
+      "PROMPT_COMMAND=. /opt/app-root/bin/activate",
+      "PYTHONDONTWRITEBYTECODE=1",
+      "PYTHONUNBUFFERED=1",
+      "KUBERNETES_SERVICE_PORT=443",
+      "KUBERNETES_SERVICE_PORT_HTTPS=443",
+      "KUBERNETES_PORT_443_TCP_PORT=443",
+      "KUBERNETES_PORT_443_TCP_PROTO=tcp",
+      "TERM=xterm",
+      "NSS_SDB_USE_CACHE=no"
+    ],
+    "requiredEnvironment": [
+      "container=oci",
+      "STI_SCRIPTS_URL=image:///usr/libexec/s2i",
+      "STI_SCRIPTS_PATH=/usr/libexec/s2i",
+      "APP_ROOT=/opt/app-root",
+      "HOME=/opt/app-root/src",
+      "PLATFORM=el9",
+      "NODEJS_VER=22",
+      "PYTHON_VERSION=3.12",
+      "PATH=/opt/app-root/src/.local/bin/:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "PYTHONIOENCODING=UTF-8",
+      "LC_ALL=en_US.UTF-8",
+      "LANG=en_US.UTF-8",
+      "CNB_STACK_ID=com.redhat.stacks.ubi9-python-312",
+      "CNB_USER_ID=1001",
+      "CNB_GROUP_ID=0",
+      "PIP_NO_CACHE_DIR=off",
+      "SUMMARY=Platform for building and running Python 3.12 applications",
+      "DESCRIPTION=Python 3.12 available as container is a base platform for building and running various Python 3.12 applications and frameworks. Python is an easy to learn, powerful programming language. It has efficient high-level data structures and a simple but effective approach to object-oriented programming. Python's elegant syntax and dynamic typing, together with its interpreted nature, make it an ideal language for scripting and rapid application development in many areas on most platforms.",
+      "BASH_ENV=/opt/app-root/bin/activate",
+      "ENV=/opt/app-root/bin/activate",
+      "PROMPT_COMMAND=. /opt/app-root/bin/activate",
+      "PYTHONDONTWRITEBYTECODE=1",
+      "PYTHONUNBUFFERED=1",
+      "KUBERNETES_SERVICE_PORT=443",
+      "KUBERNETES_SERVICE_PORT_HTTPS=443",
+      "KUBERNETES_PORT_443_TCP_PORT=443",
+      "KUBERNETES_PORT_443_TCP_PROTO=tcp",
+      "TERM=xterm",
+      "NSS_SDB_USE_CACHE=no"
+    ],
+    "capabilities": [
+      "CAP_AUDIT_CONTROL",
+      "CAP_AUDIT_READ",
+      "CAP_AUDIT_WRITE",
+      "CAP_BLOCK_SUSPEND",
+      "CAP_BPF",
+      "CAP_CHECKPOINT_RESTORE",
+      "CAP_CHOWN",
+      "CAP_DAC_OVERRIDE",
+      "CAP_DAC_READ_SEARCH",
+      "CAP_FOWNER",
+      "CAP_FSETID",
+      "CAP_IPC_LOCK",
+      "CAP_IPC_OWNER",
+      "CAP_KILL",
+      "CAP_LEASE",
+      "CAP_LINUX_IMMUTABLE",
+      "CAP_MAC_ADMIN",
+      "CAP_MAC_OVERRIDE",
+      "CAP_MKNOD",
+      "CAP_NET_ADMIN",
+      "CAP_NET_BIND_SERVICE",
+      "CAP_NET_BROADCAST",
+      "CAP_NET_RAW",
+      "CAP_PERFMON",
+      "CAP_SETFCAP",
+      "CAP_SETGID",
+      "CAP_SETPCAP",
+      "CAP_SETUID",
+      "CAP_SYSLOG",
+      "CAP_SYS_ADMIN",
+      "CAP_SYS_BOOT",
+      "CAP_SYS_CHROOT",
+      "CAP_SYS_MODULE",
+      "CAP_SYS_NICE",
+      "CAP_SYS_PACCT",
+      "CAP_SYS_PTRACE",
+      "CAP_SYS_RAWIO",
+      "CAP_SYS_RESOURCE",
+      "CAP_SYS_TIME",
+      "CAP_SYS_TTY_CONFIG",
+      "CAP_WAKE_ALARM"
+    ],
+    "mounts": [
+      {
+        "destination": "/proc",
+        "options": [
+          "nosuid",
+          "noexec",
+          "nodev",
+          "rw"
+        ],
+        "source": "proc",
+        "type_": "proc"
+      },
+      {
+        "destination": "/dev",
+        "options": [
+          "nosuid",
+          "strictatime",
+          "mode=755",
+          "size=65536k",
+          "rw"
+        ],
+        "source": "tmpfs",
+        "type_": "tmpfs"
+      },
+      {
+        "destination": "/dev/pts",
+        "options": [
+          "nosuid",
+          "noexec",
+          "newinstance",
+          "ptmxmode=0666",
+          "mode=0620",
+          "gid=5",
+          "rw"
+        ],
+        "source": "devpts",
+        "type_": "devpts"
+      },
+      {
+        "destination": "/dev/mqueue",
+        "options": [
+          "nosuid",
+          "noexec",
+          "nodev",
+          "rw"
+        ],
+        "source": "mqueue",
+        "type_": "mqueue"
+      },
+      {
+        "destination": "/sys",
+        "options": [
+          "nosuid",
+          "noexec",
+          "nodev",
+          "rw",
+          "rslave"
+        ],
+        "source": "sysfs",
+        "type_": "sysfs"
+      },
+      {
+        "destination": "/sys/fs/cgroup",
+        "options": [
+          "nosuid",
+          "noexec",
+          "nodev",
+          "rw",
+          "relatime",
+          "rslave"
+        ],
+        "source": "cgroup",
+        "type_": "cgroup"
+      },
+      {
+        "destination": "/dev/shm",
+        "options": [
+          "rbind"
+        ],
+        "source": "/run/kata-containers/sandbox/shm",
+        "type_": "bind"
+      },
+      {
+        "destination": "/etc/resolv.conf",
+        "options": [
+          "rw",
+          "bind",
+          "nodev",
+          "nosuid",
+          "noexec"
+        ],
+        "source": "shared:resolv\\.conf",
+        "type_": "bind"
+      },
+      {
+        "destination": "/etc/hostname",
+        "options": [
+          "rw",
+          "bind"
+        ],
+        "source": "shared:hostname",
+        "type_": "bind"
+      },
+      {
+        "destination": "/run/.containerenv",
+        "options": [
+          "rw",
+          "bind"
+        ],
+        "source": "shared:\\.containerenv",
+        "type_": "bind"
+      },
+      {
+        "destination": "/configuration",
+        "options": [
+          "rbind",
+          "rprivate",
+          "ro",
+          "bind"
+        ],
+        "source": "shared:configuration",
+        "type_": "bind"
+      },
+      {
+        "destination": "/etc/hosts",
+        "options": [
+          "rbind",
+          "rprivate",
+          "rw",
+          "bind"
+        ],
+        "source": "shared:hosts",
+        "type_": "bind"
+      },
+      {
+        "destination": "/dev/termination-log",
+        "options": [
+          "rbind",
+          "rprivate",
+          "rw",
+          "bind"
+        ],
+        "source": "shared:termination\\-log",
+        "type_": "bind"
+      },
+      {
+        "destination": "/run/secrets",
+        "options": [
+          "bind",
+          "rprivate",
+          "bind"
+        ],
+        "source": "shared:secrets",
+        "type_": "bind"
+      },
+      {
+        "destination": "/rendezvous",
+        "options": [
+          "rbind",
+          "rprivate",
+          "rw",
+          "bind"
+        ],
+        "source": "/run/kata-containers/sandbox/ephemeral/rendezvous",
+        "type_": "bind"
+      }
+    ],
+    "ephemeralStorages": [
+      {
+        "driver": "ephemeral",
+        "driver_options": [],
+        "fs_group": null,
+        "fstype": "tmpfs",
+        "mount_point": "/run/kata-containers/sandbox/ephemeral/rendezvous",
+        "options": [
+          "fsgid=1001"
+        ],
+        "shared": false,
+        "source": "tmpfs"
+      }
+    ],
+    "rawDevices": [
+      "/dev/coco-volume-0",
+      "/dev/coco-volume-1"
+    ]
+  },
+  "application": {
+    "image": "nvcr.io/nvidia/vllm@sha256:15f380ad9c32f0ac57ac16e4b778c6f733c88b9ffe3a936035d0a59ad17b1aab",
+    "args": [],
+    "uid": 1001,
+    "gid": 1001,
+    "additionalGroups": [
+      [
+        1001
+      ]
+    ],
+    "noNewPrivileges": true,
+    "readonlyRoot": true,
+    "environment": [
+      "AWS_OFI_NCCL_VERSION=1.14.0",
+      "BASH_ENV=/etc/bash.bashrc",
+      "COCOAPI_VERSION=2.0+nv0.8.1",
+      "CUBLASMP_VERSION=0.5.1.65",
+      "CUBLAS_VERSION=13.0.2.14",
+      "CUDA_ARCH_LIST=7.5 8.0 8.6 9.0 10.0 12.0",
+      "CUDA_DRIVER_VERSION=580.82.07",
+      "CUDA_HOME=/usr/local/cuda",
+      "CUDA_MODULE_LOADING=LAZY",
+      "CUDA_VERSION=13.0.1.012",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDLA_VERSION=13.0.1.012",
+      "CUDNN_FRONTEND_VERSION=1.14.0",
+      "CUDNN_VERSION=9.13.0.50",
+      "CUFFT_VERSION=12.0.0.61",
+      "CUFILE_VERSION=1.15.1.6",
+      "CURAND_VERSION=10.4.0.35",
+      "CUSOLVER_VERSION=12.0.4.66",
+      "CUSPARSELT_VERSION=0.8.1.1",
+      "CUSPARSE_VERSION=12.6.3.3",
+      "DALI_BUILD=",
+      "DALI_URL_SUFFIX=130",
+      "DALI_VERSION=1.51.2",
+      "DOCA_VERSION=3.1.0",
+      "DO_NOT_TRACK=1",
+      "EFA_VERSION=1.38.1",
+      "ENV=/etc/shinit_v2",
+      "GDRCOPY_VERSION=2.5",
+      "HF_HOME=/data/hf",
+      "HF_HUB_OFFLINE=1",
+      "HOME=/data/home",
+      "HPCX_VERSION=2.24.1",
+      "JUPYTER_PORT=8888",
+      "KUBERNETES_PORT_443_TCP_PORT=443",
+      "KUBERNETES_PORT_443_TCP_PROTO=tcp",
+      "KUBERNETES_SERVICE_PORT=443",
+      "KUBERNETES_SERVICE_PORT_HTTPS=443",
+      "LC_ALL=C.UTF-8",
+      "LD_LIBRARY_PATH=/usr/lib64:/usr/local/lib/python3.12/dist-packages/torch/lib:/usr/local/lib/python3.12/dist-packages/torch_tensorrt/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64",
+      "LIBRARY_PATH=/usr/local/cuda/lib64/stubs:",
+      "LOGNAME=qwen",
+      "MAXSMVER=",
+      "MAX_JOBS=12",
+      "MODEL_OPT_VERSION=0.33.0",
+      "MOFED_VERSION=5.4-rdmacore56.0",
+      "NCCL_VERSION=2.27.7",
+      "NPP_VERSION=13.0.1.2",
+      "NSIGHT_COMPUTE_VERSION=2025.3.1.4",
+      "NSIGHT_SYSTEMS_VERSION=2025.5.1.121",
+      "NSS_SDB_USE_CACHE=no",
+      "NVFATBIN_VERSION=13.0.85",
+      "NVFUSER_BUILD_VERSION=a71c674",
+      "NVFUSER_VERSION=a71c674",
+      "NVIDIA_BUILD_ID=214638689",
+      "NVIDIA_DRIVER_CAPABILITIES=compute,utility",
+      "NVIDIA_PRODUCT_NAME=vLLM",
+      "NVIDIA_PYTORCH_VERSION=25.09",
+      "NVIDIA_REQUIRE_CUDA=cuda>=9.0",
+      "NVIDIA_REQUIRE_JETPACK_HOST_MOUNTS=",
+      "NVIDIA_VISIBLE_DEVICES=void",
+      "NVIDIA_VLLM_VERSION=25.09",
+      "NVJITLINK_VERSION=13.0.88",
+      "NVJPEG_VERSION=13.0.1.86",
+      "NVPL_LAPACK_MATH_MODE=PEDANTIC",
+      "NVPTXCOMPILER_VERSION=13.0.88",
+      "NVRX_VERSION=0.4.1+cuda13",
+      "NVSHMEM_VERSION=3.4.5",
+      "NVVM_VERSION=13.0.88",
+      "OMPI_MCA_coll_hcoll_enable=0",
+      "OMP_NUM_THREADS=1",
+      "OPAL_PREFIX=/opt/hpcx/ompi",
+      "OPENMPI_VERSION=4.1.7",
+      "OPENUCX_VERSION=1.19.0",
+      "PATH=/usr/local/lib/python3.12/dist-packages/torch_tensorrt/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/mpi/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/amazon/efa/bin:/opt/tensorrt/bin",
+      "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "PIP_BREAK_SYSTEM_PACKAGES=1",
+      "PIP_CONSTRAINT=/etc/pip/constraint.txt",
+      "PIP_DEFAULT_TIMEOUT=100",
+      "PIP_NO_BUILD_ISOLATION=1",
+      "POLYGRAPHY_VERSION=0.49.26",
+      "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python",
+      "PYTHONDONTWRITEBYTECODE=1",
+      "PYTHONIOENCODING=utf-8",
+      "PYTHONUNBUFFERED=1",
+      "PYTORCH_BUILD_NUMBER=0",
+      "PYTORCH_BUILD_VERSION=2.9.0a0+50eac81",
+      "PYTORCH_HOME=/opt/pytorch/pytorch",
+      "PYTORCH_TRITON_VERSION=3.4.0+gitc817b9b6",
+      "PYTORCH_VERSION=2.9.0a0+50eac81",
+      "RDMACORE_VERSION=56.0",
+      "SHELL=/bin/bash",
+      "TENSORBOARD_PORT=6006",
+      "TERM=xterm",
+      "TMPDIR=/data/tmp",
+      "TOKENIZERS_PARALLELISM=false",
+      "TORCHINDUCTOR_CACHE_DIR=/data/cache/torchinductor",
+      "TORCH_ALLOW_TF32_CUBLAS_OVERRIDE=1",
+      "TORCH_CUDA_ARCH_LIST=7.5 8.0 8.6 9.0 10.0 12.0+PTX",
+      "TORCH_NCCL_USE_COMM_NONBLOCKING=0",
+      "TRANSFORMERS_OFFLINE=1",
+      "TRANSFORMER_ENGINE_VERSION=2.7",
+      "TRITON_CACHE_DIR=/data/triton",
+      "TRITON_CUDACRT_PATH=/usr/local/cuda/include",
+      "TRITON_CUDART_PATH=/usr/local/cuda/include",
+      "TRITON_CUOBJDUMP_PATH=/usr/local/cuda/bin/cuobjdump",
+      "TRITON_CUPTI_PATH=/usr/local/cuda/include",
+      "TRITON_NVDISASM_PATH=/usr/local/cuda/bin/nvdisasm",
+      "TRITON_PTXAS_PATH=/usr/local/cuda/bin/ptxas",
+      "TRTOSS_VERSION=",
+      "TRT_VERSION=10.13.3.9",
+      "UCC_CL_BASIC_TLS=^sharp",
+      "UCC_EC_CUDA_EXEC_NUM_THREADS=256",
+      "USER=qwen",
+      "VLLM_CACHE_ROOT=/data/vllm",
+      "VLLM_NO_USAGE_STATS=1",
+      "VLLM_USE_FLASHINFER_SAMPLER=0",
+      "VLLM_VERSION=0.10.1.1+381074ae",
+      "XDG_CACHE_HOME=/data/cache",
+      "_CUDA_COMPAT_PATH=/usr/local/cuda/compat"
+    ],
+    "requiredEnvironment": [
+      "AWS_OFI_NCCL_VERSION=1.14.0",
+      "BASH_ENV=/etc/bash.bashrc",
+      "COCOAPI_VERSION=2.0+nv0.8.1",
+      "CUBLASMP_VERSION=0.5.1.65",
+      "CUBLAS_VERSION=13.0.2.14",
+      "CUDA_ARCH_LIST=7.5 8.0 8.6 9.0 10.0 12.0",
+      "CUDA_DRIVER_VERSION=580.82.07",
+      "CUDA_HOME=/usr/local/cuda",
+      "CUDA_MODULE_LOADING=LAZY",
+      "CUDA_VERSION=13.0.1.012",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDLA_VERSION=13.0.1.012",
+      "CUDNN_FRONTEND_VERSION=1.14.0",
+      "CUDNN_VERSION=9.13.0.50",
+      "CUFFT_VERSION=12.0.0.61",
+      "CUFILE_VERSION=1.15.1.6",
+      "CURAND_VERSION=10.4.0.35",
+      "CUSOLVER_VERSION=12.0.4.66",
+      "CUSPARSELT_VERSION=0.8.1.1",
+      "CUSPARSE_VERSION=12.6.3.3",
+      "DALI_BUILD=",
+      "DALI_URL_SUFFIX=130",
+      "DALI_VERSION=1.51.2",
+      "DOCA_VERSION=3.1.0",
+      "DO_NOT_TRACK=1",
+      "EFA_VERSION=1.38.1",
+      "ENV=/etc/shinit_v2",
+      "GDRCOPY_VERSION=2.5",
+      "HF_HOME=/data/hf",
+      "HF_HUB_OFFLINE=1",
+      "HOME=/data/home",
+      "HPCX_VERSION=2.24.1",
+      "JUPYTER_PORT=8888",
+      "KUBERNETES_PORT_443_TCP_PORT=443",
+      "KUBERNETES_PORT_443_TCP_PROTO=tcp",
+      "KUBERNETES_SERVICE_PORT=443",
+      "KUBERNETES_SERVICE_PORT_HTTPS=443",
+      "LC_ALL=C.UTF-8",
+      "LD_LIBRARY_PATH=/usr/lib64:/usr/local/lib/python3.12/dist-packages/torch/lib:/usr/local/lib/python3.12/dist-packages/torch_tensorrt/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64",
+      "LIBRARY_PATH=/usr/local/cuda/lib64/stubs:",
+      "LOGNAME=qwen",
+      "MAXSMVER=",
+      "MAX_JOBS=12",
+      "MODEL_OPT_VERSION=0.33.0",
+      "MOFED_VERSION=5.4-rdmacore56.0",
+      "NCCL_VERSION=2.27.7",
+      "NPP_VERSION=13.0.1.2",
+      "NSIGHT_COMPUTE_VERSION=2025.3.1.4",
+      "NSIGHT_SYSTEMS_VERSION=2025.5.1.121",
+      "NSS_SDB_USE_CACHE=no",
+      "NVFATBIN_VERSION=13.0.85",
+      "NVFUSER_BUILD_VERSION=a71c674",
+      "NVFUSER_VERSION=a71c674",
+      "NVIDIA_BUILD_ID=214638689",
+      "NVIDIA_DRIVER_CAPABILITIES=compute,utility",
+      "NVIDIA_PRODUCT_NAME=vLLM",
+      "NVIDIA_PYTORCH_VERSION=25.09",
+      "NVIDIA_REQUIRE_CUDA=cuda>=9.0",
+      "NVIDIA_REQUIRE_JETPACK_HOST_MOUNTS=",
+      "NVIDIA_VISIBLE_DEVICES=void",
+      "NVIDIA_VLLM_VERSION=25.09",
+      "NVJITLINK_VERSION=13.0.88",
+      "NVJPEG_VERSION=13.0.1.86",
+      "NVPL_LAPACK_MATH_MODE=PEDANTIC",
+      "NVPTXCOMPILER_VERSION=13.0.88",
+      "NVRX_VERSION=0.4.1+cuda13",
+      "NVSHMEM_VERSION=3.4.5",
+      "NVVM_VERSION=13.0.88",
+      "OMPI_MCA_coll_hcoll_enable=0",
+      "OMP_NUM_THREADS=1",
+      "OPAL_PREFIX=/opt/hpcx/ompi",
+      "OPENMPI_VERSION=4.1.7",
+      "OPENUCX_VERSION=1.19.0",
+      "PATH=/usr/local/lib/python3.12/dist-packages/torch_tensorrt/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/mpi/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/amazon/efa/bin:/opt/tensorrt/bin",
+      "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "PIP_BREAK_SYSTEM_PACKAGES=1",
+      "PIP_CONSTRAINT=/etc/pip/constraint.txt",
+      "PIP_DEFAULT_TIMEOUT=100",
+      "PIP_NO_BUILD_ISOLATION=1",
+      "POLYGRAPHY_VERSION=0.49.26",
+      "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python",
+      "PYTHONDONTWRITEBYTECODE=1",
+      "PYTHONIOENCODING=utf-8",
+      "PYTHONUNBUFFERED=1",
+      "PYTORCH_BUILD_NUMBER=0",
+      "PYTORCH_BUILD_VERSION=2.9.0a0+50eac81",
+      "PYTORCH_HOME=/opt/pytorch/pytorch",
+      "PYTORCH_TRITON_VERSION=3.4.0+gitc817b9b6",
+      "PYTORCH_VERSION=2.9.0a0+50eac81",
+      "RDMACORE_VERSION=56.0",
+      "SHELL=/bin/bash",
+      "TENSORBOARD_PORT=6006",
+      "TERM=xterm",
+      "TMPDIR=/data/tmp",
+      "TOKENIZERS_PARALLELISM=false",
+      "TORCHINDUCTOR_CACHE_DIR=/data/cache/torchinductor",
+      "TORCH_ALLOW_TF32_CUBLAS_OVERRIDE=1",
+      "TORCH_CUDA_ARCH_LIST=7.5 8.0 8.6 9.0 10.0 12.0+PTX",
+      "TORCH_NCCL_USE_COMM_NONBLOCKING=0",
+      "TRANSFORMERS_OFFLINE=1",
+      "TRANSFORMER_ENGINE_VERSION=2.7",
+      "TRITON_CACHE_DIR=/data/triton",
+      "TRITON_CUDACRT_PATH=/usr/local/cuda/include",
+      "TRITON_CUDART_PATH=/usr/local/cuda/include",
+      "TRITON_CUOBJDUMP_PATH=/usr/local/cuda/bin/cuobjdump",
+      "TRITON_CUPTI_PATH=/usr/local/cuda/include",
+      "TRITON_NVDISASM_PATH=/usr/local/cuda/bin/nvdisasm",
+      "TRITON_PTXAS_PATH=/usr/local/cuda/bin/ptxas",
+      "TRTOSS_VERSION=",
+      "TRT_VERSION=10.13.3.9",
+      "UCC_CL_BASIC_TLS=^sharp",
+      "UCC_EC_CUDA_EXEC_NUM_THREADS=256",
+      "USER=qwen",
+      "VLLM_CACHE_ROOT=/data/vllm",
+      "VLLM_NO_USAGE_STATS=1",
+      "VLLM_USE_FLASHINFER_SAMPLER=0",
+      "VLLM_VERSION=0.10.1.1+381074ae",
+      "XDG_CACHE_HOME=/data/cache",
+      "_CUDA_COMPAT_PATH=/usr/local/cuda/compat"
+    ],
+    "capabilities": [],
+    "mounts": [
+      {
+        "destination": "/proc",
+        "options": [
+          "nosuid",
+          "noexec",
+          "nodev"
+        ],
+        "source": "proc",
+        "type_": "proc"
+      },
+      {
+        "destination": "/dev",
+        "options": [
+          "nosuid",
+          "strictatime",
+          "mode=755",
+          "size=65536k"
+        ],
+        "source": "tmpfs",
+        "type_": "tmpfs"
+      },
+      {
+        "destination": "/dev/pts",
+        "options": [
+          "nosuid",
+          "noexec",
+          "newinstance",
+          "ptmxmode=0666",
+          "mode=0620",
+          "gid=5"
+        ],
+        "source": "devpts",
+        "type_": "devpts"
+      },
+      {
+        "destination": "/dev/mqueue",
+        "options": [
+          "nosuid",
+          "noexec",
+          "nodev"
+        ],
+        "source": "mqueue",
+        "type_": "mqueue"
+      },
+      {
+        "destination": "/sys",
+        "options": [
+          "nosuid",
+          "noexec",
+          "nodev",
+          "ro"
+        ],
+        "source": "sysfs",
+        "type_": "sysfs"
+      },
+      {
+        "destination": "/sys/fs/cgroup",
+        "options": [
+          "nosuid",
+          "noexec",
+          "nodev",
+          "relatime",
+          "ro"
+        ],
+        "source": "cgroup",
+        "type_": "cgroup"
+      },
+      {
+        "destination": "/etc/resolv.conf",
+        "options": [
+          "ro",
+          "bind",
+          "nodev",
+          "nosuid",
+          "noexec"
+        ],
+        "source": "shared:resolv\\.conf",
+        "type_": "bind"
+      },
+      {
+        "destination": "/etc/hostname",
+        "options": [
+          "ro",
+          "bind"
+        ],
+        "source": "shared:hostname",
+        "type_": "bind"
+      },
+      {
+        "destination": "/run/.containerenv",
+        "options": [
+          "ro",
+          "bind"
+        ],
+        "source": "shared:\\.containerenv",
+        "type_": "bind"
+      },
+      {
+        "destination": "/etc/passwd",
+        "options": [
+          "rw",
+          "bind",
+          "nodev",
+          "nosuid",
+          "noexec"
+        ],
+        "source": "shared:passwd",
+        "type_": "bind"
+      },
+      {
+        "destination": "/etc/group",
+        "options": [
+          "rw",
+          "bind",
+          "nodev",
+          "nosuid",
+          "noexec"
+        ],
+        "source": "shared:group",
+        "type_": "bind"
+      },
+      {
+        "destination": "/rendezvous",
+        "options": [
+          "rbind",
+          "rprivate",
+          "rw",
+          "bind"
+        ],
+        "source": "/run/kata-containers/sandbox/ephemeral/rendezvous",
+        "type_": "bind"
+      },
+      {
+        "destination": "/data",
+        "options": [
+          "rbind",
+          "rprivate",
+          "rw",
+          "bind"
+        ],
+        "source": "/run/kata-containers/sandbox/ephemeral/data-target",
+        "type_": "bind"
+      },
+      {
+        "destination": "/models/qwen",
+        "options": [
+          "rbind",
+          "rprivate",
+          "rw",
+          "bind"
+        ],
+        "source": "/run/kata-containers/sandbox/ephemeral/model-target",
+        "type_": "bind"
+      },
+      {
+        "destination": "/dev/shm",
+        "options": [
+          "rbind",
+          "rprivate",
+          "rw",
+          "bind"
+        ],
+        "source": "/run/kata-containers/sandbox/ephemeral/shm",
+        "type_": "bind"
+      },
+      {
+        "destination": "/etc/hosts",
+        "options": [
+          "rbind",
+          "rprivate",
+          "rw",
+          "bind"
+        ],
+        "source": "shared:hosts",
+        "type_": "bind"
+      },
+      {
+        "destination": "/dev/termination-log",
+        "options": [
+          "rbind",
+          "rprivate",
+          "rw",
+          "bind"
+        ],
+        "source": "shared:termination\\-log",
+        "type_": "bind"
+      },
+      {
+        "destination": "/run/secrets",
+        "options": [
+          "bind",
+          "rprivate",
+          "bind"
+        ],
+        "source": "shared:secrets",
+        "type_": "bind"
+      }
+    ],
+    "ephemeralStorages": [
+      {
+        "driver": "ephemeral",
+        "driver_options": [],
+        "fs_group": null,
+        "fstype": "tmpfs",
+        "mount_point": "/run/kata-containers/sandbox/ephemeral/rendezvous",
+        "options": [
+          "fsgid=1001"
+        ],
+        "shared": false,
+        "source": "tmpfs"
+      },
+      {
+        "driver": "ephemeral",
+        "driver_options": [],
+        "fs_group": null,
+        "fstype": "tmpfs",
+        "mount_point": "/run/kata-containers/sandbox/ephemeral/data-target",
+        "options": [
+          "fsgid=1001"
+        ],
+        "shared": false,
+        "source": "tmpfs"
+      },
+      {
+        "driver": "ephemeral",
+        "driver_options": [],
+        "fs_group": null,
+        "fstype": "tmpfs",
+        "mount_point": "/run/kata-containers/sandbox/ephemeral/model-target",
+        "options": [
+          "fsgid=1001"
+        ],
+        "shared": false,
+        "source": "tmpfs"
+      },
+      {
+        "driver": "ephemeral",
+        "driver_options": [],
+        "fs_group": null,
+        "fstype": "tmpfs",
+        "mount_point": "/run/kata-containers/sandbox/ephemeral/shm",
+        "options": [
+          "fsgid=1001"
+        ],
+        "shared": false,
+        "source": "tmpfs"
+      }
+    ],
+    "rawDevices": []
+  },
+  "runtimeClassName": "kata-cc-nvidia-gpu",
+  "applicationPython": "/usr/bin/python3",
+  "kubernetesServiceHost": ""
+}

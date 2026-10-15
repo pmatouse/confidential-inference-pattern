@@ -3,9 +3,10 @@
 See the [fresh release workflow](fresh-release.md) for publication, scoped key
 enrollment, measured deployment and acceptance gates.
 
-This is the executable subset of the design. The initial isolated installation
-uses existing, digest-pinned lab helper/populator images. A portable clean-cluster
-release still needs reproducible image publication and trusted release automation.
+The fresh isolated installation passed the [E2E acceptance gates](acceptance.md)
+with add-on images built in its own namespace. Rebuild/publish those images for
+your registry and use the [public compatibility template](../../profiles/README.md).
+Trusted enrollment and signing remain explicit administrative steps.
 
 ## One-time platform prerequisites
 

@@ -1,4 +1,4 @@
-# Edge lab override; some helper images are still supplied by the existing lab.
+# Public edge example; build equivalent pinned images for another registry.
 installation:
   namespace: confidential-inference-demo
   clusterIdentity: edge-rtx6k
@@ -7,11 +7,11 @@ base:
   trusteeName: kbsconfig
 images:
   controller: image-registry.openshift-image-registry.svc:5000/confidential-inference-demo/confidential-volume-controller@sha256:ea319a76f3350052df2d4ee4954d8848fd7a73e59ff21de5c754886fc1e790cb
-  populator: image-registry.openshift-image-registry.svc:5000/confidential-storage-test/encrypted-model-populator@sha256:46dc94bd59c9cd8e08437eb35326f740e9327153c970b8e107923e2bfe961ded
-  sidecar: image-registry.openshift-image-registry.svc:5000/confidential-storage-test/confidential-storage-sidecar@sha256:aff5a4874e7edf39cd67bf03b7f5c31df70a4a2191bb24e7423e4f65bb798aba
+  populator: image-registry.openshift-image-registry.svc:5000/confidential-inference-demo/encrypted-model-populator@sha256:eea816e4fbe6fbe931f43a166fea028798471273dbd837b469b9f9d28b1bbf2d
+  sidecar: image-registry.openshift-image-registry.svc:5000/confidential-inference-demo/confidential-storage-sidecar@sha256:274aabedae5490a0671651a33609bc1a148f9cb6caa487b62933446c2937cfee
 registry:
   origin: https://image-registry.openshift-image-registry.svc:5000
 gitops:
   enabled: true
   repository: git@github.com:pmatouse/confidential-inference-pattern.git
-  revision: e446ccb327b3964ce06042dfdad9a4507ff734e9
+  revision: 96d7eac31de7f908c17e2f6f9f21da2bc6d4ae3e

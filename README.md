@@ -11,22 +11,26 @@ privileged storage sidecar inside its confidential VM owns device access and
 mount transfer. Keys require approved CPU/GPU evidence at Trustee; a separate
 storage authority manages volume lifecycle authorization.
 
-**Implementation status:** the separate repository, installer, GitOps chart,
-preflight, controller/populator packaging, declaration binder, chat chart and
-create-once authority bootstrap, trusted metadata enrollment and public release
-packaging are implemented. The controllers were installed
-in an isolated namespace on the edge cluster. The full fresh-install workflow,
-scoped key provisioning, qualified release profiles and first-format sidecar E2E test
-are **not yet qualified**. Do not treat the earlier lab workload as proof that
-this repository can already reproduce it from zero.
+**E2E status:** the fresh add-on run passed on 2026-10-15: a newly encrypted
+Qwen3-0.6B model was published to the internal OCI registry and populated into a
+new RO PVC; a blank RW PVC was initialized inside the stock confidential GPU VM.
+Real KServe/chat inference, CUDA, administrator exec denial and persistence across
+a second VM passed. [Evidence](tests/evidence/2026-10-15/fresh-qwen-e2e.json)
+includes the new PVC and VM identities and the unchanged formatting journal.
+This was a new add-on installation on an existing configured CoCo cluster,
+not a reinstallation of OpenShift/CoCo. Trusted enrollment and signing remain
+explicit steps; only the OSC SNP/NVIDIA profile is hardware-qualified.
 
 ## Start here
 
+- [Fresh encrypted release preparation](docs/demo/fresh-release.md)
+- [Repeatable E2E acceptance commands](docs/demo/acceptance.md)
+- [Runtime profile template](profiles/README.md)
 - [Current executable setup and component ownership](docs/demo/setup.md)
 - [Trusted Vault bootstrap prerequisite](docs/demo/vault-bootstrap.md)
 - [Implementation status and remaining release gates](docs/implementation-status.md)
 - [Detailed design](docs/confidential-inference-pattern-plan.md)
-- [Planned complete E2E acceptance procedure](docs/qwen-clean-cluster-demo-plan.md)
+- [Original E2E implementation plan](docs/qwen-clean-cluster-demo-plan.md)
 
 The design documents describe the full target, including commands not implemented
 yet. `./pattern.sh make` and the current setup guide are the executable interface.

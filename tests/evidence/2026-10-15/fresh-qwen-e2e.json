@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "result": "passed",
+  "scope": "Fresh add-on namespace, freshly encrypted Qwen publication, new model/data PVCs and keys on an existing configured CoCo cluster; no cluster reinstall",
+  "platform": {
+    "openshift": "4.22.15",
+    "osc": "1.13",
+    "kserve": "0.20.0",
+    "runtimeClass": "kata-cc-nvidia-gpu",
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "stockKata": true,
+    "stockVllm": true
+  },
+  "namespace": "confidential-inference-demo",
+  "workload": "qwen-demo-003",
+  "chatUrl": "http://10.14.202.14:31865/",
+  "transport": "Private network HTTP; TLS to guest is not part of this run",
+  "runtime": {
+    "guestImageSha256": "abd755287282a268578687137bf437caeda6139c1a654f18d13f8a72a68892ca",
+    "initDataSha256": "55d9686c06ecfd8533c1a352f08e98eaf79c150442efa9b93d6bd67dfa6f02b3",
+    "launchMeasurement": "be2e11ecce7f8fedf0ab8fe056b927c5508557c5e57279f70c6e43ab6b3c3afcb10da6982a6e5f5bcf1069ec8a664818",
+    "runtimeClassName": "kata-cc-nvidia-gpu"
+  },
+  "images": {
+    "controller": "image-registry.openshift-image-registry.svc:5000/confidential-inference-demo/confidential-volume-controller@sha256:ea319a76f3350052df2d4ee4954d8848fd7a73e59ff21de5c754886fc1e790cb",
+    "populator": "image-registry.openshift-image-registry.svc:5000/confidential-inference-demo/encrypted-model-populator@sha256:eea816e4fbe6fbe931f43a166fea028798471273dbd837b469b9f9d28b1bbf2d",
+    "sidecar": "image-registry.openshift-image-registry.svc:5000/confidential-inference-demo/confidential-storage-sidecar@sha256:274aabedae5490a0671651a33609bc1a148f9cb6caa487b62933446c2937cfee",
+    "application": "nvcr.io/nvidia/vllm@sha256:15f380ad9c32f0ac57ac16e4b778c6f733c88b9ffe3a936035d0a59ad17b1aab",
+    "python": "registry.access.redhat.com/ubi9/python-312@sha256:56fad467cb1e41666f0028b7fd71107df0556bcc9ecfc577597858c85618f55c",
+    "authority": "image-registry.openshift-image-registry.svc:5000/confidential-inference-demo/confidential-storage-authority@sha256:ab4fb9a6d31b9b1c3f450bcf6a4a72d2bbeeb55b7debd9699b7d29309ddae4f2"
+  },
+  "source": {
+    "diskBytes": 2147483648,
+    "diskDigest": "sha256:48b39b0533a35dfe3bc24b339d6a45e00b76f7fa215d71eab7459134f65d42a1",
+    "format": "luks-verity-v1",
+    "manifestDigest": "sha256:267a66f0ec64b42cc51fc9669083f7160c9a129b9f6d21ae0dc2c4d67a19882f",
+    "repository": "confidential-inference-demo/qwen-demo-003-model"
+  },
+  "first": {
+    "phase": "first",
+    "pod": "qwen-demo-003-predictor-76587cd846-hc476",
+    "podUid": "ab3bc319-a327-443e-90c4-26565b48c593",
+    "boot": "59ee90e5-34f1-4715-93e0-aeaaf5798c37",
+    "pvcUids": {
+      "data": "fa5d711d-38fb-4a29-a44a-db8995347ee9",
+      "model": "8b5d61d8-4e00-4a27-8ef7-1b30772f8adf"
+    },
+    "initDataSha256": "55d9686c06ecfd8533c1a352f08e98eaf79c150442efa9b93d6bd67dfa6f02b3",
+    "model": "qwen3-0.6b",
+    "chatStatus": 200,
+    "execDenied": true,
+    "provenance": "Captured first-pod.json, application-first.log, chat-first.json and exec-denial-first.txt before VM replacement"
+  },
+  "reopen": {
+    "phase": "reopen",
+    "namespace": "confidential-inference-demo",
+    "workload": "qwen-demo-003",
+    "pod": "qwen-demo-003-predictor-76587cd846-rzjtb",
+    "podUid": "8ea6b4f6-987c-42cb-852d-ac47726506dd",
+    "boot": "f9aa089a-1db4-482d-ae6e-509b642fd3dd",
+    "pvcUids": {
+      "data": "fa5d711d-38fb-4a29-a44a-db8995347ee9",
+      "model": "8b5d61d8-4e00-4a27-8ef7-1b30772f8adf"
+    },
+    "initDataSha256": "55d9686c06ecfd8533c1a352f08e98eaf79c150442efa9b93d6bd67dfa6f02b3",
+    "applicationImage": "nvcr.io/nvidia/vllm@sha256:15f380ad9c32f0ac57ac16e4b778c6f733c88b9ffe3a936035d0a59ad17b1aab",
+    "model": "qwen3-0.6b",
+    "chatStatus": 200,
+    "chatResponse": "<think>\n\n</think>\n\n7 plus 5 equals 12.",
+    "modelHashesVerified": true,
+    "execDenied": true,
+    "gpu": {
+      "event": "CUDA_GPU_PROBE_PASS",
+      "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "torch": "2.9.0a0+50eac811a6.nv25.09",
+      "cuda": "13.0"
+    },
+    "scope": "application, persistence, chat and exec checks; authority evidence separate"
+  },
+  "authority": {
+    "firstOperationCount": 3,
+    "secondOperationCount": 5,
+    "newOperations": "two reopen operations",
+    "formatStepsUnchanged": true,
+    "cpuAppraisal": "affirming",
+    "gpuAppraisal": "affirming",
+    "initializationSteps": [
+      {
+        "step": "luks-format",
+        "stepId": "77971cc3-7373-4ec2-bb64-bd91c3d9db1f",
+        "status": "Complete"
+      },
+      {
+        "step": "integrity-initialize",
+        "stepId": "16492792-5bc6-451e-9821-d45faeac8e43",
+        "status": "Complete"
+      },
+      {
+        "step": "filesystem-create",
+        "stepId": "61fdc95d-65b0-4dfc-afd7-20ea535a2436",
+        "status": "Complete"
+      },
+      {
+        "step": "durability-barrier",
+        "stepId": "8d8a650c-b371-4855-81a4-148f4ff2d18a",
+        "status": "Complete"
+      }
+    ],
+    "diskIdentities": [
+      {
+        "volumeId": "v-ryfzqjt774yccfuwz76ooyzhigqmdypxpvvxorxedigichqy37gq",
+        "headerSha256": "e9d8294be66107292a5a8cd502fd3985fefa230b52f81ee8fc185b042c770dd1",
+        "manifestSha256": "4ddaaf07a8b0d70d09a2abdfd67021b99d181ca9f57b7125a8cfa8d888e6a82e"
+      },
+      {
+        "volumeId": "v-npz3cjgsdadrb3hbth7zzuhcjixualzj7ae75yvsh525z4ffxtaq",
+        "headerSha256": "ac06e4c2fa1140b7e5732c54bb5f369d4e43f2e3e210e67384ef7fca1f3aeac0",
+        "manifestSha256": "ad27a012657f44047b6f5740606fb72ffdabf79a179b147a649c76181edd7475"
+      }
+    ]
+  },
+  "originalQwen": {
+    "podUid": "d5cc3080-ae0b-4490-b145-56a216732566",
+    "ready": true,
+    "unchanged": true
+  },
+  "limitations": [
+    "Only the OSC SNP/NVIDIA profile is hardware-qualified",
+    "Trusted release review/enrollment/signing are explicit administrative steps",
+    "Registry reader credential renewal is manual",
+    "Storage authority history must be retained; unclean owner recovery is not automatic",
+    "HTTP chat frontend is outside the TEE; no end-to-end prompt TLS claim"
+  ],
+  "registryCredential": {
+    "renewal": "manual",
+    "expiresAt": "2026-10-15T09:14:43+00:00",
+    "scope": "helper ImageStream layers GET only; credential released by Trustee"
+  },
+  "standalonePopulatorCheck": {
+    "name": "qwen-demo-003-populator-check",
+    "uid": "196f98ae-d919-472b-9098-76a3805fab07",
+    "volume": "pvc-353125db-b9a8-4c85-8ecc-226caa26fd4e",
+    "phase": "Bound",
+    "source": {
+      "apiGroup": "storage.confidentialcontainers.org",
+      "kind": "EncryptedModelSource",
+      "name": "qwen-demo-003-model"
+    },
+    "image": "sha256:eea816e4fbe6fbe931f43a166fea028798471273dbd837b469b9f9d28b1bbf2d"
+  }
+}

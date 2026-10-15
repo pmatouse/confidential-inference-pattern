@@ -3,6 +3,8 @@
 This guide describes the new installation path, including trusted preparation.
 Use it with [setup](setup.md), [Vault bootstrap](vault-bootstrap.md) and the
 [release command reference](../../components/inference-release/README.md).
+The demonstrated run passed; see the [public receipt](../../tests/evidence/2026-10-15/fresh-qwen-e2e.json)
+and [acceptance commands](acceptance.md).
 A fresh add-on namespace, new keys, a freshly encrypted model and new PVCs on an
 existing configured CoCo cluster are not a reinstallation of that cluster.
 The current qualified target is stock OSC SNP with NVIDIA GPU passthrough;
@@ -87,7 +89,9 @@ no data source. A binding Job checks Bound claims and creates ConfidentialVolume
 bound to the actual claim UIDs. The ConfidentialWorkload controller then publishes
 its public request and waits for approval.
 
-Render a draft from that request and the reviewed runtime/image profile. Include
+Instantiate the [runtime profile template](../../profiles/README.md) using the
+new publisher descriptor and public site inputs, then render a draft from that
+profile and the controller request. Include
 `startupChecks` with the producer's file inventory, `/model`, `/data` and a fresh
 run identity. Create the enrollment plan from the reviewed publisher descriptor
 and explicit list of new blank data claim UIDs. `charts/storage-enrollment` runs
