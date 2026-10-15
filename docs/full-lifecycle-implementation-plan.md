@@ -9,11 +9,31 @@ signing, manifest copying or acceptance commands.
 **Status:** proposed work, not an implemented API. The existing staged demo passed
 hardware E2E; [automation.md](automation.md) describes today's boundary.
 
+## Two required delivery paths
+
+| Path | User operation | Execution |
+| --- | --- | --- |
+| **Manual quickstart first** | Run documented Make targets in order, or an explicit aggregate `quickstart-all` | Make invokes shared tools/Jobs, records receipts and prints the next command; no new release controller required |
+| **GitOps/controller** | Bootstrap once; commit site YAML | Argo installs services and release intent; the release controller invokes the same tools/Jobs and verifies the same receipts |
+
+The manual path still uses the existing volume populator, ConfidentialVolume/
+workload controller, KServe and guest sidecar. It replaces only the **new release
+orchestrator**. It is a supported operating path, not a temporary debugging script.
+No two executors may manage the same release concurrently; handover must validate
+existing identities/receipts and explicitly transfer orchestration ownership.
+
+The [manual quickstart specification](demo/quickstart-implementation-plan.md)
+defines all Make targets, expected outputs, follow-ups and image-build requirements.
+The agreed starting platform is OpenShift + CoCo already installed.
+Those targets are planned, not present-day commands. Both paths must pass independently
+from empty add-on state; writing a how-to alone is not completion.
+
 ## Scope and decisions
 
 - Keep stock Kata, OSC, vLLM, KServe and Trustee. Add orchestration in this repository.
 - Use existing OpenShift GitOps/Argo CD. No second workflow engine is required:
   one new **trusted release controller**, Kubernetes Jobs and durable receipts suffice.
+  Keep a CLI interface to every shared stage so Make can operate without that controller.
 - First qualify the existing `osc-snp-nvidia-x86_64-v1` profile. Architecture stays
   profile-driven; additional hardware requires its own launch/appraisal adapter and E2E.
 - Use immutable model digests and explicit release identities. Initial delivery
@@ -152,18 +172,18 @@ release is deleted. Finalizers and explicit retirement govern destructive cleanu
 
 | Milestone | Changes and existing code to reuse | Exit gate |
 | --- | --- | --- |
-| **1. Contract and reconciliation skeleton** | New `components/inference-release-controller/` and chart/CRD; extend `values.schema.json` and `scripts/addon.py`; validation, conditions, leases, receipt storage and ownership checks | Fake-backend tests prove deterministic retry, UID replacement rejection, spec-change handling and no keys in status/logs |
-| **2. Portable installation and bootstrap** | Publish pinned controller/populator/helper/authority/preparation images; extend `charts/addon-bootstrap`; install trusted namespace, external credential references and retained authority; dependency ownership/preflight and custom Argo health | One bootstrap plus site YAML installs foundation from portable artifacts; resync makes no additional identities or state |
-| **3. Trusted preparation and volume creation** | Wrap existing publisher tools, `charts/model-publisher`, release/provisioning and binder functions in bounded Jobs; durable key staging and OCI receipts | Fresh model publication and blank data claim; interrupted publication resumes with the same key; importer receives ciphertext only |
-| **4. Measurements and authority enrollment** | Reuse `profile.py`, `render.py`, `enroll.py`, `package.py`; add qualified launch calculation adapter and serialized authenticated authority administration | No manual measurement/metadata transfer; negative profile/launch/UID tests fail closed; authority restart preserves exact plans |
-| **5. Trustee integration and signing** | Refactor `key_enrollment.py` into backend/owner adapters; remove fixed Vault/ESO mapping; automate exact binding verification and `approve.py` signing | Matching CPU/GPU launch/InitData can obtain keys; mismatches cannot; partial updates resume without broadening policy |
-| **6. Serving and executable acceptance** | Connect generated package to existing workload controller; render chat; run `scripts/verify-demo.py` through a scoped test runner; publish custom health | Fresh RO/RW Qwen E2E, exec denial, actual chat, fresh-VM persistence and stable identity/history checks all pass |
-| **7. Lifecycle hardening and handover** | Credential renewal, retained-state recovery, retirement flow, failure injection, concise operator docs and public sanitized receipts | Resync/restart/renewal tests pass; documented recovery preserves keys/data; clean add-on install completes without per-stage commands |
+| **1. Shared stage contract and feasibility** | Define versioned inputs/receipts and execution ownership; extend the site schema; spike launch calculation and authority enrollment; factor existing release tools into idempotent CLI operations | No hidden lab files; exact retry/UID/conflict tests; document every public input and external credential |
+| **2. Manual build and bootstrap** | Add `make/quickstart.mk` and `scripts/quickstart.py`; build/push controller, populator, helper, authority and preparation images; create scoped identities, retained authority and dependency preflight | Fresh clone + site inputs produces digest-pinned images and foundation; no prebuilt lab binary, anonymous pull or key-bearing build context |
+| **3. Complete manual release path** | Wrap publisher, provisioner/binder, profile/render/enroll/package/key-enrollment/signer and chat tools; emit commands/receipts; parameterize site mappings | Explicit Make targets prepare fresh encrypted Qwen, RO/RW PVCs, exact Trustee bindings and running KServe/chat without file editing between stages |
+| **4. Manual quickstart E2E and how-to** | Wrap verification and graceful test-VM replacement; collect authority/appraisal evidence; document command → expected output → next action, recovery and access | Execute the guide from empty add-on state with empty build caches; first/reopen tests pass; second invocation preserves keys and initialization history |
+| **5. Release controller** | New `components/inference-release-controller/`, chart and `InferenceRelease` CRD; invoke shared operations with durable reconciliation, leases and scoped Jobs | Equivalent release succeeds without Make orchestration; fault injection proves retry/parity and no key leakage |
+| **6. Full GitOps integration** | Extend `charts/addon-bootstrap`; watched site YAML, root/child Applications, trusted namespace/project, credential references, release intent and custom health | One bootstrap + Git change drives complete verified demo; Argo sync alone is not Ready; no competing resource writers |
+| **7. Lifecycle hardening and parity** | Renewal, recovery, retention, explicit handover/retirement and CI coverage for both entry points; publish concise docs and sanitized receipts | Manual and GitOps paths independently pass clean E2E, interruption/resync, renewal and persistence tests |
 
-Dependencies: 1 → 2 → 3 → 4 → 5 → 6 → 7. Prove the launch-measurement adapter
-and authority enrollment interface early during milestone 1: they are feasibility
-gates, not tasks to defer until integration. No implementation time estimate is
-reliable until those two spikes pass.
+Dependencies: 1 → 2 → 3 → 4 → 5 → 6 → 7. Deliver the complete **manual quickstart
+before** unattended controller orchestration. The shared stages are the reusable
+implementation, not a second set of shell-only business rules. No implementation
+time estimate is reliable until the launch/authority feasibility spikes pass.
 
 ## Integration details that must be resolved
 
@@ -214,8 +234,11 @@ than bypass it. Key rotation and arbitrary workload upgrades are later workflows
 1. Start from CoCo with working CPU/GPU attestation and declared registry/CSI/KServe/
    GitOps prerequisites. Create a new add-on namespace, keys, model publication,
    claims and authority state. No copied lab approvals or prepopulated volumes.
-2. Bootstrap once, commit one site YAML, then observe only Argo/release status.
-   No operator copies digests, supplies PVC UIDs or runs enrollment/signing commands.
+2. Test both entry points on separate fresh release identities. For manual mode,
+   follow the Makefile how-to, including builds and pushes; each target prints its
+   result and next command. For GitOps, bootstrap once, commit site YAML and observe
+   Argo/release status. Neither path requires hand-editing generated digests, PVC
+   UIDs, policy hashes or approval artifacts.
 3. Prove model hashes and RO mount, GPU computation/inference, unprivileged vLLM,
    private helper interfaces and denied administrator exec.
 4. Fsync a `/data` canary; replace the designated VM; require different Pod/boot

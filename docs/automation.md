@@ -8,6 +8,11 @@ Routine deployment requires no manual `oc apply`, signing or enrollment commands
 
 Implementation sequence and acceptance gates: [full lifecycle plan](full-lifecycle-implementation-plan.md).
 
+The plan requires two maintained entry points: a complete [manual Makefile
+quickstart](demo/quickstart-implementation-plan.md), delivered first, and GitOps
+orchestration over the same operations. The manual path still uses the existing
+volume/workload controllers, but does not need the new release orchestrator.
+
 ## Inputs and bootstrap
 
 The site YAML selects installation identity, qualified hardware profile, pinned
