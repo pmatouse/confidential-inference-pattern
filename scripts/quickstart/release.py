@@ -326,8 +326,8 @@ def trustee_pod(r):
     return active[0] if len(active)==1 else None
 
 
-def verify_loaded_keys(r,values):
-    pod=trustee_pod(r)
+def verify_loaded_keys(r,values,pod=None):
+    pod=pod or trustee_pod(r)
     if not pod:return False
     # Trustee's Secret converter flattens resource paths using literal \x2F.
     base='/opt/confidential-containers/storage/repository/'
@@ -339,6 +339,25 @@ def verify_loaded_keys(r,values):
     except RuntimeError:return False
     actual=[line.split()[0] for line in result.splitlines()]
     return actual==[sha(values[tag]) for tag in sorted(values)]
+
+
+def ensure_loaded_keys(r,expected):
+    # Updating owner-managed policy can roll Trustee while keys are projected.
+    # Wait for that rollout before deciding whether a separate restart is needed.
+    pod=r.wait('healthy Trustee after owner reconciliation',lambda:trustee_pod(r),timeout=600,interval=5)
+    if verify_loaded_keys(r,expected,pod):return pod
+    require(r.q.get('allowTrusteeRestart') is True,'keys projected but KBS not loaded; allow one controlled Trustee restart in site inputs')
+    pending=r.state/'trustee-restart.json'
+    if not pending.exists():write(pending,{'pod':pod['metadata']['name'],'uid':pod['metadata']['uid']})
+    old=json.loads(pending.read_text());current=r.get('pod',old['pod'],r.v['base']['trusteeNamespace'])
+    if current and not current['metadata'].get('deletionTimestamp'):
+        require(current['metadata']['uid']==old['uid'],'restart Pod identity changed')
+        r.oc('delete','pod',old['pod'],'-n',r.v['base']['trusteeNamespace'],'--wait=false','--ignore-not-found=true')
+    def loaded():
+        current=trustee_pod(r)
+        if current and current['metadata']['uid']!=old['uid'] and verify_loaded_keys(r,expected,current):return current
+        return None
+    return r.wait('replacement Trustee with exact loaded resources',loaded,timeout=600,interval=5)
 
 
 def enroll(r):
@@ -357,19 +376,8 @@ def enroll(r):
         for cli,key in [('vault-namespace','namespace'),('vault-pod','pod'),('enrollment-namespace','enrollmentNamespace'),('service-account','serviceAccount'),('auth-mount','authMount'),('role','role'),('external-secret','externalSecret'),('secret','projectionSecret')]:command+=['--'+cli,vault[key]]
         command+=['--trustee-namespace',r.v['base']['trusteeNamespace']]
         r.command(command,timeout=600,sensitive=True)
-    if not verify_loaded_keys(r,expected):
-        require(r.q.get('allowTrusteeRestart') is True,'keys projected but KBS not loaded; allow one controlled Trustee restart in site inputs')
-        pending=r.state/'trustee-restart.json'
-        if not pending.exists():
-            pod=trustee_pod(r);require(pod is not None,'Trustee must be healthy before controlled restart')
-            write(pending,{'pod':pod['metadata']['name'],'uid':pod['metadata']['uid']})
-        old=json.loads(pending.read_text());current=r.get('pod',old['pod'],r.v['base']['trusteeNamespace'])
-        if current and not current['metadata'].get('deletionTimestamp'):
-            require(current['metadata']['uid']==old['uid'],'restart Pod identity changed')
-            r.oc('delete','pod',old['pod'],'-n',r.v['base']['trusteeNamespace'],'--wait=false')
-        r.wait('replacement Trustee with exact loaded resources',lambda:verify_loaded_keys(r,expected),timeout=600,interval=5)
-        require(trustee_pod(r)['metadata']['uid']!=old['uid'],'new Trustee Pod UID required')
-    return {'state':'TrustReady','policySha256':policy_sha,'runtime':runtime,'tags':tags,'trusteePodUID':trustee_pod(r)['metadata']['uid']}
+    pod=ensure_loaded_keys(r,expected)
+    return {'state':'TrustReady','policySha256':policy_sha,'runtime':runtime,'tags':tags,'trusteePodUID':pod['metadata']['uid']}
 
 
 def deploy(r):

@@ -88,6 +88,44 @@ class QuickstartTests(unittest.TestCase):
         self.assertIn(r'/opt/confidential-containers/storage/repository/default\x2Fmodel-keys\x2Fdata',calls[0][0])
         self.assertNotIn(b'example-data-key',calls[0][0])
 
+    def test_enrollment_waits_for_owner_rollout_and_does_not_restart_loaded_trustee(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from quickstart.release import ensure_loaded_keys
+        pod={'metadata':{'name':'replacement','uid':'new'}}
+        def wait(description,check,**kwargs):
+            self.assertIsNone(check())
+            return check()
+        with tempfile.TemporaryDirectory() as directory:
+            r=SimpleNamespace(state=Path(directory),q={'allowTrusteeRestart':False},wait=wait,
+                oc=lambda *args,**kwargs:self.fail('owner rollout must not cause a second restart'))
+            with patch('quickstart.release.trustee_pod',side_effect=[None,pod]),patch('quickstart.release.verify_loaded_keys',return_value=True) as verify:
+                self.assertEqual(ensure_loaded_keys(r,{'key':b'expected'}),pod)
+                verify.assert_called_once_with(r,{'key':b'expected'},pod)
+            self.assertFalse((r.state/'trustee-restart.json').exists())
+
+    def test_enrollment_restarts_stale_trustee_once_and_requires_new_uid_and_exact_keys(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from quickstart.release import ensure_loaded_keys
+        old={'metadata':{'name':'old','uid':'old'}};new={'metadata':{'name':'new','uid':'new'}}
+        def wait(description,check,**kwargs):
+            for _ in range(5):
+                result=check()
+                if result:return result
+            self.fail('readiness never passed')
+        with tempfile.TemporaryDirectory() as directory:
+            state=Path(directory);calls=[]
+            def oc(*args):
+                self.assertEqual(json.loads((state/'trustee-restart.json').read_text())['uid'],'old')
+                calls.append(args)
+            r=SimpleNamespace(state=state,q={'allowTrusteeRestart':True},v={'base':{'trusteeNamespace':'trustee'}},
+                wait=wait,get=lambda *args:old,oc=oc)
+            with patch('quickstart.release.trustee_pod',side_effect=[old,None,old,new,new]),patch('quickstart.release.verify_loaded_keys',side_effect=[False,False,True]):
+                self.assertEqual(ensure_loaded_keys(r,{'key':b'expected'}),new)
+            self.assertEqual(len(calls),1)
+            self.assertIn('--ignore-not-found=true',calls[0])
+
     def test_completed_pending_build_is_recovered_without_second_submission(self):
         from types import SimpleNamespace
         from quickstart.build import image_build

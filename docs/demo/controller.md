@@ -42,8 +42,13 @@ is the earlier intermediate snapshot, not the final outcome.
 
 Fresh repetition `qwen-controller-002` exposed a shared-CRD ownership bug during
 bootstrap, before any release started ([failure record](../../tests/evidence/2026-10-15/controller-002-bootstrap-failed.json)).
-The installer now reuses the validated shared API without adopting it. A new
-installation will qualify this correction; the failed attempt is not counted as E2E.
+The installer now reuses the validated shared API without adopting it. Attempt
+`003` then passed fresh bootstrap, model publication, volume binding and measurement,
+but hit an enrollment readiness race during the owner-managed Trustee rollout
+([failure record](../../tests/evidence/2026-10-15/controller-003-enrollment-failed.json)).
+Enrollment now waits for a healthy Trustee and checks its exact resource hashes
+before deciding whether the authorized restart is needed. Neither failed attempt
+is counted as successful E2E; a new installation must qualify the correction.
 
 ## Bootstrap once
 

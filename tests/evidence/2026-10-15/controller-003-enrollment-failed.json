@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-15",
+  "state": "EnrollmentFailed",
+  "hardwareE2EQualified": false,
+  "run": "qwen-controller-003",
+  "sourceCommit": "aa73949f11ab218ed8950fba28c927369dfc56f7",
+  "releaseStarted": true,
+  "manualRetry": false,
+  "completedStages": [
+    "model",
+    "volumes",
+    "measure"
+  ],
+  "failure": "Trustee must be healthy before controlled restart: exact owner-policy update was rolling Trustee when enrollment checked loaded resources.",
+  "resolution": "Wait for healthy owner-managed Trustee, verify resource hashes on that Pod, then request at most the already-authorized controlled restart if resources remain stale. Qualify on a new installation.",
+  "auditBaseline": {
+    "observedAt": "2026-10-15T11:03:25.734372+00:00",
+    "sourceCommit": "aa73949f11ab218ed8950fba28c927369dfc56f7",
+    "controller": {
+      "uid": "78b26d61-fa18-4c85-a162-e7825be78dad",
+      "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-003/inference-release-executor@sha256:e11234a6db02cadde17982e354e79a33b1732a5ba606c12a98a69c2c85b8c283",
+      "restarts": 0
+    },
+    "executorContextSha256": "3a85df6204efe0a6932517df7bb92a58aaf96ba9fbcfb7b5b1b092a245dfec6f",
+    "gpuAllocatedBeforeStart": 1,
+    "gpuCapacity": 2,
+    "modelAndDataClaimsAbsent": true,
+    "releaseAbsent": true,
+    "releaseJobsAbsent": true,
+    "scopedSSHCredentialOnly": true,
+    "namespaceUIDs": {
+      "ci-controller-003": "bc83fdb3-f58d-4c83-a470-c052886971ec",
+      "ci-controller-003-trusted": "349b1807-25bd-4602-bf38-fedef753d4f2"
+    }
+  },
+  "observations": [
+    {
+      "observedAt": "2026-10-15T11:05:20.054968+00:00",
+      "phase": "Preparing",
+      "currentStage": "model",
+      "reason": "StageScheduled",
+      "completed": 0
+    },
+    {
+      "observedAt": "2026-10-15T11:05:30.567263+00:00",
+      "phase": "Progressing",
+      "currentStage": "model",
+      "reason": "StageRunning",
+      "completed": 0
+    },
+    {
+      "observedAt": "2026-10-15T11:09:01.477650+00:00",
+      "phase": "Binding",
+      "currentStage": "volumes",
+      "reason": "StageScheduled",
+      "completed": 1
+    },
+    {
+      "observedAt": "2026-10-15T11:09:12.030021+00:00",
+      "phase": "Progressing",
+      "currentStage": "volumes",
+      "reason": "StageRunning",
+      "completed": 1
+    },
+    {
+      "observedAt": "2026-10-15T11:09:54.161018+00:00",
+      "phase": "Progressing",
+      "currentStage": "measure",
+      "reason": "StageRunning",
+      "completed": 2
+    },
+    {
+      "observedAt": "2026-10-15T11:10:04.731593+00:00",
+      "phase": "Progressing",
+      "currentStage": "enroll",
+      "reason": "StageRunning",
+      "completed": 3
+    },
+    {
+      "observedAt": "2026-10-15T11:10:36.400230+00:00",
+      "phase": "Blocked",
+      "currentStage": "enroll",
+      "reason": "StageFailedExplicitRetryRequired",
+      "completed": 3
+    }
+  ],
+  "executor": {
+    "build": "inference-release-executor-1",
+    "contextSha256": "3a85df6204efe0a6932517df7bb92a58aaf96ba9fbcfb7b5b1b092a245dfec6f",
+    "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-003/inference-release-executor@sha256:e11234a6db02cadde17982e354e79a33b1732a5ba606c12a98a69c2c85b8c283",
+    "namespace": "ci-controller-003"
+  }
+}
