@@ -6,6 +6,8 @@ release intent; trusted controllers/Jobs prepare, enroll, sign and verify the de
 Routine deployment requires no manual `oc apply`, signing or enrollment commands.
 **Full lifecycle reconciliation is not implemented yet.**
 
+Implementation sequence and acceptance gates: [full lifecycle plan](full-lifecycle-implementation-plan.md).
+
 ## Inputs and bootstrap
 
 The site YAML selects installation identity, qualified hardware profile, pinned

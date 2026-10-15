@@ -21,6 +21,7 @@ unattended demo**, a cross-hardware qualification, or an official VP support tie
 | [Demo setup](docs/demo/setup.md) | One-time installation and release sequence |
 | [Acceptance](docs/demo/acceptance.md) | Inference, fresh-VM persistence and negative checks |
 | [GitOps target](docs/automation.md) | One site YAML, Argo ownership, trusted release lifecycle and remaining work |
+| [Implementation plan](docs/full-lifecycle-implementation-plan.md) | Milestones, release API, integration gaps and completion gates |
 | [Status](docs/implementation-status.md) | Verified result and open integration gaps |
 
 Start by filling site values, then run:
