@@ -338,13 +338,50 @@ private AA after the GPU consumer exists ensures its additional GPU attester is
 selected. AA validates the exact InitData against SNP HOST_DATA; Trustee checks
 its approved hash and launch identity. A substituted ConfigMap is insufficient.
 
-The sidecar and app share the **guest PID namespace**, with separate mount
-namespaces. The helper checks `SO_PEERCRED`, UID/GID 1001, exact startup command,
-zero effective capabilities and `NoNewPrivs`, then retains a pidfd and descriptors
-for the app's root and mount namespace. It clones private mounts with `open_tree`,
-enters that namespace with `setns`, and attaches them with `move_mount`. Targets
-are `nodev,nosuid,noexec` and the approved RO/RW mode. No shared host mount
-propagation, host mount helper, custom CSI decryptor or Kata-agent patch is used.
+### How mounts enter an unprivileged application
+
+The Pod sets `shareProcessNamespace: true`: the sidecar and app share the **guest
+PID namespace**, with separate mount namespaces. This exposes guest processes to
+the helper; it does not enable the host PID namespace or share filesystem mounts.
+The renderer gives raw PVC `volumeDevices` only to the helper. The application
+gets memory-backed placeholder directories at the approved mount destinations.
+
+1. The application runs a measured wait command from the existing image and
+   connects to `/rendezvous/storage.sock`. vLLM has not started yet.
+2. The helper obtains the caller PID/UID/GID using `SO_PEERCRED`. It checks
+   UID/GID 1001, the exact startup command, zero effective capabilities and
+   `NoNewPrivs`. It retains a pidfd plus descriptors for `/proc/<pid>/root` and
+   `/proc/<pid>/ns/mnt`; mount requests do not accept an application-supplied PID.
+3. After attestation and storage activation, the filesystems are mounted privately
+   in the helper. A forked helper process performs the namespace transfer below.
+4. After successful attachment it sends `READY`. The application checks the
+   mounts, model hashes, data persistence and GPU, then `exec`s stock vLLM.
+
+```mermaid
+sequenceDiagram
+  participant H as Privileged helper child
+  participant K as Guest Linux kernel
+  participant N as Application mount namespace
+  H->>K: open_tree(source, OPEN_TREE_CLONE | O_CLOEXEC)
+  K-->>H: Detached mount descriptor (no file copy)
+  H->>K: setns(pinned application mount namespace)
+  H->>K: fchdir(pinned application root); chroot; chdir
+  H->>N: move_mount(descriptor, approved destination)
+  H->>N: Remount bind with nodev,nosuid,noexec and RO/RW mode
+  H-->>H: Exit; parent checks successful completion
+```
+
+This is a bind-mount-style attachment using Linux's file-descriptor mount API.
+The clone refers to the same guest filesystem; it does not copy model bytes or
+export plaintext through a host filesystem. `setns` changes the **helper child's**
+namespace, not the application's credentials. The helper retains the privileges
+needed for mount operations; vLLM receives only filesystem access. Its read-only
+root filesystem is compatible with a separately mounted writable `/data`.
+
+No shared host mount propagation, host mount helper, custom CSI decryptor or
+Kata-agent patch is used. Implementation: [renderer and wait command](../components/inference-release/render.py),
+[consumer authentication and mount transfer](../components/confidential-storage-sidecar/runtime.py)
+(`Consumer.__init__`, `Consumer.transfer`).
 
 The app waits for `READY` before executing vLLM. It has no raw storage devices,
 `CAP_SYS_ADMIN`, private CDH socket or volume-key API. The sidecar is privileged
@@ -352,6 +389,11 @@ The app waits for `READY` before executing vLLM. It has no raw storage devices,
 measured policy constrains container creation and denies administrator
 `ExecProcessRequest`; the SCC/admission guard additionally restricts use of the
 helper's service account on OpenShift.
+
+The sidecar is trusted guest root and can enter the application's namespace;
+these containers are not mutually isolated TEEs. On shutdown it stops the
+consumer before unmounting and closing storage. Uncertain cleanup retains
+authority ownership rather than permitting another writer.
 
 ## 5. Storage bytes and lifecycle
 

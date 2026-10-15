@@ -47,6 +47,8 @@ The helper starts private copies of stock AA/CDH after GPU attachment; AA checks
 InitData against SNP HOST_DATA. The helper authenticates the application over a
 Unix socket, pins its process/mount namespace, and transfers mounts with
 `open_tree`/`move_mount`. vLLM receives filesystem mounts, not decryption keys.
+The helper enters the application's mount namespace using `setns`; the app's
+credentials stay unchanged. See [the syscall sequence and startup handshake](workload-walkthrough.md#how-mounts-enter-an-unprivileged-application).
 
 The authority/publisher/enrollment environment is trusted. Colocation on the demo
 cluster does not protect their credentials or history from that cluster's administrator.
@@ -96,3 +98,5 @@ Intel TDX, other GPU models, other OSC/vLLM versions, other CSI implementations,
 WFFC, multi-GPU and multi-replica serving are **not qualified here**. The installer
 currently accepts only `osc-snp-nvidia-x86_64-v1`; a new platform needs a reviewed
 runtime/attestation profile and the same hardware E2E gates.
+See [porting to other hardware](hardware-porting.md) for the CPU-only and TDX
+implementation paths, source entry points and qualification checklist.

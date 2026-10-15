@@ -27,3 +27,6 @@ The template reproduces the demonstrated policy with its original public inputs.
 This is the first supported profile, not a claim that arbitrary CoCo hardware is
 already supported. Generic CRDs, ciphertext population and authority contracts are
 separate from this platform-specific policy/attestation layer.
+
+See [hardware porting](../docs/hardware-porting.md) for CPU-only and Intel TDX:
+required add-on changes, stock-platform prerequisites and E2E qualification gates.

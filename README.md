@@ -19,6 +19,7 @@ other hardware qualification and production credential/authority lifecycle remai
 | [Workload walkthrough](docs/workload-walkthrough.md) | CR/PVC examples, approval, attestation, mount transfer, disk I/O, inference and shutdown |
 | [Component map](docs/components.md) | Every source directory, running process, interface and key holder |
 | [Architecture](docs/architecture.md) | Components, data paths, trust boundaries, diagram, exact tested stack |
+| [Hardware porting](docs/hardware-porting.md) | CPU-only and Intel TDX paths, platform-specific code, bring-up order and qualification gates |
 | [Inputs](docs/inputs.md) | What to supply first, what is generated, credentials and reproducibility |
 | [Demo setup](docs/demo/setup.md) | One-time installation and release sequence |
 | [Acceptance](docs/demo/acceptance.md) | Inference, fresh-VM persistence and negative checks |
