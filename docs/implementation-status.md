@@ -28,6 +28,15 @@ The [controller runbook](demo/controller.md) records the failed fresh attempts a
 fixes. Earlier [controller evidence](../tests/evidence/2026-10-15/controller-e2e.json)
 also covers restart recovery; that initial run required explicit fixes/retries.
 
+## Installation parity
+
+Manual `quickstart-all` and `controller-demo` use the same site template,
+credentials, foundation handlers and release operations. `quickstart-foundation`
+provides an ordered installation boundary; controller handover adds its executor
+image and retained state before submission. Regression tests check stage parity,
+input forwarding and fail-stop behavior under parallel Make. These local checks
+do not extend the hardware qualification recorded above.
+
 ## Automatic integration bootstrap
 
 The new [stock-pattern bootstrap](demo/stock-bootstrap.md) configures the scoped

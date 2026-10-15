@@ -47,7 +47,8 @@ shared-dependency installation path.
 The acceptance workflow intentionally replaces its own predictor once to test
 persistence. That replacement is an automated test stage, not an operator repair.
 All six builds also completed on their first attempts; no automatic transfer
-retry was needed. 144 Python tests and values/security validation pass.
+retry was needed. These counts and results describe the recorded `006` run;
+subsequent changes and bootstrap coverage are recorded in the `007` evidence.
 
 ### Qualification history
 
@@ -67,28 +68,38 @@ A failed stage Job still blocks the release; it is never silently retried.
 
 ## Bootstrap once
 
-For automatic Vault/ESO/Trustee setup, follow [stock-pattern bootstrap](stock-bootstrap.md)
-and run `make controller-demo` with external credential files. The explicit commands
-below remain available for installations with preconfigured integrations.
-
-
-Use the [quickstart inputs](quickstart.md), but a new run and new namespaces.
-Supply the existing scoped Vault identity and permission for exact Trustee-owner
-updates. The operator performs these steps once:
+Use the same [site template and external credentials](stock-bootstrap.md#inputs)
+as the manual quickstart, with a fresh run and namespaces. The normal entry point is:
 
 ```sh
-export KUBECONFIG=/private/path/cluster.kubeconfig
-export VALUES=overrides/sites/my-controller.yaml
-make qs-tools qs-dependencies qs-preflight qs-bootstrap qs-build qs-push qs-install VALUES="$VALUES"
-# Register a repository-only deploy key using the commands below, then:
+make controller-demo VALUES="$VALUES" PYTHON=python3
+make release-controller-status VALUES="$VALUES" \
+  PYTHON="${QUICKSTART_CACHE:-$PWD/.cache/quickstart}/venv/bin/python"
+```
+
+The expanded sequence is useful for inspecting the foundation before handover:
+
+```sh
+make quickstart-foundation VALUES="$VALUES" PYTHON=python3
+export PYTHON="${QUICKSTART_CACHE:-$PWD/.cache/quickstart}/venv/bin/python"
+make release-controller-image VALUES="$VALUES" PYTHON="$PYTHON"
+make release-controller-install VALUES="$VALUES" PYTHON="$PYTHON"
+make release-controller-start VALUES="$VALUES" PYTHON="$PYTHON"
+```
+
+`quickstart-foundation` is shared with the manual path and includes
+`qs-integrations`; it installs the repository-scoped Git Secret automatically when
+integrations are enabled. Run expanded commands sequentially. Do not list dependent
+Make targets together under `make -j`.
+
+If integrations were configured externally, set `quickstart.integrations.enabled: false`
+before starting and follow [external bootstrap](vault-bootstrap.md). In that
+mode, create the Git Secret after the foundation and before controller start:
+
+```sh
 oc -n <trusted-namespace> create secret generic inference-release-git \
   --from-file=ssh-privatekey=/private/path/deploy-key \
   --from-file=known_hosts=/private/path/known_hosts
-make release-controller-image VALUES="$VALUES"
-make release-controller-install VALUES="$VALUES"
-# The credential Secret is required before start; install can seed state without it.
-make release-controller-start VALUES="$VALUES"
-make release-controller-status VALUES="$VALUES"
 ```
 
 Expected: `ControllerBootstrapReady`, followed by stage progress and eventually
@@ -114,7 +125,8 @@ repository. Keys and credentials never enter either repository.
 For GitHub, create a dedicated write deploy key. GitHub restricts it to that one
 repository; it can write any permitted branch in that repository, so branch
 protection still matters. Register the public key using a repository administrator
-session; only the new private key goes into the cluster Secret above.
+session; only the new private key goes into the cluster Secret (automatically
+during enabled integration bootstrap).
 
 ```sh
 export TRUSTEE_REPO=<owner/repository>

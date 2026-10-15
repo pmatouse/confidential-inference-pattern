@@ -27,7 +27,7 @@ its control, ciphertext, key and plaintext paths interact.
 | Serving | KServe v0.20.0 in Standard mode; cert-manager; existing OpenShift internal registry available |
 | Site YAML | Unique installation/run/namespaces, stable cluster ID, node, StorageClass, Trustee origin/public certificate references, GitOps owner mapping, Vault enrollment identity |
 | Owner access | Git credentials allowing a commit to the declared Trustee owner's values file; Argo must consume that file |
-| Scoped key enrollment | Vault Kubernetes-auth role and ServiceAccount, standard `secret/data/hub/modelKeys` backend and ESO projection; see [bootstrap](vault-bootstrap.md) |
+| Integration bootstrap | Explicit private Git SSH/host-pin and Vault administrator files; `qs-integrations` creates the scoped role and Git-owned ESO/policy mapping. See [shared inputs](stock-bootstrap.md#inputs) |
 | Downloads | GitHub, PyPI, Go, Rust crates, Debian packages, Hugging Face, pinned base registries, and the profile's signed Red Hat guest-kernel RPM URL (or an approved mirror) |
 | Local scratch | Python 3.12+, Helm **3**, `oc`, Git, curl; allow several GiB for compiler/artifact caches. No local Docker daemon needed |
 
@@ -52,6 +52,11 @@ helm version --short                         # v3.x
 cp overrides/sites/quickstart.example.yaml overrides/sites/my-site.yaml
 # Edit public site inputs; use new run, namespace and key-resource names.
 export VALUES=overrides/sites/my-site.yaml
+# Same credentials as controller installation; keep all files outside Git.
+export CI_GIT_SSH_KEY_FILE=/private/path/deploy-key
+export CI_GIT_KNOWN_HOSTS_FILE=/private/path/known_hosts
+export CI_VAULT_ADMIN_TOKEN_FILE=/private/path/vault-bootstrap-token
+chmod 600 "$CI_GIT_SSH_KEY_FILE" "$CI_GIT_KNOWN_HOSTS_FILE" "$CI_VAULT_ADMIN_TOKEN_FILE"
 # Optional: put disposable caches outside a synchronized Documents directory.
 export QUICKSTART_CACHE=/private/tmp/confidential-inference-build-cache
 make qs-tools VALUES="$VALUES"
@@ -63,40 +68,32 @@ under the cache. On macOS with Helm 4 also installed, prepend
 for subsequent commands. Do not edit a run's inputs after starting it: use a new run
 or an explicit retained-volume migration.
 
-## One-time backend identity
+## Shared installation and integrations
 
-The current example enables [automatic integration bootstrap](stock-bootstrap.md).
-Provide its external credential files and run `make qs-integrations VALUES="$VALUES"`
-after `qs-preflight`; it creates the scoped identity and owner-managed ESO/policy
-configuration. The commands below are the alternative for `integrations.enabled: false`.
+Both paths use the same site template, credentials, stage handlers and receipts.
+The example enables automatic Vault/ESO/Trustee setup. Follow the
+[common bootstrap contract](stock-bootstrap.md) for credential provisioning,
+owner mapping, required platform services and qualification limits. “Manual” means
+Make drives the release stages; it does not require hand-written Vault configuration.
 
-
-If the CoCo administrator has not provided the scoped enrollment identity, run
-these commands once with an **already authenticated Vault administrator session**.
-They grant no Vault access to the workload namespace. Replace the auth mount and
-trusted namespace with the site YAML values; keep administrator credentials out of
-values files and command arguments.
+To stop after installing the foundation:
 
 ```sh
-oc create namespace confidential-inference-enrollment
-oc -n confidential-inference-enrollment create serviceaccount confidential-inference-enroller
-vault policy write confidential-inference-enroller - <<'POLICY'
-path "secret/data/hub/modelKeys" { capabilities = ["patch"] }
-path "secret/metadata/hub/modelKeys" { capabilities = ["read"] }
-POLICY
-vault write auth/hub/role/confidential-inference-enroller \
-  bound_service_account_names=confidential-inference-enroller \
-  bound_service_account_namespaces=confidential-inference-enrollment \
-  audience=vault token_policies=confidential-inference-enroller \
-  token_no_default_policy=true token_ttl=900 token_max_ttl=3600
+make quickstart-foundation VALUES="$VALUES"
+# Expected: FoundationReady. Continue manually from qs-model below,
+# or hand over a fresh, unprepared release using the controller runbook.
 ```
 
-Expected: policy and role writes succeed. `qs-bootstrap` verifies a short-lived
-scoped login. This role can patch the shared KV document; its runner is trusted.
-The base CoCo owner must already map that document through ESO to `model-keys`
-and render `kbs.resourcePolicy.modelKeyBindings` into Trustee's resource policy.
-The quickstart adds exact bindings through that owner; it refuses an incompatible
-owner rather than replacing a shared policy with a broad allow rule.
+This runs `tools → dependencies → preflight → integrations → bootstrap → build →
+push → install` sequentially, even with `make -j`. `controller-demo` uses exactly
+this target before building/installing/submitting the release controller. Both
+paths build the same five foundation images; the controller path adds one executor
+image and retained orchestration state PVC.
+
+For integrations already provided by the platform administrator, set
+`quickstart.integrations.enabled: false` **before starting** and follow the
+[external-integration alternative](vault-bootstrap.md). `qs-integrations` then
+records `ExternalIntegrationsReused`; it does not create a role or alter the owner.
 
 If KServe is missing, set `quickstart.dependencies.installKServe: true` before the
 first run. `qs-dependencies` installs `kserve-crd` and `kserve-resources` v0.20.0
@@ -112,6 +109,7 @@ retain its state and rerun that target after fixing the cause.
 
 | Command (`VALUES="$VALUES"` on each) | Expected result | Action performed |
 | --- | --- | --- |
+| `make qs-tools` | `ToolsReady` | Check clients and create the isolated Python environment |
 | `make qs-dependencies` | `DependenciesReady` | Check existing CoCo, KServe and registry; refuse incompatible shared services |
 | `make qs-preflight` | `PlatformReady` | Record cluster/node/runtime/storage and namespace ownership; report GPU allocation |
 | `make qs-integrations` | `IntegrationsReady` (or `ExternalIntegrationsReused`) | Configure scoped Vault enrollment and Git-owned ESO/model policy when enabled |
@@ -176,7 +174,7 @@ once, and exposes decrypted mounts to vLLM. The application has no storage devic
 inside the VM; this is an explicit part of the trusted workload.
 
 The supported profile is a PoC qualification, not an official OpenShift support claim.
-The missing-KServe installation branch is opt-in; this hardware run reused existing KServe.
+The example enables installation of missing KServe; recorded hardware runs reused existing KServe.
 
 ## Inspect and recover
 

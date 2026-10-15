@@ -1,10 +1,23 @@
-# Stock CoCo pattern → controller-driven Qwen
+# Shared CoCo bootstrap: manual or controller-driven Qwen
 
 Supply a site YAML, cluster access, a repository-scoped SSH deploy key and a Vault
 administrator token file. `make controller-demo` configures the missing Vault/ESO
 and Trustee policy integration, builds the add-on and submits one `InferenceRelease`.
 The controller then publishes encrypted Qwen, populates `/model`, initializes
 encrypted `/data`, serves chat and tests persistence across a new confidential VM.
+
+The manual quickstart uses **the same inputs and automatic integration bootstrap**.
+Choose one executor for each fresh run:
+
+| Entry point | Foundation | Release through acceptance |
+| --- | --- | --- |
+| `make quickstart-all` | Shared `tools` through `install` handlers | Local sequential Make/Python execution through `report` |
+| `make controller-demo` | `quickstart-foundation`, then controller image/install/start | Eight Kubernetes stage Jobs after handover |
+| `make quickstart-foundation` | Only `tools` through `install` | Stop at `FoundationReady`; choose manual continuation or controller handover |
+
+Both paths install the volume/workload controller, populator and authority. Only
+the controller path adds the `InferenceRelease` controller, executor image and
+orchestration state PVC. Never run both executors against the same handed-over run.
 
 **Platform prerequisite:** an installed CoCo Validated Pattern with working CPU/GPU
 attestation, the qualified OSC SNP/NVIDIA runtime, Vault Kubernetes authentication,
@@ -91,7 +104,10 @@ export CI_VAULT_ADMIN_TOKEN_FILE=/private/path/vault-bootstrap-token
 chmod 600 "$CI_GIT_SSH_KEY_FILE" "$CI_GIT_KNOWN_HOSTS_FILE" \
   "$CI_VAULT_ADMIN_TOKEN_FILE"
 
+# Choose ONE for a new run:
 make controller-demo VALUES="$VALUES" PYTHON=python3
+# Or execute the entire release locally:
+# make quickstart-all VALUES="$VALUES" PYTHON=python3
 ```
 
 Expected bootstrap sequence:
@@ -102,7 +118,9 @@ ToolsReady → DependenciesReady → PlatformReady → IntegrationsReady
 → ControllerBootstrapReady → release submitted
 ```
 
-Observe the run, substituting the names from your YAML:
+For a manual run, `quickstart-all` continues through `E2EPassed`; use
+`make qs-status VALUES="$VALUES"` and `make qs-chat VALUES="$VALUES"`.
+For a controller run, observe it using the names from your YAML:
 
 ```sh
 oc -n confidential-inference-trusted get inferencerelease qwen-demo-001 -w

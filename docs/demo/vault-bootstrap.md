@@ -2,8 +2,9 @@
 
 The workload controller, populator, sidecar and chat receive **no Vault provisioning
 identity**. Run enrollment in a trusted namespace/administration environment.
-The current adapter uses the existing CoCo Trustee owner's ESO mapping from
-`secret/data/hub/modelKeys`; it does not own or replace that mapping.
+The current adapter uses the CoCo Trustee owner's ESO mapping from
+`secret/data/hub/modelKeys`. Automatic bootstrap configures it through that Git
+owner; external-integration mode requires it to exist already.
 
 For automatic setup from site YAML and external credentials, use the
 [stock-pattern bootstrap](stock-bootstrap.md). The commands below are the manual
@@ -11,26 +12,30 @@ alternative (`quickstart.integrations.enabled: false`).
 
 ## One-time administrator action
 
-Create this policy and bind a short-lived role to the dedicated enrollment
-ServiceAccount. Substitute the existing Kubernetes auth mount and trusted namespace.
-
-```hcl
-path "secret/data/hub/modelKeys" {
-  capabilities = ["patch"]
-}
-path "secret/metadata/hub/modelKeys" {
-  capabilities = ["read"]
-}
-```
+Run with an already authenticated Vault administrator session and local Vault CLI.
+Use the names from `quickstart.vault.*`; the enrollment namespace is distinct from
+both workload and controller namespaces in the example. Create only missing
+objects; inspect an existing role/policy before changing it.
 
 ```sh
-vault policy write confidential-inference-enroller enrollment-policy.hcl
+oc create namespace confidential-inference-enrollment
+oc -n confidential-inference-enrollment create serviceaccount confidential-inference-enroller
+vault policy write confidential-inference-enroller - <<'POLICY'
+path "secret/data/hub/modelKeys" { capabilities = ["patch"] }
+path "secret/metadata/hub/modelKeys" { capabilities = ["read"] }
+POLICY
 vault write auth/hub/role/confidential-inference-enroller \
   bound_service_account_names=confidential-inference-enroller \
-  bound_service_account_namespaces=TRUSTED_NAMESPACE \
+  bound_service_account_namespaces=confidential-inference-enrollment \
   audience=vault token_policies=confidential-inference-enroller \
   token_no_default_policy=true token_ttl=900 token_max_ttl=3600
 ```
+
+Expected: role/policy writes succeed; `qs-bootstrap` verifies a scoped login.
+The administrator must also provide the existing KV record, Ready `model-keys-eso`
+projection and `model-keys` KbsConfig mapping, plus a Trustee owner chart supporting
+`kbs.resourcePolicy.modelKeyBindings`. Use the [automatic path](stock-bootstrap.md)
+if these are missing. Preserve existing KV entries and policy bindings.
 
 The runner requests a projected ServiceAccount token with audience `vault` and
 exchanges it for the scoped token. Keep administrator credentials outside the
@@ -41,6 +46,9 @@ role can patch other entries in the shared record. Keep it trusted; per-installa
 backend paths and corresponding owner-managed ESO mappings remain an integration gap.
 
 ## Per-release enrollment
+
+`qs-enroll` and the controller’s `enroll` Job perform this same sequence; do not
+run a separate enrollment tool against a controller-owned release.
 
 1. Install and verify exact CPU/GPU, launch-measurement and InitData bindings for
    the new resource tags **before writing their keys**. The current base policy's

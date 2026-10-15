@@ -7,7 +7,7 @@ site YAML plus external Git SSH and Vault administrator credential-file referenc
 It establishes the previously manual Vault/ESO/Trustee integration. Administrator
 credentials are never retained by the release controller.
 
-For the manual Make path, copy [quickstart.example.yaml](../overrides/sites/quickstart.example.yaml).
+For either the manual Make or controller path, copy [quickstart.example.yaml](../overrides/sites/quickstart.example.yaml).
 It merges over [values-global.yaml](../values-global.yaml) and covers public
 preparation, Trustee-owner and backend references in `quickstart.*`.
 The [quickstart](demo/quickstart.md) generates images, keys, measurements and release

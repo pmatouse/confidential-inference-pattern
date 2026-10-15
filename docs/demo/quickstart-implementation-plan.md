@@ -2,7 +2,9 @@
 
 **Acceptance specification for the implemented manual path.** Use the
 [executable quickstart](quickstart.md) for current commands, qualification and limits.
-The release-controller path remains separate work.
+The [controller path](controller.md) is also implemented and uses the same stage
+handlers. Both installers share `quickstart-foundation`; automatic integration
+bootstrap and current credentials are described in [stock bootstrap](stock-bootstrap.md).
 
 ## Starting and finishing states
 
@@ -33,7 +35,7 @@ remain installed. See the [two-path plan](../full-lifecycle-implementation-plan.
 - Pinned build recipes/contexts for every add-on image, with public input inventories.
 - Manual-path E2E evidence from a fresh run; CI tests of stage contracts/retries.
 
-Use the same operation API and receipt schema as the future controller. Make runs
+Use the same operation API and receipt schema as the release controller. Make runs
 commands rather than relying on file timestamps as proof of external completion.
 Completed steps are verified before skipping. Local private state uses a mode-0700
 run directory with mode-0600 files; generated public output is separate. Both are
@@ -50,7 +52,8 @@ All targets take `VALUES=overrides/sites/my-site.yaml RUN=qwen-demo-001`.
 | `make qs-tools` | Check/install documented client dependencies; create pinned Python environment; verify Helm 3, oc and local build prerequisites | `ToolsReady`; print versions and any exact missing-tool installation command |
 | `make qs-dependencies` | Inventory shared services; install only explicitly enabled, pinned missing dependencies such as KServe; configure the internal registry/storage through the supported site recipe | `DependenciesReady`; print reused/installed versions and owners; reject incompatible existing installations |
 | `make qs-preflight` | Check kubecontext, qualified runtime/CPU/GPU, free GPU capacity, registry CA/storage, CSI raw Block/RWOP/Immediate, KServe and namespace ownership | `PlatformReady`; otherwise name failed prerequisite and its setup instructions; never evict another workload |
-| `make qs-bootstrap` | Create isolated workload/build/trusted namespaces and scoped identities; provision public registry/CA references, backend role and stable authority/signing credentials through authorized admin access | `BootstrapReady`; print public identities and private-state location, never secrets |
+| `make qs-integrations` | Configure scoped Vault role/backend and Git-owned ESO/Trustee integration, or record externally supplied integrations | `IntegrationsReady` / `ExternalIntegrationsReused`; verify policy and ESO convergence |
+| `make qs-bootstrap` | Create isolated workload/build/trusted namespaces and scoped identities; provision public registry/CA references and stable authority/signing credentials through authorized admin access | `BootstrapReady`; print public identities and private-state location, never secrets |
 | `make qs-build` | Fetch verified source/tool inputs; compile/package all add-on images using the qualified Linux environment; build in OpenShift where appropriate | `BuildsComplete`; code/context hashes and actual OpenShift build metadata |
 | `make qs-push` | Publish or verify build outputs in the selected registry; resolve manifest digests, pull permissions and CA trust; create resolved values automatically | `ImagesPinned`; public image lock with each `repository@sha256:...`; rerun preserves completed artifacts |
 | `make qs-install` | Install admission/RBAC/controllers, retained authority bootstrap and required supported dependencies in ownership-safe order | `FoundationReady`; authority identity preserved, existing CoCo services reused |

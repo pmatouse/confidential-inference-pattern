@@ -46,7 +46,11 @@ credentials in [stock-pattern bootstrap](docs/demo/stock-bootstrap.md), then run
 make controller-demo VALUES=overrides/sites/my-site.yaml PYTHON=python3
 ```
 
-For the stage-by-stage alternative, follow the [manual quickstart](docs/demo/quickstart.md).
+For the local alternative, run `make quickstart-all VALUES=overrides/sites/my-site.yaml`
+with the **same site YAML and external credentials**, or follow the
+[stage-by-stage quickstart](docs/demo/quickstart.md). Both paths share the ordered
+`quickstart-foundation` installation; they differ only in release execution and
+retained orchestration state. Choose one executor per fresh run.
 The new Vault/ESO bootstrap has live integration coverage; fresh stock-chart E2E
 qualification remains open.
 
