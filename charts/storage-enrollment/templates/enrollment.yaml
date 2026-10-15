@@ -1,0 +1,53 @@
+{{- if not (regexMatch "^[^[:space:]@]+@sha256:[a-f0-9]{64}$" .Values.image) }}{{ fail "pin enrollment image by digest" }}{{ end -}}
+{{- if ne .Values.plan.purpose "trusted-storage-enrollment/v1" }}{{ fail "reviewed public enrollment plan required" }}{{ end }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}
+immutable: true
+data:
+  plan.json: {{ .Values.plan | toJson | quote }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 120
+  template:
+    spec:
+      serviceAccountName: {{ required "serviceAccount required" .Values.serviceAccount }}
+      automountServiceAccountToken: false
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: enroll
+          image: {{ .Values.image | quote }}
+          command: [sh, -c]
+          args:
+            - python3 ../inference-release/enroll.py apply --plan /plan/plan.json --state /state/retained --installation "$INSTALLATION" --output /tmp/enrollment.json && cat /tmp/enrollment.json
+          env:
+            - name: INSTALLATION
+              value: {{ required "installation required" .Values.installation | quote }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits: {cpu: "1", memory: 256Mi}
+          volumeMounts:
+            - {name: state, mountPath: /state}
+            - {name: plan, mountPath: /plan, readOnly: true}
+            - {name: tmp, mountPath: /tmp}
+      volumes:
+        - name: state
+          persistentVolumeClaim: {claimName: {{ required "stateClaim required" .Values.stateClaim }}}
+        - name: plan
+          configMap: {name: {{ .Release.Name }}}
+        - name: tmp
+          emptyDir: {medium: Memory, sizeLimit: 8Mi}

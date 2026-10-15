@@ -178,9 +178,12 @@ class Authority:
         return record
 
     def update_workload_policy(
-        self, volume_ids, old_policy, new_policy, evidence_sha256
+        self, volume_ids, old_policy, new_policy, evidence_sha256, *, allow_never_started=False
     ):
-        """Administrator-only, atomic update of closed Ready volumes.
+        """Administrator-only atomic update of closed Ready volumes.
+
+        Explicitly opted-in blank volumes additionally require an existing first-use
+        approval and zero operation history. Their initialization identity is retained.
 
         This does not rotate keys, reset disks, change manifests, or recover an
         owner. Previous policies are permanently retired for these records.
@@ -200,9 +203,19 @@ class Authority:
         with self._transaction() as db:
             records = [self._load(db, name) for name in volume_ids]
             for record in records:
+                never_started = (
+                    allow_never_started is True
+                    and record["state"] == "Uninitialized"
+                    and record.get("initialization_approval") is not None
+                    and record["last_closed"] is None
+                    and record["header_sha256"] is None
+                    and record["manifest_sha256"] is None
+                    and db.execute("SELECT 1 FROM operations WHERE volume_id=? LIMIT 1",
+                                   (record["volume_id"],)).fetchone() is None
+                )
                 if (
                     record["revoked"]
-                    or record["state"] != "Ready"
+                    or (record["state"] != "Ready" and not never_started)
                     or record["owner"] is not None
                     or record["policy_sha256"] != old_policy
                     or new_policy in record.get("retired_workload_policies", [])

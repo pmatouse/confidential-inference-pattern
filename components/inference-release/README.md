@@ -19,9 +19,10 @@ that a new runtime profile works on hardware. A qualified profile must bind actu
 stock image metadata, guest ABI/mount shape, injected environment, launch identity
 and NVIDIA evidence. No lab VM state or old signed approval is a valid substitute.
 
-The current draft wraps the declared application command in the sidecar rendezvous
-protocol. Startup filesystem/hash/CUDA/persistence evidence and trusted profile
-publication still need integration before this is a complete E2E release path.
+The draft wraps the declared application command in the sidecar rendezvous
+protocol. Optional `startupChecks` verify model hashes, mount modes, application
+isolation, CUDA and a flushed persistence canary across guest boot IDs. See the
+[fresh release workflow](../../docs/demo/fresh-release.md) for the trusted steps.
 
 ## Trusted metadata enrollment and packaging
 
@@ -72,5 +73,7 @@ The URI encodings map is `{"kbs:///repository/type/tag": "raw32"}` (or
 keys in these files. Real compatibility profiles, trust pins and publisher metadata
 are required; the synthetic fixtures in tests must never be deployed.
 
-The code path is unit/contract tested. It has not yet enrolled the new live demo,
-provisioned its keys, qualified the new release profile or run fresh inference.
+The new live demo has fresh publication, populated/blank PVCs, retained metadata
+enrollment and scoped Vault/ESO key provisioning. Full hardware qualification
+requires the inference and fresh-VM persistence gates; see the current evidence
+before treating a profile as qualified.

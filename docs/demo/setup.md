@@ -1,5 +1,8 @@
 # Current add-on setup
 
+See the [fresh release workflow](fresh-release.md) for publication, scoped key
+enrollment, measured deployment and acceptance gates.
+
 This is the executable subset of the design. The initial isolated installation
 uses existing, digest-pinned lab helper/populator images. A portable clean-cluster
 release still needs reproducible image publication and trusted release automation.

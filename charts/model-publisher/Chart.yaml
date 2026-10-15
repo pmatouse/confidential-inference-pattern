@@ -1,0 +1,4 @@
+apiVersion: v2
+name: model-publisher
+version: 0.1.0
+description: Trusted unprivileged model producer and narrowly scoped registry identities

@@ -48,15 +48,19 @@ spec:
           - name: kserve-container
             image: {{ .Values.images.application | quote }}
             command: [python3, -m, vllm.entrypoints.openai.api_server]
-            args: [--model, {{ .Values.demo.modelMount | quote }}, --served-model-name, {{ .Values.demo.modelName | quote }}, --host, "0.0.0.0", --port, "8000", --max-model-len, "4096"]
+            args: [--model, {{ .Values.demo.modelMount | quote }}, --served-model-name, {{ .Values.demo.modelName | quote }}, --host, "0.0.0.0", --port, "8000", --dtype, bfloat16, --max-model-len, "2048", --max-num-seqs, "4", --gpu-memory-utilization, "0.25", --enforce-eager, --disable-log-requests, --generation-config, vllm]
             env:
               - {name: HF_HUB_OFFLINE, value: "1"}
               - {name: TRANSFORMERS_OFFLINE, value: "1"}
               - {name: HF_HOME, value: /data/huggingface}
               - {name: VLLM_CACHE_ROOT, value: /data/vllm}
+              - {name: TMPDIR, value: /data/tmp}
+              - {name: HOME, value: /data/home}
+              - {name: XDG_CACHE_HOME, value: /data/cache}
+              - {name: TRITON_CACHE_DIR, value: /data/triton}
             resources:
-              requests: {cpu: "4", memory: 16Gi, nvidia.com/gpu: "1"}
-              limits: {cpu: "6", memory: 48Gi, nvidia.com/gpu: "1"}
+              requests: {cpu: "4", memory: 16Gi, {{ .Values.base.gpuResourceName | default "nvidia.com/pgpu" | quote }}: "1"}
+              limits: {cpu: "6", memory: 48Gi, {{ .Values.base.gpuResourceName | default "nvidia.com/pgpu" | quote }}: "1"}
             securityContext:
               runAsUser: 1001
               runAsGroup: 1001

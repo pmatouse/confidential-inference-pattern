@@ -1,0 +1,6 @@
+installation: ''
+image: ''
+stateClaim: ''
+serviceAccount: ''
+# Public output of inference-release/enroll.py plan; never contains a key.
+plan: {}

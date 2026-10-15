@@ -31,6 +31,9 @@ class ReleaseTests(unittest.TestCase):
         self.assertNotIn('volumeDevices',app)
         self.assertEqual(len(helper['volumeDevices']),len(self.req['contract']['volumes']))
         self.assertFalse(app['securityContext']['privileged'])
+        self.assertEqual(app['workingDir'],'/')
+        self.assertEqual(helper['workingDir'],'/')
+        self.assertEqual(d['predictor']['labels']['coco.io/skip-initdata'],'true')
         self.assertIn('ExecProcessRequest := false',d['policy'])
         self.assertFalse(d['predictor']['automountServiceAccountToken'])
     def test_wrong_image_refused(self):

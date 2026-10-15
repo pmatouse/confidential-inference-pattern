@@ -26,6 +26,8 @@ def prepare(wheels, output):
         entries[str((component / name).relative_to(ROOT))] = (component / name).read_bytes()
     for path in sorted((ROOT / 'components/confidential-storage-guest/profiles').glob('*.json')):
         entries[str(path.relative_to(ROOT))] = path.read_bytes()
+    enrollment = ROOT / 'components/inference-release/enroll.py'
+    entries[str(enrollment.relative_to(ROOT))] = enrollment.read_bytes()
     entries['Containerfile'] = (component / 'Containerfile').read_bytes()
     entries['LICENSE'] = (ROOT / 'LICENSE').read_bytes()
     with output.open('xb') as stream, tarfile.open(fileobj=stream, mode='w:gz') as tar:

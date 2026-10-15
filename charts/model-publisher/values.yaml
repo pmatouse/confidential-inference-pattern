@@ -1,0 +1,9 @@
+# Install this chart in the trusted enrollment namespace, not the application namespace.
+workloadNamespace: ''
+modelImageStream: ''
+helperImageStream: confidential-storage-sidecar
+publisherServiceAccount: model-publisher
+registryCAConfigMap: registry-service-ca
+readerName: ''
+image: docker.io/library/rust@sha256:4ec71e955e6c08aeb238885083222ddff79d82eb87654a96c76e38e94da1a53b
+nodeSelector: {}

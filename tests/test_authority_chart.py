@@ -17,6 +17,7 @@ class AuthorityChartTests(unittest.TestCase):
         docs=self.render();job=next(x for x in docs if x['kind']=='Job')
         spec=job['spec']['template']['spec']
         self.assertFalse(spec['automountServiceAccountToken'])
+        self.assertEqual(spec['securityContext']['fsGroupChangePolicy'],'OnRootMismatch')
         self.assertEqual(len(spec['containers']),1)
         self.assertEqual(spec['containers'][0]['command'],['python3','bootstrap.py'])
         self.assertNotIn('secret',json.dumps(spec).lower())
@@ -32,6 +33,7 @@ class AuthorityChartTests(unittest.TestCase):
         self.assertEqual(c['command'],['python3','serve.py'])
         self.assertIn('--state',c['args'])
         self.assertFalse(pod['automountServiceAccountToken'])
+        self.assertEqual(pod['securityContext']['fsGroupChangePolicy'],'OnRootMismatch')
         self.assertNotIn('bootstrap.py',json.dumps(pod))
         self.assertTrue(c['securityContext']['readOnlyRootFilesystem'])
         self.assertEqual(c['securityContext']['capabilities']['drop'],['ALL'])

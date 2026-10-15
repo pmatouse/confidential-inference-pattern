@@ -15,13 +15,13 @@ hardware evidence is not a new clean-install result.
 | Actual PVC UID binding Job | Implemented; edge Job bound two new PVC UIDs successfully |
 | Unprivileged KServe workload intent and chat chart | Implemented; fresh inference pending |
 | Standalone Qwen source manifest | Extracted pinned model/file identities; no dependency on old producer AST |
-| Create-once authority history bootstrap | Implemented and tested; two-mode authority chart added; fresh bootstrap Job passed on a retained PVC; normal serving/backend integration pending |
-| Generic measured sidecar release renderer | New offline draft/package renderer added with synthetic contract tests; stock runtime profile and real-hardware qualification pending |
-| Trusted metadata enrollment and package generation | Implemented; multi-volume/retry/retained-owner tests pass; live enrollment pending |
-| Scoped Vault authentication | Approved one-time edge bootstrap completed; projected JWT login and least-privilege capability checks passed; no key records changed |
-| Scoped key enrollment and Trustee owner integration | Writer and owner integration pending; no root-token harvesting imported into installer |
+| Create-once authority history bootstrap | Implemented and tested; two-mode authority chart added; fresh bootstrap and retained serving passed on a new PVC |
+| Generic measured sidecar release renderer | New offline draft/package renderer added with synthetic contract tests; measured stock runtime profile deployed; full hardware qualification pending |
+| Trusted metadata enrollment and package generation | Implemented; multi-volume/retry/retained-owner tests pass; fresh two-volume metadata enrollment passed |
+| Scoped Vault authentication | Approved one-time edge bootstrap completed; projected JWT login and least-privilege capability checks passed; new release keys subsequently enrolled using the scoped role |
+| Scoped key enrollment and Trustee owner integration | CAS merge-patch writer implemented and verified through Vault/ESO; three exact measured bindings installed through the base Trustee owner |
 | Portable helper/populator/authority image release | New helper and authority images built in isolated project; stock protocol/no-CPU-fallback tests pass; guest qualification pending; edge override still uses existing lab artifacts |
-| Fresh model publication → population → guest mount | Population regression passed using an existing encrypted artifact; fresh publication and guest mount pending |
+| Fresh model publication → population → guest mount | Fresh Qwen encryption, ciphertext/verity verification, local OCI publication and population passed; guest mount pending |
 | Blank RW first-format through stock sidecar → fresh VM reopen | Pending; cannot substitute prior reopened data for this gate |
 | Real Qwen/GPU/chat and negative security E2E | Pending for new installation |
 | Second TEE/site and WFFC qualification | Pending |

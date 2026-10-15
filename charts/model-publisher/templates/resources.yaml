@@ -1,0 +1,99 @@
+{{- $target := required "workloadNamespace required" .Values.workloadNamespace -}}
+{{- if eq $target .Release.Namespace }}{{ fail "publisher/reader must use a separate trusted namespace to avoid implicit same-project image pulls" }}{{ end -}}
+{{- $repository := required "modelImageStream required" .Values.modelImageStream -}}
+{{- $reader := required "readerName required" .Values.readerName -}}
+{{- if not (regexMatch "^[^[:space:]@]+@sha256:[a-f0-9]{64}$" .Values.image) }}{{ fail "publisher image must be digest pinned" }}{{ end }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.publisherServiceAccount }}
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $reader }}
+automountServiceAccountToken: false
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: {{ $repository }}
+  namespace: {{ $target }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.registryCAConfigMap }}
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+---
+{{- range $name, $settings := dict .Release.Name (dict "stream" $repository "account" .Values.publisherServiceAccount "verbs" (list "get" "update")) $reader (dict "stream" .Values.helperImageStream "account" $reader "verbs" (list "get")) }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $name }}
+  namespace: {{ $target }}
+rules:
+  - apiGroups: [image.openshift.io]
+    resources: [imagestreams/layers]
+    resourceNames: [{{ $settings.stream | quote }}]
+    verbs: {{ $settings.verbs | toJson }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $name }}
+  namespace: {{ $target }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ $name }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ $settings.account }}
+    namespace: {{ $.Release.Namespace }}
+---
+{{- end }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  serviceAccountName: {{ .Values.publisherServiceAccount }}
+  automountServiceAccountToken: false
+  restartPolicy: Never
+  {{- with .Values.nodeSelector }}
+  nodeSelector:
+{{ . | toYaml | indent 4 }}
+  {{- end }}
+  securityContext:
+    runAsNonRoot: true
+    seccompProfile: {type: RuntimeDefault}
+  containers:
+    - name: publisher
+      image: {{ .Values.image | quote }}
+      command: [sleep, "21600"]
+      resources:
+        requests: {cpu: "2", memory: 4Gi}
+        limits: {cpu: "4", memory: 16Gi}
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities: {drop: [ALL]}
+      volumeMounts:
+        - {name: work, mountPath: /build}
+        - {name: tmp, mountPath: /tmp}
+        - {name: ca, mountPath: /registry-ca, readOnly: true}
+        - {name: token, mountPath: /registry-auth, readOnly: true}
+  volumes:
+    - name: work
+      emptyDir: {medium: Memory, sizeLimit: 12Gi}
+    - name: tmp
+      emptyDir: {medium: Memory, sizeLimit: 1Gi}
+    - name: ca
+      configMap: {name: {{ .Values.registryCAConfigMap }}}
+    - name: token
+      projected:
+        sources:
+          - serviceAccountToken: {path: token, expirationSeconds: 3600}

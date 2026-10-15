@@ -11,7 +11,7 @@ import re
 import sys
 import tomllib
 ROOT=Path(__file__).resolve().parents[2]
-sys.path[:0]=[str(ROOT/'components/confidential-volume-controller'),str(ROOT/'components/confidential-storage-sidecar')]
+sys.path[:0]=[str(Path(__file__).resolve().parent),str(ROOT/'components/confidential-volume-controller'),str(ROOT/'components/confidential-storage-sidecar')]
 from controller import validate_artifacts
 from policy import render as render_policy
 
@@ -56,8 +56,10 @@ def draft(request,profile):
     require(re.fullmatch(r'[^\s@]+@sha256:[a-f0-9]{64}',profile['helper']['image']),'helper digest required')
     command=app.get('command',[])+app.get('args',[])
     require(command and all(isinstance(x,str) for x in command),'explicit application command required')
-    consumer=[profile['applicationPython'],'-c',WAIT+'os.execvp('+repr(command[0])+', '+repr(command)+')\n']
-    app['command']=consumer;app.pop('args',None)
+    from startup import render as startup_checks
+    checks=startup_checks(profile['startupChecks']) if 'startupChecks' in profile else ''
+    consumer=[profile['applicationPython'],'-c',WAIT+checks+'os.execvp('+repr(command[0])+', '+repr(command)+')\n']
+    app['command']=consumer;app.pop('args',None);app['workingDir']='/'
     app['securityContext']={'runAsUser':1001,'runAsGroup':1001,'runAsNonRoot':True,'privileged':False,'allowPrivilegeEscalation':False,'readOnlyRootFilesystem':True,'capabilities':{'drop':['ALL']}}
     app['ports']=[{'containerPort':8000,'protocol':'TCP'}]
     app['readinessProbe']={'httpGet':{'path':'/health','port':8000},'periodSeconds':5,'timeoutSeconds':2,'failureThreshold':3}
@@ -72,8 +74,8 @@ def draft(request,profile):
         mounts.append({'name':target,'mountPath':e['mountPath']})
     volumes += [{'name':'configuration','configMap':{'name':'pending-public-configuration'}},{'name':'rendezvous','emptyDir':{'medium':'Memory','sizeLimit':'4Mi'}},{'name':'shm','emptyDir':{'medium':'Memory','sizeLimit':'4Gi'}}]
     app['volumeMounts']=mounts+[{'name':'rendezvous','mountPath':'/rendezvous'},{'name':'shm','mountPath':'/dev/shm'}]
-    helper={'name':'storage-sidecar','image':profile['helper']['image'],'command':['python3','/opt/storage-sidecar/runtime.py'],'securityContext':{'runAsUser':0,'privileged':True},'resources':{'requests':{'cpu':'1','memory':'2Gi'},'limits':{'cpu':'2','memory':'4Gi'}},'volumeDevices':devices,'volumeMounts':[{'name':'configuration','mountPath':'/configuration','readOnly':True},{'name':'rendezvous','mountPath':'/rendezvous'}]}
-    p.update(minReplicas=1,maxReplicas=1,deploymentStrategy={'type':'Recreate'},serviceAccountName='storage-sidecar',runtimeClassName=profile['runtimeClassName'],shareProcessNamespace=True,automountServiceAccountToken=False,enableServiceLinks=False,hostname=name+'-sidecar',securityContext={'fsGroup':1001},terminationGracePeriodSeconds=180,containers=[app,helper],volumes=volumes)
+    helper={'name':'storage-sidecar','image':profile['helper']['image'],'command':['python3','/opt/storage-sidecar/runtime.py'],'workingDir':'/','securityContext':{'runAsUser':0,'privileged':True},'resources':{'requests':{'cpu':'1','memory':'2Gi'},'limits':{'cpu':'2','memory':'4Gi'}},'volumeDevices':devices,'volumeMounts':[{'name':'configuration','mountPath':'/configuration','readOnly':True},{'name':'rendezvous','mountPath':'/rendezvous'}]}
+    p.update(labels={'coco.io/skip-initdata':'true'},minReplicas=1,maxReplicas=1,deploymentStrategy={'type':'Recreate'},serviceAccountName='storage-sidecar',runtimeClassName=profile['runtimeClassName'],shareProcessNamespace=True,automountServiceAccountToken=False,enableServiceLinks=False,hostname=name+'-sidecar',securityContext={'fsGroup':1001},terminationGracePeriodSeconds=180,containers=[app,helper],volumes=volumes)
     policy={'namespace':ns,'gpuCount':1,**{r:copy.deepcopy(profile[r]) for r in ('pause','helper','application')}}
     for role,container in [('helper',helper),('application',app)]:
         settings=policy[role];settings['args']=container['command'];settings['image']=container['image']

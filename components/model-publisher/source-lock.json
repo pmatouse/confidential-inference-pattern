@@ -1,0 +1,9 @@
+{
+  "repository": "https://github.com/pmatouse/coco-pattern-edge-rtx6k",
+  "commit": "ebfaf34608dccc383234c38aa35ab1404b96eb95",
+  "files": {
+    "tests/confidential-storage/kernel-lab/fetch.py": "c1a522cdf2617d15935298f178025a5ffe2a44a965e40d99a0ccbb7560258aa9",
+    "tests/confidential-storage/evidence/2026-10-13/kernel/packages.txt": "82a05a744d28b652bddbbdd9f056aea4c4bc88b547c04d0f3b62b161cb06f55d"
+  },
+  "change": "Resolve the package lock adjacent to this standalone fetcher."
+}

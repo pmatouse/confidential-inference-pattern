@@ -88,3 +88,36 @@ class PolicyUpdateTests(unittest.TestCase):
                 )
             )
         self.assertEqual(sum(outcomes), 1)
+
+    def blank(self):
+        from test_receipts import BINDING, PLAN
+        self.a.register("blank", "a" * 64, "c" * 64,
+                        "kbs:///storage-test/keys/blank", mount_binding=BINDING)
+        self.a.approve_initialization("blank", PLAN | {"provisioning_id": "7f3399dd-4f0c-4fa3-83ec-cc6898e4b691"})
+
+    def test_explicit_never_started_upgrade_preserves_first_use_approval(self):
+        from initialization import approved_policy
+        self.blank()
+        before = self.a.inspect("blank")
+        with self.assertRaises(Denied):
+            self.update(["blank"])
+        after = self.a.update_workload_policy(["blank"], "a"*64, "f"*64,
+                                             "e"*64, allow_never_started=True)[0]
+        self.assertEqual(after["initialization_approval"], before["initialization_approval"])
+        self.assertEqual(approved_policy(after), "a"*64)
+        self.assertEqual(after["state"], "Uninitialized")
+        with self.assertRaises(Denied):
+            self.a.begin("blank", self.peer, "old", "initialize", 1)
+        self.a.begin("blank", AttestedPeer("f"*64,"1"*64), "new", "initialize", 1)
+
+    def test_never_started_option_rejects_even_released_operation_history(self):
+        self.blank()
+        opened = self.a.begin("blank", self.peer, "started", "initialize", 1)
+        with self.assertRaises(Denied):
+            self.a.update_workload_policy(["scratch","blank"], "a"*64, "f"*64,
+                                         "e"*64, allow_never_started=True)
+        self.a.release_unstarted_initialization("blank", opened["owner"]["activation_id"], "e"*64)
+        with self.assertRaises(Denied):
+            self.a.update_workload_policy(["scratch","blank"], "a"*64, "f"*64,
+                                         "e"*64, allow_never_started=True)
+        self.assertEqual(self.a.inspect("scratch")["policy_sha256"], "a"*64)

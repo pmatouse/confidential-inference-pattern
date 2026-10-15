@@ -1,0 +1,4 @@
+apiVersion: v2
+name: storage-enrollment
+version: 0.1.0
+description: One-shot trusted metadata enrollment into retained authority history
