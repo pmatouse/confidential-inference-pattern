@@ -45,7 +45,7 @@ quickstart:
       branch: main
       valuesFile: overrides/values-confidential-inference.yaml
   dependencies:
-    installKServe: false
+    installKServe: true
   integrations:
     enabled: true
     topologyFile: values-baremetal.yaml

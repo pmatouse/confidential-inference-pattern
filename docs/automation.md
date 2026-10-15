@@ -8,6 +8,9 @@ Routine deployment requires no manual `oc apply`, signing or enrollment commands
 bootstrap, `InferenceRelease` drives publication through fresh-VM acceptance as
 Jobs. See the [controller runbook](demo/controller.md). Full foundation GitOps,
 renewal and multi-release lifecycle management remain open.
+The [administrator integration command](demo/stock-bootstrap.md) now automates
+Vault/ESO/Trustee setup from site YAML and explicit credentials; it does not give
+the release controller a Vault administrator token.
 
 Implementation sequence and acceptance gates: [full lifecycle plan](full-lifecycle-implementation-plan.md).
 

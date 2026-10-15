@@ -229,6 +229,8 @@ def setup_vault(r):
     old=admin.call(['read','-format=json',role_path],missing=True)
     if old:
         data=json.loads(old)['data'];require(all(data.get(k)==value for k,value in desired.items()),'existing Vault role differs; refuse privilege replacement')
+        require(not data.get('bound_service_account_namespace_selector') and not data.get('token_period'),
+                'existing Vault role expands namespace access or token lifetime; refuse reuse')
     else:admin.call(['write',role_path,'-'],desired)
     metadata=admin.call(['read','-format=json','secret/metadata/hub/modelKeys'],missing=True)
     created=metadata is None

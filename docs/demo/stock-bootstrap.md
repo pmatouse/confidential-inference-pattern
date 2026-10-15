@@ -16,10 +16,14 @@ values. See [runtime pins](../../profiles/runtime/osc-snp-nvidia-artifacts.json)
 ## Inputs
 
 Start from [quickstart.example.yaml](../../overrides/sites/quickstart.example.yaml).
-Fill the cluster/node/StorageClass/Trustee fields, then verify this integration block:
+Fill the cluster/node/StorageClass/Trustee fields, then verify this integration block.
+`installKServe: true` handles an absent KServe installation; it never replaces a
+foreign or incompatible installation:
 
 ```yaml
 quickstart:
+  dependencies:
+    installKServe: true  # Install the pinned release if absent; reuse a matching existing controller.
   integrations:
     enabled: true
     topologyFile: values-baremetal.yaml
@@ -167,6 +171,9 @@ has no binding and cannot be released through the model-key rule.
 - Existing Vault Kubernetes auth and ESO ClusterSecretStore configuration stay owned
   by CoCo. Auth-mount creation, Vault initialization/unseal and hardware attestation
   configuration are outside this add-on.
+- Enrollment remains a trusted operation: the stage identity can execute the Vault
+  CLI in the named Vault Pod and perform the declared Trustee integration. See
+  [cross-namespace grants](controller.md#privilege-and-trusted-service-boundary).
 - The current key adapter uses the shared `hub/modelKeys` KV document. Vault grants
   apply to the entire document; per-installation KV paths remain future work.
 - The generated policy binds new model resources; unrelated existing bindings and
@@ -174,12 +181,32 @@ has no binding and cannot be released through the model-key rule.
 - Chart upgrades, credential/certificate renewal, full lifecycle GitOps and prompt
   TLS inside the guest remain separate work.
 
-Validation: stock single/multi-source owner transformation, unchanged chart-file
-hashes, conflict/credential boundaries and 17 OPA allow/deny cases are tested.
-The earlier [fresh controller E2E](../../tests/evidence/2026-10-15/controller-fresh-e2e.json)
-predates this bootstrap extension and does not by itself qualify the new stock
-installation path. The live `qwen-controller-007` integration test reused the existing compatible
-Trustee chart, created a new scoped Vault enrollment identity, preserved the existing
-KV record, and verified Git/Argo policy reconciliation and Ready ESO. The stock
-chart conversion is locally tested; a fresh stock-chart cluster has not yet been
-qualified with this extension.
+## Recorded validation
+
+[`qwen-controller-007` evidence](../../tests/evidence/2026-10-15/integration-bootstrap.json),
+2026-10-15: automatic integration bootstrap created a new scoped Vault identity,
+preserved the existing KV record and converged the Git/Argo policy and ESO mapping.
+A repeat made no new Git commit and did not initialize the backend again.
+The administrator credential was absent from build archives/retained release state;
+temporary local copies were removed.
+
+The controller then reached **Ready / E2EPassed** from source `f7752a7`: eight initial
+Jobs, no stage retries, no controller restart and no manual stage intervention.
+Both VMs returned HTTP 200 through chat and ran CUDA inference; model hashes matched,
+PVC identities persisted, and administrator exec was denied. Independent authority
+log checks confirmed affirmative CPU/GPU evidence. The original separate Qwen pod
+kept its UID.
+
+| Path | Coverage |
+| --- | --- |
+| New enrollment identity; existing KV preservation; Git/Argo/ESO convergence | Live cluster, including repeat and scoped login |
+| Controller release using that identity | Live encrypted RO model + blank RW first use + fresh-VM persistence |
+| Stock 0.10.2 chart conversion | Local single/multi-source rendering, runtime file hashes and 17 OPA cases |
+| Missing backend CAS=0; conflicting privileges/owners | Unit tests; 160 tests pass across the repository |
+| Fresh stock-chart installation on another cluster | Not yet live-qualified |
+
+This live run reused a compatible Trustee chart and existing CoCo/KServe/shared
+APIs. Before release submission, preparation needed an artifact-transfer fix (the
+node's pinned hashes were unchanged) and retirement of the previous test compute.
+The unattended claim applies to the eight controller stages after submission,
+not to a completely intervention-free bootstrap or a fresh CoCo installation.

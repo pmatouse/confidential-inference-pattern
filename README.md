@@ -16,7 +16,9 @@ and fresh-VM E2E on AMD SEV-SNP + RTX PRO 6000 Blackwell Server Edition.
 six first-attempt image builds, then `Ready / E2EPassed` through eight initial
 stage Jobs, with no manual fixes/retries and fresh-VM persistence
 ([fresh controller evidence](tests/evidence/2026-10-15/controller-fresh-e2e.json)).
-The existing OpenShift + CoCo platform and compatible shared APIs were reused.
+The [automatic Vault/ESO/Trustee bootstrap](docs/demo/stock-bootstrap.md) also passed
+a new identity and `qwen-controller-007` E2E run. The existing OpenShift + CoCo
+platform and compatible shared APIs were reused.
 Full lifecycle GitOps, other hardware qualification and production credential/authority
 lifecycle remain open.
 

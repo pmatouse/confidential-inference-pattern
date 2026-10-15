@@ -27,13 +27,394 @@
     "backendReinitialized": false
   },
   "validation": {
-    "unitTestsPassed": 159,
+    "unitTestsPassed": 160,
     "opaCasesPassed": 17,
     "kbsConfigIncludesModelKeys": true,
-    "adminTokenProvidedToFoundation": false
+    "adminTokenProvidedToFoundation": false,
+    "finalVaultValidation": {
+      "backendCreated": false,
+      "adminCredentialRetained": false,
+      "role": "ci-controller-007-enroller",
+      "backendPath": "secret/data/hub/modelKeys",
+      "namespaceSelectorAbsent": true,
+      "periodicTokenDisabled": true,
+      "temporaryCredentialDeletedOnExit": true
+    },
+    "bootstrapImplementationSha256": "89ceacb317dfd765aa5cf2a8df27a9db3906e1b484117433766cbc0f0d050d46"
   },
   "remainingQualification": [
     "Fresh stock chart conversion on a separate CoCo installation",
-    "New controller release after this bootstrap"
+    "Missing-backend CAS=0 is unit-tested; live bootstrap preserved the existing backend."
+  ],
+  "credentialBoundary": {
+    "adminCredentialAbsentFromArchives": [
+      "release-executor.tar.gz",
+      "populator.tar.gz",
+      "authority.tar.gz",
+      "controller.tar.gz",
+      "payload.tar.gz",
+      "preparation.tar.gz",
+      "compiler-source.tar.gz",
+      "sidecar.tar.gz",
+      "go.tar.gz"
+    ],
+    "adminCredentialAbsentFromLocalReleaseState": true,
+    "temporaryAdminTokenFileRemoved": true
+  },
+  "controllerRelease": {
+    "audit": {
+      "state": "FreshUnattendedE2EPassed",
+      "releaseUID": "3d802a86-f098-4c06-a452-a77e2d26ae32",
+      "completedAt": "2026-10-15T14:09:02.198057+00:00",
+      "eightInitialJobs": true,
+      "failedStageJobs": 0,
+      "retryAnnotationAbsent": true,
+      "singleExecutorImage": "image-registry.openshift-image-registry.svc:5000/ci-controller-007/inference-release-executor@sha256:e272c3fab3adce6d3df5b08baa16aa6d0d077fd117254157eb7fd856b40c91f4",
+      "unchangedController": {
+        "uid": "5a4f5df1-3760-4483-9b7c-67c747ed0e68",
+        "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-007/inference-release-executor@sha256:e272c3fab3adce6d3df5b08baa16aa6d0d077fd117254157eb7fd856b40c91f4",
+        "restarts": 0
+      },
+      "manualFixesDuringRelease": 0,
+      "manualRetries": 0,
+      "baseline": {
+        "observedAt": "2026-10-15T13:55:41.727120+00:00",
+        "sourceCommit": "f7752a7dee6b86a9350eb168aca3b9661abf6f96",
+        "controller": {
+          "uid": "5a4f5df1-3760-4483-9b7c-67c747ed0e68",
+          "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-007/inference-release-executor@sha256:e272c3fab3adce6d3df5b08baa16aa6d0d077fd117254157eb7fd856b40c91f4",
+          "restarts": 0
+        },
+        "executorContextSha256": "8d1c69be07a1d0f73be34e58375c7561292a8951bb1f6f236bb907eb4eb4115a",
+        "gpuAllocatedBeforeStart": 1,
+        "gpuCapacity": 2,
+        "modelAndDataClaimsAbsent": true,
+        "releaseAbsent": true,
+        "releaseJobsAbsent": true,
+        "scopedSSHCredentialOnly": true,
+        "namespaceUIDs": {
+          "ci-controller-007": "b0f39c4c-cfb3-4cab-9b95-01103c9a365c",
+          "ci-controller-007-trusted": "cce0f959-6dfc-4151-a27d-0255d5a90ee2"
+        }
+      },
+      "observations": [
+        {
+          "observedAt": "2026-10-15T13:56:08.645016+00:00",
+          "phase": null,
+          "currentStage": null,
+          "reason": null,
+          "completed": 0
+        },
+        {
+          "observedAt": "2026-10-15T13:56:19.302299+00:00",
+          "phase": "Progressing",
+          "currentStage": "model",
+          "reason": "StageRunning",
+          "completed": 0
+        },
+        {
+          "observedAt": "2026-10-15T14:00:06.294785+00:00",
+          "phase": "Binding",
+          "currentStage": "volumes",
+          "reason": "StageScheduled",
+          "completed": 1
+        },
+        {
+          "observedAt": "2026-10-15T14:00:17.216067+00:00",
+          "phase": "Progressing",
+          "currentStage": "volumes",
+          "reason": "StageRunning",
+          "completed": 1
+        },
+        {
+          "observedAt": "2026-10-15T14:00:49.103099+00:00",
+          "phase": "Measuring",
+          "currentStage": "measure",
+          "reason": "StageScheduled",
+          "completed": 2
+        },
+        {
+          "observedAt": "2026-10-15T14:00:59.750293+00:00",
+          "phase": "Enrolling",
+          "currentStage": "enroll",
+          "reason": "StageScheduled",
+          "completed": 3
+        },
+        {
+          "observedAt": "2026-10-15T14:01:10.691534+00:00",
+          "phase": "Progressing",
+          "currentStage": "enroll",
+          "reason": "StageRunning",
+          "completed": 3
+        },
+        {
+          "observedAt": "2026-10-15T14:01:53.309684+00:00",
+          "phase": "Progressing",
+          "currentStage": "deploy",
+          "reason": "StageRunning",
+          "completed": 4
+        },
+        {
+          "observedAt": "2026-10-15T14:05:09.630370+00:00",
+          "phase": "Progressing",
+          "currentStage": "test-first",
+          "reason": "StageRunning",
+          "completed": 5
+        },
+        {
+          "observedAt": "2026-10-15T14:05:31.119828+00:00",
+          "phase": "Progressing",
+          "currentStage": "test-reopen",
+          "reason": "StageRunning",
+          "completed": 6
+        },
+        {
+          "observedAt": "2026-10-15T14:08:44.978206+00:00",
+          "phase": "Verifying",
+          "currentStage": "report",
+          "reason": "StageScheduled",
+          "completed": 7
+        },
+        {
+          "observedAt": "2026-10-15T14:08:57.953278+00:00",
+          "phase": "Ready",
+          "currentStage": null,
+          "reason": "E2EPassed",
+          "completed": 8
+        }
+      ]
+    },
+    "e2e": {
+      "first": {
+        "applicationImage": "nvcr.io/nvidia/vllm@sha256:15f380ad9c32f0ac57ac16e4b778c6f733c88b9ffe3a936035d0a59ad17b1aab",
+        "boot": "02bea6cf-a957-41f7-a6b9-bca39260f212",
+        "chatResponse": "<think>\n\n</think>\n\n7 plus 5 equals 12.",
+        "chatStatus": 200,
+        "execDenied": true,
+        "gpu": {
+          "cuda": "13.0",
+          "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+          "event": "CUDA_GPU_PROBE_PASS",
+          "torch": "2.9.0a0+50eac811a6.nv25.09"
+        },
+        "initDataSha256": "3d9080cf2dd6e5f5a75138e6d0ae6a84b1634a5b653705119d0b01ebc0d5705e",
+        "model": "qwen3-0.6b",
+        "modelHashesVerified": true,
+        "namespace": "ci-controller-007",
+        "phase": "first",
+        "pod": "qwen-controller-007-predictor-5d8fb95595-rggvs",
+        "podUid": "16037475-979d-4297-8b55-faaee1dd4ace",
+        "pvcUids": {
+          "data": "9407c2d9-3acb-425d-8f47-1c5c5ece3325",
+          "model": "25d3bbc9-9aa5-4177-966b-946bb57d8c32"
+        },
+        "scope": "application, persistence, chat and exec checks; authority evidence separate",
+        "workload": "qwen-controller-007"
+      },
+      "images": {
+        "authority": {
+          "build": "confidential-storage-authority-1",
+          "contextSha256": "d2bd60174b4b56d11150b3edd9249b986bd37e6420a39bbff6bcd1b2451f1471",
+          "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-007/confidential-storage-authority@sha256:bb079b22cc6c1b9905337f55d343a41c81ffbbdcbac7b0f80a41a7b00e087f25",
+          "namespace": "ci-controller-007"
+        },
+        "controller": {
+          "build": "confidential-volume-controller-1",
+          "contextSha256": "b1bd863543c4a9ea095d047fd11efeea0a4ddc11fa3990239934c4a696df98ff",
+          "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-007/confidential-volume-controller@sha256:3b842fe2db664c68d56d5b783f92290edb3fa643b687f8dd1a921de49e9a66a5",
+          "namespace": "ci-controller-007"
+        },
+        "populator": {
+          "build": "encrypted-model-populator-1",
+          "contextSha256": "bce3077b7f33753303b769ee4234344a56de3f56b079966d72875e0785d2644f",
+          "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-007/encrypted-model-populator@sha256:9be302bc7b2e58b208a37b376dbcdfac5c5b957e894936571bfeeb6fc944bfb3",
+          "namespace": "ci-controller-007"
+        },
+        "preparation": {
+          "build": "inference-preparation-1",
+          "contextSha256": "c36eea1865ab4aa0a69c1a42ca8a581f24b0a30d9727672bbebf4814f38308e6",
+          "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-007/inference-preparation@sha256:a80f7a0dc6c1b114a274c21daf5a178c2be459f8b749f81839a534b27b42a839",
+          "namespace": "ci-controller-007"
+        },
+        "sidecar": {
+          "build": "confidential-storage-sidecar-1",
+          "contextSha256": "a42470c3aca2af7cbf05c8b3aeeb87ff86e7aa44e4ea275a20c64c035f2261ea",
+          "image": "image-registry.openshift-image-registry.svc:5000/ci-controller-007/confidential-storage-sidecar@sha256:0f1b24eb5ca375f03e23a3d143d436ccbf919e404dd79ddb8d0551fc595dc451",
+          "namespace": "ci-controller-007"
+        }
+      },
+      "limitations": [
+        "Qualified OSC SNP/NVIDIA profile only",
+        "Chat proxy HTTP outside TEE; localhost port-forward",
+        "Retained authority is trusted; full RW snapshot rollback resistance is not claimed"
+      ],
+      "namespace": "ci-controller-007",
+      "reopen": {
+        "applicationImage": "nvcr.io/nvidia/vllm@sha256:15f380ad9c32f0ac57ac16e4b778c6f733c88b9ffe3a936035d0a59ad17b1aab",
+        "boot": "d40c6bb5-5e80-4491-bb84-a7218a2d0384",
+        "chatResponse": "<think>\n\n</think>\n\n7 plus 5 equals 12.",
+        "chatStatus": 200,
+        "execDenied": true,
+        "gpu": {
+          "cuda": "13.0",
+          "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+          "event": "CUDA_GPU_PROBE_PASS",
+          "torch": "2.9.0a0+50eac811a6.nv25.09"
+        },
+        "initDataSha256": "3d9080cf2dd6e5f5a75138e6d0ae6a84b1634a5b653705119d0b01ebc0d5705e",
+        "model": "qwen3-0.6b",
+        "modelHashesVerified": true,
+        "namespace": "ci-controller-007",
+        "phase": "reopen",
+        "pod": "qwen-controller-007-predictor-5d8fb95595-c85wx",
+        "podUid": "a118297b-5927-4e8f-9148-bcc8eea152a3",
+        "pvcUids": {
+          "data": "9407c2d9-3acb-425d-8f47-1c5c5ece3325",
+          "model": "25d3bbc9-9aa5-4177-966b-946bb57d8c32"
+        },
+        "scope": "application, persistence, chat and exec checks; authority evidence separate",
+        "workload": "qwen-controller-007"
+      },
+      "run": "qwen-controller-007",
+      "source": {
+        "diskBytes": 2147483648,
+        "diskDigest": "sha256:0d4ee5148cb05c62cb559d167755343312bb4e92332a14821e4816216514d2b4",
+        "format": "luks-verity-v1",
+        "manifestDigest": "sha256:53f8f3a7ff0acd46dfd9c153822b113567315bb22c50a0ab1f921051fc5e9133",
+        "repository": "ci-controller-007/qwen-controller-007-model"
+      },
+      "state": "E2EPassed"
+    },
+    "independentChecks": {
+      "clusterAdministratorExecDenied": true,
+      "denial": "ExecProcessRequest is blocked by policy",
+      "attestationMarkers": [
+        "STORAGE_EAR submod=cpu0 status=affirming hardware=2 configuration=3 executables=3",
+        "STORAGE_EAR submod=gpu0 status=affirming hardware=2 configuration=3 executables=3"
+      ]
+    },
+    "firstBoot": {
+      "chatStatus": 200,
+      "cpuGpuAttestation": true,
+      "podUID": "16037475-979d-4297-8b55-faaee1dd4ace",
+      "pvcUIDs": {
+        "data": "9407c2d9-3acb-425d-8f47-1c5c5ece3325",
+        "model": "25d3bbc9-9aa5-4177-966b-946bb57d8c32"
+      },
+      "state": "FirstBootPassed"
+    },
+    "freshVM": {
+      "chatStatus": 200,
+      "cpuGpuAttestation": true,
+      "initializationUnchanged": true,
+      "oldOwnerClosed": true,
+      "podUID": "a118297b-5927-4e8f-9148-bcc8eea152a3",
+      "previousPodUID": "16037475-979d-4297-8b55-faaee1dd4ace",
+      "samePVCs": true,
+      "state": "FreshVMPersistencePassed"
+    },
+    "enrollment": {
+      "policySha256": "59a2caba6c78a2156e660da92475b9df072454588298d73c8500b716e5b075e5",
+      "runtime": {
+        "guestImageSha256": "abd755287282a268578687137bf437caeda6139c1a654f18d13f8a72a68892ca",
+        "initDataSha256": "3d9080cf2dd6e5f5a75138e6d0ae6a84b1634a5b653705119d0b01ebc0d5705e",
+        "launchMeasurement": "be2e11ecce7f8fedf0ab8fe056b927c5508557c5e57279f70c6e43ab6b3c3afcb10da6982a6e5f5bcf1069ec8a664818",
+        "runtimeClassName": "kata-cc-nvidia-gpu"
+      },
+      "state": "TrustReady",
+      "tags": [
+        "qwen-controller-007-model",
+        "qwen-controller-007-data",
+        "qwen-controller-007-registry"
+      ],
+      "trusteePodUID": "e5fd5324-c42b-467b-b9a3-a488dd980a05"
+    },
+    "stageReceipts": [
+      {
+        "jobUID": "660be395-9970-4d0a-989d-4d0f2c9ae040",
+        "releaseUID": "3d802a86-f098-4c06-a452-a77e2d26ae32",
+        "schemaVersion": 1,
+        "siteSha256": "3b75173af553390db2bea0f0e09025d7425cf2b489cc6fae86afc13e78f32856",
+        "specSha256": "bd9a4d8fa919e5f29781bf048256104e41bc2b1f989dec23819529dd8afb153f",
+        "stage": "model",
+        "stageReceiptSha256": "c250f014b84e35e246d83a0d0af382fa85fecb24f04f0d3996cfccd68374b1b0",
+        "state": "ModelPublished"
+      },
+      {
+        "jobUID": "d9bd2dd0-4b40-4201-8b78-a0e3ea30d003",
+        "releaseUID": "3d802a86-f098-4c06-a452-a77e2d26ae32",
+        "schemaVersion": 1,
+        "siteSha256": "3b75173af553390db2bea0f0e09025d7425cf2b489cc6fae86afc13e78f32856",
+        "specSha256": "bd9a4d8fa919e5f29781bf048256104e41bc2b1f989dec23819529dd8afb153f",
+        "stage": "volumes",
+        "stageReceiptSha256": "d56c2880c0c62e0794115fbf75d4bf28731ccfcffc5edbcc9a64f4ea9c8b75ac",
+        "state": "VolumesBound"
+      },
+      {
+        "jobUID": "479cef5f-5622-4648-8b4a-e7a4f6e65791",
+        "releaseUID": "3d802a86-f098-4c06-a452-a77e2d26ae32",
+        "schemaVersion": 1,
+        "siteSha256": "3b75173af553390db2bea0f0e09025d7425cf2b489cc6fae86afc13e78f32856",
+        "specSha256": "bd9a4d8fa919e5f29781bf048256104e41bc2b1f989dec23819529dd8afb153f",
+        "stage": "measure",
+        "stageReceiptSha256": "21fdefa952321b0cb6558c08725dcde896f43f13e6e291bc9366f6d31c1cd41f",
+        "state": "ReleaseMeasured"
+      },
+      {
+        "jobUID": "c95fd594-b29b-47fa-8b01-e9eee7ea8490",
+        "releaseUID": "3d802a86-f098-4c06-a452-a77e2d26ae32",
+        "schemaVersion": 1,
+        "siteSha256": "3b75173af553390db2bea0f0e09025d7425cf2b489cc6fae86afc13e78f32856",
+        "specSha256": "bd9a4d8fa919e5f29781bf048256104e41bc2b1f989dec23819529dd8afb153f",
+        "stage": "enroll",
+        "stageReceiptSha256": "00b4baf71e703f70d79d1c61b01be0b2ffc3bc4f8469719e1bd147ad03c97b27",
+        "state": "TrustReady"
+      },
+      {
+        "jobUID": "53636a32-1465-4d92-b4be-d2dd949ecd18",
+        "releaseUID": "3d802a86-f098-4c06-a452-a77e2d26ae32",
+        "schemaVersion": 1,
+        "siteSha256": "3b75173af553390db2bea0f0e09025d7425cf2b489cc6fae86afc13e78f32856",
+        "specSha256": "bd9a4d8fa919e5f29781bf048256104e41bc2b1f989dec23819529dd8afb153f",
+        "stage": "deploy",
+        "stageReceiptSha256": "2881811648525935f6eee17437a6810ff876bee7640f8a142dd182b3d3b09da8",
+        "state": "Serving"
+      },
+      {
+        "jobUID": "0c0a43d6-c324-4f2f-98bb-1da0b2190558",
+        "releaseUID": "3d802a86-f098-4c06-a452-a77e2d26ae32",
+        "schemaVersion": 1,
+        "siteSha256": "3b75173af553390db2bea0f0e09025d7425cf2b489cc6fae86afc13e78f32856",
+        "specSha256": "bd9a4d8fa919e5f29781bf048256104e41bc2b1f989dec23819529dd8afb153f",
+        "stage": "test-first",
+        "stageReceiptSha256": "29b47b69886238e425c258bb38169880f7defe8c2d826fa11130908449e0d3a1",
+        "state": "FirstBootPassed"
+      },
+      {
+        "jobUID": "752b8bb2-70d5-4377-b5e9-bfe1acdc55aa",
+        "releaseUID": "3d802a86-f098-4c06-a452-a77e2d26ae32",
+        "schemaVersion": 1,
+        "siteSha256": "3b75173af553390db2bea0f0e09025d7425cf2b489cc6fae86afc13e78f32856",
+        "specSha256": "bd9a4d8fa919e5f29781bf048256104e41bc2b1f989dec23819529dd8afb153f",
+        "stage": "test-reopen",
+        "stageReceiptSha256": "f5cc97d00a20298e92c9debfc91b2489f52b33c1c56ab1737b0f9e617c92d28e",
+        "state": "FreshVMPersistencePassed"
+      },
+      {
+        "jobUID": "afc703f8-7628-454a-9238-46942402c2f6",
+        "releaseUID": "3d802a86-f098-4c06-a452-a77e2d26ae32",
+        "schemaVersion": 1,
+        "siteSha256": "3b75173af553390db2bea0f0e09025d7425cf2b489cc6fae86afc13e78f32856",
+        "specSha256": "bd9a4d8fa919e5f29781bf048256104e41bc2b1f989dec23819529dd8afb153f",
+        "stage": "report",
+        "stageReceiptSha256": "a9bcae2814fe570b70619a76c70d0d293b2d11bfd54b31a5390377728b613edc",
+        "state": "E2EPassed"
+      }
+    ],
+    "preservedOriginalPredictorUID": "8ea6b4f6-987c-42cb-852d-ac47726506dd"
+  },
+  "preSubmissionInterventions": [
+    "Fixed a truncated stock initrd transfer; node-side hashes still matched the approved profile; no runtime pins changed.",
+    "Retired the previous test compute; a controller shutdown race recreated it once and was resolved before release submission."
   ]
 }

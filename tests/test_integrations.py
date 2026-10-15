@@ -158,6 +158,14 @@ class IntegrationTests(unittest.TestCase):
         with patch.object(m,'VaultAdmin',return_value=admin):result=m.setup_vault(SimpleNamespace(q={'vault':VAULT}))
         self.assertFalse(result['backendCreated']);self.assertFalse(any(c.args[0][0]=='write' for c in admin.call.call_args_list))
 
+    def test_existing_role_cannot_expand_namespaces_or_use_periodic_tokens(self):
+        role={'bound_service_account_names':['enroller'],'bound_service_account_namespaces':['demo-enrollment'],'audience':'vault','token_policies':['demo-enroller'],'token_no_default_policy':True,'token_ttl':900,'token_max_ttl':3600}
+        for extra in ({'bound_service_account_namespace_selector':'{"matchLabels":{"team":"any"}}'},{'token_period':900}):
+            admin=Mock();admin.call.side_effect=[json.dumps({'hub/':{'type':'kubernetes'}}),m.vault_policy(VAULT),json.dumps({'data':role|extra})]
+            with patch.object(m,'VaultAdmin',return_value=admin),self.assertRaisesRegex(ValueError,'expands namespace access or token lifetime'):
+                m.setup_vault(SimpleNamespace(q={'vault':VAULT}))
+            self.assertFalse(any(c.args[0][0]=='write' for c in admin.call.call_args_list))
+
     def test_vault_credential_only_on_stdin_and_errors_redacted(self):
         with tempfile.TemporaryDirectory() as d:
             path=Path(d)/'token';path.write_text('private-value');path.chmod(0o600)

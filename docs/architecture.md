@@ -59,8 +59,15 @@ The inference host and storage backend are treated as untrusted for workload dat
 The [release controller](demo/controller.md) adds immutable release intent and
 sequential publication, binding, measurement, enrollment, approval and acceptance
 Jobs. Argo may own that intent after administrator bootstrap. This initial path
-is implemented and undergoing independent hardware qualification; full foundation
+has passed hardware E2E on the qualified SNP/NVIDIA profile; full foundation
 lifecycle, renewal and retained-volume upgrades remain open.
+
+The [integration bootstrap](demo/stock-bootstrap.md) runs once with explicit
+administrator credentials. It creates the scoped Vault enrollment identity and
+commits ESO/model-policy wiring through CoCo’s existing Git/Argo owner. A pinned
+chart adapter supplies the missing exact model-key binding hook; Trustee binaries
+are unchanged. The release controller receives scoped credentials, not the Vault
+administrator token.
 
 ## Data protection
 

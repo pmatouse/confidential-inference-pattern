@@ -38,7 +38,9 @@ the live `qwen-controller-007` bootstrap passed with a new scoped identity, pres
 backend, exact Git/Argo policy convergence and Ready ESO. A repeat produced no new
 Git commit or backend initialization; scoped login and foundation bootstrap passed
 without the administrator token. This reused the existing compatible Trustee chart;
-fresh stock-chart E2E qualification remains open. See the
+fresh stock-chart E2E qualification remains open. The new identity also completed
+`qwen-controller-007`: eight initial Jobs reached `Ready / E2EPassed` without stage
+retries or a controller restart, including first-use storage and fresh-VM persistence. See the
 [bootstrap receipt](../tests/evidence/2026-10-15/integration-bootstrap.json).
 
 ## Remaining integration work

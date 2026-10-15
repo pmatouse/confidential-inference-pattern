@@ -14,6 +14,12 @@ hardware E2E on the qualified AMD SEV-SNP/NVIDIA profile.
 
 ## Recorded validation
 
+The [integration-bootstrap run](../../tests/evidence/2026-10-15/integration-bootstrap.json)
+also passed `qwen-controller-007` after automatic Vault/ESO/Trustee setup: eight
+initial Jobs, fresh-VM persistence and no stage intervention. It reused a compatible
+Trustee chart; [stock-chart coverage and bootstrap limits](stock-bootstrap.md#recorded-validation)
+are recorded separately.
+
 [Fresh unattended E2E evidence](../../tests/evidence/2026-10-15/controller-fresh-e2e.json),
 2026-10-15: `qwen-controller-006` reached **Ready / E2EPassed** from source
 `c273861`. A single bootstrap invocation built six new images and installed the

@@ -82,6 +82,12 @@ name does not mean a replacement guest image. The sidecar image carries this cod
 the stock kernel/initrd/agent and vLLM image remain unchanged. Reviewed matching
 kernel modules are loaded inside the guest; compatibility is profile-specific.
 
+The administrator-side [`scripts/quickstart/integrations.py`](../scripts/quickstart/integrations.py)
+configures Vault enrollment ACL/role, preserves or initializes the backend record,
+and commits ESO/Trustee wiring through the existing CoCo owner. It materializes a
+pinned chart adapter when needed; it is not a long-running controller. The external
+Vault administrator credential is used only for bootstrap. See [inputs and flow](demo/stock-bootstrap.md).
+
 ## Platform components reused
 
 | Component | Responsibility in the running workload |
