@@ -101,17 +101,20 @@ def receive(r,pod,source,destination,expected=None):
 
 
 def read_stock_artifact(r,pod,item):
-    """Retry only failed read-only transport; never accept a different measurement."""
+    """Verify the installed pin before bounded, hash-checked transport retries."""
+    prefix=('exec','-n','openshift-machine-config-operator',pod,'-c','machine-config-daemon','--')
+    remote=r.oc(*prefix,'sha256sum','/rootfs'+item['path'],timeout=120).split()[0]
+    require(remote==item['sha256'],'installed artifact differs from approved stock profile')
     for attempt in range(3):
         try:
-            raw=r.oc('exec','-n','openshift-machine-config-operator',pod,'-c','machine-config-daemon','--','cat','/rootfs'+item['path'],binary=True,timeout=600)
+            raw=r.oc(*prefix,'cat','/rootfs'+item['path'],binary=True,timeout=600)
         except (RuntimeError,subprocess.TimeoutExpired):
             if attempt==2:raise
-            print('Stock artifact transport interrupted; automatic read attempt '+str(attempt+2)+' of 3',flush=True)
-            time.sleep(2**attempt)
-            continue
-        require(sha(raw)==item['sha256'],'installed artifact differs from approved stock profile')
-        return raw
+        else:
+            if sha(raw)==item['sha256']:return raw
+            if attempt==2:raise RuntimeError('stock artifact transport digest mismatch; no bytes accepted')
+        print('Stock artifact transfer incomplete; automatic read attempt '+str(attempt+2)+' of 3',flush=True)
+        time.sleep(2**attempt)
 
 
 def artifacts(r,work):

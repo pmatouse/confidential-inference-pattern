@@ -57,21 +57,26 @@ class QuickstartTests(unittest.TestCase):
             self.assertEqual(a.read_bytes(),b.read_bytes())
             with tarfile.open(a) as t:self.assertEqual(t.getmember('encrypted-model-populator').mode,0o755)
 
-    def test_stock_artifact_read_retries_transport_but_never_digest_mismatch(self):
+    def test_stock_artifact_read_verifies_source_and_retries_unaccepted_transport(self):
         from types import SimpleNamespace
         from unittest.mock import Mock,patch
         from quickstart.build import read_stock_artifact
         item={'path':'/approved/initrd','sha256':sha(b'approved')}
-        r=SimpleNamespace(oc=Mock(side_effect=[RuntimeError('transport'),b'approved']))
+        remote=item['sha256']+'  /rootfs/approved/initrd\n'
+        r=SimpleNamespace(oc=Mock(side_effect=[remote,RuntimeError('transport'),b'truncated',b'approved']))
         with patch('quickstart.build.time.sleep'):
             self.assertEqual(read_stock_artifact(r,'daemon',item),b'approved')
-        self.assertEqual(r.oc.call_count,2)
-        r.oc=Mock(side_effect=[b'different',b'approved'])
+        self.assertEqual(r.oc.call_count,4)
+        r.oc=Mock(side_effect=['changed  /rootfs/approved/initrd',b'approved'])
         with self.assertRaisesRegex(ValueError,'differs from approved'):read_stock_artifact(r,'daemon',item)
         self.assertEqual(r.oc.call_count,1)
-        r.oc=Mock(side_effect=RuntimeError('transport'))
+        r.oc=Mock(side_effect=[remote,b'bad',b'bad',b'bad'])
+        with patch('quickstart.build.time.sleep'),self.assertRaisesRegex(RuntimeError,'transport digest mismatch'):
+            read_stock_artifact(r,'daemon',item)
+        self.assertEqual(r.oc.call_count,4)
+        r.oc=Mock(side_effect=[remote,RuntimeError('transport'),RuntimeError('transport'),RuntimeError('transport')])
         with patch('quickstart.build.time.sleep'),self.assertRaises(RuntimeError):read_stock_artifact(r,'daemon',item)
-        self.assertEqual(r.oc.call_count,3)
+        self.assertEqual(r.oc.call_count,4)
 
     def test_compiler_receive_recovers_transport_without_publishing_unverified_bytes(self):
         from types import SimpleNamespace
