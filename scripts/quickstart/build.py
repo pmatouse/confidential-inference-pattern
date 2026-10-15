@@ -87,8 +87,14 @@ def send(r,pod,path,destination):
 def receive(r,pod,source,destination,expected=None):
     # Verify length/hash against the compiler before accepting potentially truncated exec streams.
     digest=expected or r.oc('exec','-n',r.trusted,pod,'--','sha256sum',source).split()[0]
-    for _ in range(3):
-        raw=r.oc('exec','-n',r.trusted,pod,'--','cat',source,binary=True,timeout=300)
+    for attempt in range(3):
+        try:
+            raw=r.oc('exec','-n',r.trusted,pod,'--','cat',source,binary=True,timeout=300)
+        except (RuntimeError,subprocess.TimeoutExpired):
+            if attempt==2:raise
+            print('Compiler artifact transport interrupted; automatic read attempt '+str(attempt+2)+' of 3',flush=True)
+            time.sleep(2**attempt)
+            continue
         if sha(raw)==digest:
             write(destination,raw);return
     raise RuntimeError('binary transport digest mismatch: '+source)

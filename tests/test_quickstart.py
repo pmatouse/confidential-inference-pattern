@@ -73,6 +73,22 @@ class QuickstartTests(unittest.TestCase):
         with patch('quickstart.build.time.sleep'),self.assertRaises(RuntimeError):read_stock_artifact(r,'daemon',item)
         self.assertEqual(r.oc.call_count,3)
 
+    def test_compiler_receive_recovers_transport_without_publishing_unverified_bytes(self):
+        from types import SimpleNamespace
+        from unittest.mock import Mock,patch
+        from quickstart.build import receive
+        with tempfile.TemporaryDirectory() as directory:
+            target=Path(directory)/'binary';target.write_bytes(b'previous')
+            r=SimpleNamespace(trusted='trusted',oc=Mock(side_effect=[RuntimeError('transport'),b'truncated',b'complete']))
+            with patch('quickstart.build.time.sleep'):receive(r,'compiler','/work/binary',target,sha(b'complete'))
+            self.assertEqual(r.oc.call_count,3);self.assertEqual(target.read_bytes(),b'complete')
+            r.oc=Mock(return_value=b'corrupt')
+            with self.assertRaisesRegex(RuntimeError,'digest mismatch'):receive(r,'compiler','/work/binary',target,sha(b'complete'))
+            self.assertEqual(r.oc.call_count,3);self.assertEqual(target.read_bytes(),b'complete')
+            r.oc=Mock(side_effect=RuntimeError('transport'))
+            with patch('quickstart.build.time.sleep'),self.assertRaises(RuntimeError):receive(r,'compiler','/work/binary',target,sha(b'complete'))
+            self.assertEqual(r.oc.call_count,3);self.assertEqual(target.read_bytes(),b'complete')
+
     def test_failed_archive_read_never_publishes_partial_context(self):
         from unittest.mock import patch
         with tempfile.TemporaryDirectory() as d, patch('quickstart.build.time.sleep'):

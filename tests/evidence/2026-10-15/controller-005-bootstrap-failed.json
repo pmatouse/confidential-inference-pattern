@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-15",
+  "state": "BootstrapCompilerReadFailed",
+  "hardwareE2EQualified": false,
+  "run": "qwen-controller-005",
+  "sourceCommit": "8cd7cbe",
+  "releaseStarted": false,
+  "manualRetry": false,
+  "failure": "Read-only binary retrieval of the compiled populator failed after successful compilation and verified retrieval of the storage service.",
+  "resolution": "Handle transport exceptions within the existing three-attempt, hash-verified compiler receive loop. Never publish partial or unverified bytes. Qualify in a new installation."
+}

@@ -52,7 +52,10 @@ is counted as successful E2E. Attempt `004` stopped before image builds when the
 large stock-initrd `oc exec` transfer failed ([record](../../tests/evidence/2026-10-15/controller-004-bootstrap-failed.json)).
 Stock artifact acquisition now retries failed read-only transport at most three
 times, while a digest mismatch still fails immediately. A new installation must
-qualify these corrections.
+qualify these corrections. Attempt `005` reached successful compilation but failed
+while retrieving a compiled binary ([record](../../tests/evidence/2026-10-15/controller-005-bootstrap-failed.json));
+the existing hash-verified receive loop now also bounds transport exceptions.
+Neither transfer fix accepts partial or unverified artifacts.
 
 ## Bootstrap once
 
