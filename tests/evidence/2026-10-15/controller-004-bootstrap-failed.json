@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-15",
+  "state": "BootstrapArtifactReadFailed",
+  "hardwareE2EQualified": false,
+  "run": "qwen-controller-004",
+  "sourceCommit": "4e5e75a",
+  "releaseStarted": false,
+  "manualRetry": false,
+  "failure": "oc exec binary transfer failed while acquiring the stock initrd; firmware and kernel had already verified. No image build or controller release started.",
+  "resolution": "Bound failed read-only transport to three automatic attempts; preserve immediate failure on a pinned digest mismatch. Test another fresh installation."
+}

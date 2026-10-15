@@ -48,7 +48,11 @@ but hit an enrollment readiness race during the owner-managed Trustee rollout
 ([failure record](../../tests/evidence/2026-10-15/controller-003-enrollment-failed.json)).
 Enrollment now waits for a healthy Trustee and checks its exact resource hashes
 before deciding whether the authorized restart is needed. Neither failed attempt
-is counted as successful E2E; a new installation must qualify the correction.
+is counted as successful E2E. Attempt `004` stopped before image builds when the
+large stock-initrd `oc exec` transfer failed ([record](../../tests/evidence/2026-10-15/controller-004-bootstrap-failed.json)).
+Stock artifact acquisition now retries failed read-only transport at most three
+times, while a digest mismatch still fails immediately. A new installation must
+qualify these corrections.
 
 ## Bootstrap once
 

@@ -94,6 +94,20 @@ def receive(r,pod,source,destination,expected=None):
     raise RuntimeError('binary transport digest mismatch: '+source)
 
 
+def read_stock_artifact(r,pod,item):
+    """Retry only failed read-only transport; never accept a different measurement."""
+    for attempt in range(3):
+        try:
+            raw=r.oc('exec','-n','openshift-machine-config-operator',pod,'-c','machine-config-daemon','--','cat','/rootfs'+item['path'],binary=True,timeout=600)
+        except (RuntimeError,subprocess.TimeoutExpired):
+            if attempt==2:raise
+            print('Stock artifact transport interrupted; automatic read attempt '+str(attempt+2)+' of 3',flush=True)
+            time.sleep(2**attempt)
+            continue
+        require(sha(raw)==item['sha256'],'installed artifact differs from approved stock profile')
+        return raw
+
+
 def artifacts(r,work):
     lock=json.loads((ROOT/'profiles/runtime/osc-snp-nvidia-artifacts.json').read_text())
     node=r.require_stage('preflight')['node']
@@ -104,8 +118,7 @@ def artifacts(r,work):
     for key,item in lock['files'].items():
         path=work/key
         if not path.exists() or sha(path.read_bytes())!=item['sha256']:
-            raw=r.oc('exec','-n','openshift-machine-config-operator',pod,'-c','machine-config-daemon','--','cat','/rootfs'+item['path'],binary=True,timeout=600)
-            require(sha(raw)==item['sha256'],'installed '+key+' differs from approved stock profile')
+            raw=read_stock_artifact(r,pod,item)
             write(path,raw)
         paths[key]=str(path)
     fetch(r,lock['kernelModulesRPM']['url'],work/'kernel-modules.rpm',lock['kernelModulesRPM']['sha256'])
