@@ -20,7 +20,7 @@ unattended demo**, a cross-hardware qualification, or an official VP support tie
 | [Inputs](docs/inputs.md) | What to supply first, what is generated, credentials and reproducibility |
 | [Demo setup](docs/demo/setup.md) | One-time installation and release sequence |
 | [Acceptance](docs/demo/acceptance.md) | Inference, fresh-VM persistence and negative checks |
-| [Automation target](docs/automation.md) | What remains for “install, measure, enroll and run” |
+| [GitOps target](docs/automation.md) | One site YAML, Argo ownership, trusted release lifecycle and remaining work |
 | [Status](docs/implementation-status.md) | Verified result and open integration gaps |
 
 Start by filling site values, then run:

@@ -16,8 +16,9 @@ CoCo cluster. No cluster reinstall. Original Qwen remained healthy and unchanged
 
 ## Remaining integration work
 
-- **Install-and-run orchestration:** discovery, expected launch measurement,
-  publication, enrollment, signing, deployment and acceptance are not one workflow.
+- **Full lifecycle GitOps:** Argo currently owns the foundation. Watched site YAML,
+  a trusted release reconciler, expected launch measurement, publication/enrollment,
+  signing and acceptance health gates remain to be integrated.
 - **Portability:** publish portable images; qualify additional hardware/runtime/CSI
   profiles. Only the tested OSC SNP/NVIDIA configuration is qualified.
 - **Credential lifecycle:** automate helper pull-token, approval and certificate

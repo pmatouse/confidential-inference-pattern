@@ -24,7 +24,7 @@ and [qualified stack](../architecture.md#qualified-hardware-and-software).
 4. Bootstrap the trusted enrollment identity ([Vault mapping](vault-bootstrap.md)),
    authority TLS/signing credentials and retained authority state. Bootstrap state
    **once**; normal serving verifies it. Supply the approval public key to the controller.
-5. Optionally configure repository-scoped GitOps access, then `make enable-gitops
+5. Configure repository-scoped GitOps access, then `make enable-gitops
    VALUES=...` with a full commit pin. Its restricted project owns add-on resources;
    existing CoCo services and Trustee policies retain their original owner.
 
@@ -47,7 +47,9 @@ are not duplicated.
 
 Commands and checks: [release preparation](fresh-release.md),
 [release tool reference](../../components/inference-release/README.md),
-[acceptance](acceptance.md). Trusted steps are currently operator-orchestrated.
+[acceptance](acceptance.md). Trusted steps are currently operator-orchestrated. The [GitOps target](../automation.md)
+replaces these per-release commands with declarative intent and trusted reconciliation;
+today Argo manages only the foundation.
 `make demo-status VALUES=...` reports resources; it is not E2E proof.
 
 ## Retention and access
