@@ -1,5 +1,8 @@
 # Security and experimental status
 
+The [security model](docs/security-model.md) documents InitData, attestation
+coverage, key release, trusted components and residual threats.
+
 Do not use this unqualified add-on as a production security boundary.
 Report security concerns privately to the repository owner through the available
 GitHub private reporting channel; if unavailable, request a private contact

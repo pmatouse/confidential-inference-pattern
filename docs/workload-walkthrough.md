@@ -290,6 +290,9 @@ KServe readiness, guest checks and authority state establish those later stages.
 
 ## 4. Boot, attestation and mount transfer
 
+See the [security model](security-model.md) for what InitData binds, which claims
+are attested directly, and the separate Trustee and storage-authority decisions.
+
 ```mermaid
 sequenceDiagram
   participant R as Stock Kata runtime / agent

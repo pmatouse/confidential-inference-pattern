@@ -2,6 +2,8 @@
 
 For the complete execution sequence, read the [workload walkthrough](workload-walkthrough.md)
 and [component map](components.md).
+For attestation coverage, key release and threat boundaries, read the
+[security model](security-model.md).
 
 ## What runs
 
