@@ -1,0 +1,45 @@
+# Public site inputs. Empty required values intentionally fail preflight.
+# Merge over values-global.yaml; use your own registry and installation identity.
+installation:
+  name: confidential-inference
+  namespace: confidential-inference
+  clusterIdentity: ''                  # Stable cluster identifier
+  profile: osc-snp-nvidia-x86_64-v1    # Only qualified profile today
+base:
+  storageClassName: ''                # Raw Block, RWOP, Immediate
+  runtimeClassName: kata-cc-nvidia-gpu
+  runtimeHandler: kata-snp-nvidia-gpu
+  gpuResourceName: nvidia.com/pgpu
+  trusteeNamespace: trustee-operator-system
+  trusteeName: ''                     # Existing KbsConfig name
+  kserveNamespace: kserve
+  kserveDeployment: kserve-controller-manager
+  kserveVersion: v0.20.0
+  gitopsNamespace: vp-gitops
+images:
+  controller: ''                     # Full repository@sha256:digest
+  populator: ''
+  sidecar: ''
+registry:
+  origin: ''                         # HTTPS internal registry origin
+  injectServiceCA: true
+approvalKeys: {}                      # Generated PUBLIC approval signer key
+# Generated after fresh publication; not copied from the edge demonstration.
+demo:
+  name: qwen-demo-001
+  modelSize: 2Gi
+  dataSize: 1Gi
+  modelMount: /model
+  dataMount: /data
+  modelName: qwen3-0.6b
+  modelKeyResource: kbs:///default/model-keys/qwen-demo-001-model
+  dataKeyResource: kbs:///default/model-keys/qwen-demo-001-data
+  approvedManifestRef: qwen-demo-001-release
+  source: {}                         # Publisher receipt, required for demo-provision
+chat:
+  enabled: true
+  serviceType: ClusterIP
+  port: 8080
+  nodePort: null
+# Authority, publisher and backend enrollment have separate inputs: docs/inputs.md.
+# No key bytes, tokens, kubeconfig or signed approvals belong in this file.

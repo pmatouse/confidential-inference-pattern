@@ -86,32 +86,5 @@ same exec denial. Compare authority journals: initialization step IDs/results an
 header/manifest hashes must remain identical; reopen operations may increase,
 format operations may not. Both tests must pass before labeling the run qualified.
 
-## Workflow
-
-```mermaid
-sequenceDiagram
-    participant Owner as Trusted release owner
-    participant OCI as Internal OCI registry
-    participant Pop as Volume populator / CSI
-    participant Ctrl as ConfidentialVolume controller
-    participant VM as Stock Kata VM + storage sidecar
-    participant KBS as Standard Trustee
-    participant Auth as Storage authority
-    participant App as Unprivileged stock vLLM
-    Owner->>OCI: Publish encrypted LUKS + verity model disk
-    Owner->>Pop: Model PVC(dataSourceRef) + blank data PVC
-    Pop->>Pop: Import and verify ciphertext; bind PVCs
-    Owner->>Ctrl: ConfidentialVolumes + ConfidentialWorkload
-    Ctrl-->>Owner: Request bound to actual PVC UIDs
-    Owner->>Auth: Register model and approve first-use data plan
-    Owner->>KBS: Enroll keys + exact CPU/GPU/InitData bindings
-    Owner->>Ctrl: Signed measured deployment package
-    Ctrl->>VM: KServe predictor, raw disks only to sidecar
-    VM->>Auth: Fresh attestation; ownership / format-step requests
-    VM->>KBS: CPU+GPU attested key retrieval via private CDH
-    VM->>VM: Verify/open RO model; initialize or reopen RW data
-    VM->>App: Transfer mounts into application namespace
-    App->>App: Verify files, persistence and CUDA; start Qwen
-    Note over App: Chat frontend → KServe → Qwen on GPU
-    VM->>Auth: Close ownership on graceful shutdown
-```
+Architecture and workflow diagrams: [current data paths](../architecture.md),
+[proposed automated lifecycle](../automation.md).

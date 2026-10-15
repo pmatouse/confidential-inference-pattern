@@ -1,5 +1,9 @@
 # Qwen encrypted-storage demo: clean-install runbook specification
 
+> Historical design specification. For the current implementation use
+> [architecture](architecture.md), [inputs](inputs.md) and [demo setup](demo/setup.md).
+> Proposed commands and old status statements below are not the current interface.
+
 **Status: planned acceptance procedure, not an executable installer today.**
 The new `confidential-inference-pattern` repository and the `demo-*`/`release-*`
 Make targets below must be implemented by the

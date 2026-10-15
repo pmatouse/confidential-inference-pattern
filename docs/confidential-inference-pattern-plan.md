@@ -1,5 +1,9 @@
 # Confidential inference add-on pattern: implementation plan
 
+> Historical design specification. For the current implementation use
+> [architecture](architecture.md), [inputs](inputs.md) and [demo setup](demo/setup.md).
+> Proposed commands and old status statements below are not the current interface.
+
 **Status: proposed implementation, researched 14 October 2026.** This document
 does not claim that a clean-cluster installer or a second hardware profile has
 already passed. The current implementation baseline is commit `858e523` on

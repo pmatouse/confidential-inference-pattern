@@ -1,146 +1,68 @@
-# Current add-on setup
+# Qwen demo: installation sequence
 
-See the [fresh release workflow](fresh-release.md) for publication, scoped key
-enrollment, measured deployment and acceptance gates.
+**Outcome:** chat → KServe → stock vLLM on a confidential GPU; verified encrypted
+RO `/model` and persistent encrypted RW `/data`. Start with the [inputs](../inputs.md)
+and [qualified stack](../architecture.md#qualified-hardware-and-software).
 
-The fresh isolated installation passed the [E2E acceptance gates](acceptance.md)
-with add-on images built in its own namespace. Rebuild/publish those images for
-your registry and use the [public compatibility template](../../profiles/README.md).
-Trusted enrollment and signing remain explicit administrative steps.
+## One-time setup
 
-## One-time platform prerequisites
+1. Install/configure CoCo VP's stock CPU/GPU runtime and standard Trustee. Provide
+   KServe, GitOps, internal registry and an Immediate raw Block/RWOP CSI class.
+2. Build/publish pinned controller, populator, sidecar and authority images. Copy
+   [the input template](../../overrides/sites/demo-inputs.example.yaml) to a site override; edge registry URLs cannot be used on an unrelated cluster.
+3. Set private `KUBECONFIG`; install Python 3.12+, Helm 3, `oc` and dependencies:
 
-Install CoCo VP, configure the confidential CPU/GPU runtime, and provide KServe,
-Trustee and a raw Block CSI class. The installer creates the pinned upstream
-volume-populator registration CRD if absent, or verifies an existing one. Existing
-platform resources remain under their current owners. The installer checks the
-stock GPU RuntimeClass handler, Immediate storage, available KServe version and
-Trustee resource. Those checks do not prove attestation or hardware correctness.
+   ```sh
+   python3 -m venv .venv
+   . .venv/bin/activate
+   python -m pip install -r requirements.txt
+   ./pattern.sh make demo-preflight VALUES=overrides/sites/my-site.yaml
+   ./pattern.sh make render VALUES=overrides/sites/my-site.yaml
+   ./pattern.sh make install-addon VALUES=overrides/sites/my-site.yaml
+   ```
 
-Use Python 3.12+, Helm 3 and `oc`, with access to the target cluster. Install the
-pinned Python dependencies from `requirements.txt`. Put private credentials outside
-this repository and select your kubeconfig through the environment.
+4. Bootstrap the trusted enrollment identity ([Vault mapping](vault-bootstrap.md)),
+   authority TLS/signing credentials and retained authority state. Bootstrap state
+   **once**; normal serving verifies it. Supply the approval public key to the controller.
+5. Optionally configure repository-scoped GitOps access, then `make enable-gitops
+   VALUES=...` with a full commit pin. Its restricted project owns add-on resources;
+   existing CoCo services and Trustee policies retain their original owner.
 
-Copy `values-global.yaml` to a site override and set cluster identity, target
-namespace, runtime/CSI names, Trustee resource identity, registry origin and exact
-image digests. Empty generic inputs intentionally fail preflight. The edge values
-are an example, not portable defaults.
+The installer checks namespace/resource ownership, reuses compatible shared CRDs,
+installs admission before SCC access and waits for controllers. It does not enroll
+keys, calculate SNP launch measurements, create a model release or prove hardware
+attestation. The populator registration CRD is installed if absent; shared operators
+are not duplicated.
 
-```sh
-./pattern.sh make demo-preflight VALUES=overrides/sites/my-site.yaml
-./pattern.sh make render VALUES=overrides/sites/my-site.yaml
-./pattern.sh make install-addon VALUES=overrides/sites/my-site.yaml
-```
+## Each fresh demo release
 
-`install-addon` creates a separate owned namespace; compatible existing shared
-CRDs are inspected but not rewritten. It checks all object ownership before
-applying anything. Admission is installed and type-checked before granting helper
-SCC access. Controller readiness is checked before success. Repeating the command
-reconciles the same resources without modifying keys, disks or running Qwen.
+| Order | Action | Result |
+| --- | --- | --- |
+| 1 | Trusted publisher fetches pinned Qwen, generates fresh model/data keys, encrypts and publishes | Ciphertext OCI digest + verified public descriptor |
+| 2 | Set `demo.source`; run `make demo-provision VALUES=...` | RO model PVC, blank RW PVC, bound ConfidentialVolumes, workload request |
+| 3 | Instantiate reviewed profile; render policy and enroll metadata | RO identity and explicitly approved first-use RW plan |
+| 4 | Package InitData; install exact Trustee bindings through its owner; enroll keys | CPU/GPU + launch/InitData-gated resources, verified in running KBS |
+| 5 | Start authority serving; sign/apply public deployment package | Controller automatically creates KServe + sidecar |
+| 6 | Enable `chat.enabled`; run `make demo-chat VALUES=...`; execute acceptance | Chat response, CUDA, exec denial and fresh-VM persistence receipt |
 
-For images in another OpenShift project, the installer grants only named image
-stream pulls to the four add-on service accounts. These bootstrap RBAC objects
-remain outside the workload GitOps project. External registry authentication and
-vendor guest pull qualification are separate platform prerequisites.
+Commands and checks: [release preparation](fresh-release.md),
+[release tool reference](../../components/inference-release/README.md),
+[acceptance](acceptance.md). Trusted steps are currently operator-orchestrated.
+`make demo-status VALUES=...` reports resources; it is not E2E proof.
 
-## GitOps ownership
+## Retention and access
 
-The same charts can be reconciled by the existing GitOps instance after the
-bootstrap admission check. Configure a repository-scoped read-only credential
-in that instance for this private repository. Pin `gitops.revision` to a reviewed
-40-character commit, set `gitops.enabled: true`, then:
+Use a new identity/keys/claims for a **fresh** run. Reopen existing volumes with
+unchanged keys, PVC identities and retained authority history. Initialization
+permission is not inferred from a PVC name or label. Never reset ownership or
+reformat to bypass a failed restart. Model sources/PVCs have GitOps deletion
+protection; no automatic uninstall/destroy workflow exists.
 
-```sh
-./pattern.sh make render-gitops VALUES=overrides/sites/my-site.yaml
-./pattern.sh make enable-gitops VALUES=overrides/sites/my-site.yaml
-```
-
-The add-on creates its own restricted AppProject and root Application, with
-pruning disabled. It manages the add-on controllers and security resources only.
-It does not permit Secret, KataConfig, KbsConfig, Subscription or InferenceService
-resources in that project. Existing shared CRDs are omitted from Helm sync;
-upgrades need the current CRD owner's coordinated migration. Namespace bootstrap,
-registry pull grants and binary-build resources remain explicit installer actions.
-
-## Declare a model and writable volume
-
-Set `demo.source` from a verified publisher receipt: `format`, `repository`,
-`manifestDigest`, `diskDigest`, `diskBytes`. Supply key **resource identifiers** and
-an approved manifest identifier; these values contain no decryption key.
+Chat defaults to ClusterIP:
 
 ```sh
-./pattern.sh make demo-provision VALUES=overrides/sites/my-site.yaml
-./pattern.sh make demo-status VALUES=overrides/sites/my-site.yaml
+oc -n <namespace> port-forward service/<demo>-chat 8765:8080
 ```
 
-This creates the immutable EncryptedModelSource, model Block PVC with
-`dataSourceRef`, a blank data Block PVC, a ConfidentialWorkload intent and a
-restricted binding Job. The Job waits for Bound claims, verifies their source,
-class, capacity and mode, then creates immutable ConfidentialVolumes containing
-actual PVC UIDs. It has no Secret, signer, authority, disk, pod-exec or pod-update
-access. Retry compares existing declarations; it never overwrites an identity.
-
-The model uses `ReadOnly/luks-verity-v1/Never`; data uses
-`ReadWrite/luks-integrity-v1/OnceIfApproved`. This is intent, not permission to
-format. The controller publishes a request and waits for a separately signed
-configuration. It does not deploy an arbitrary unapproved predictor.
-
-`bind-volumes` is the equivalent operator-side troubleshooting command. A failed
-binding Job is retained for diagnosis. Changed immutable inputs require a new run
-identity, not deletion of retained claims.
-
-## Trusted preparation still required
-
-The [release renderer and metadata enrollment commands](../../components/inference-release/README.md)
-are implemented and contract tested. Qualified runtime profiles, scoped key
-enrollment, Trustee-owner integration and approval renewal are not wired into one
-command yet. The [Vault bootstrap guide](vault-bootstrap.md) describes the
-trusted-authentication prerequisite, now verified on the edge cluster; new sites
-must configure their own scoped identity. The legacy `prepare-qwen.py` is retained
-as source provenance and is not a clean-install interface. Do not copy the old lab's prepared state to make
-this stage pass.
-
-`components/confidential-storage-authority/bootstrap.py` creates a new authority
-history directory exactly once in a trusted environment. Normal server restart
-must verify retained state and must not rerun fresh initialization. Missing history,
-partial bootstrap, symlinks or changed installation identity fail closed. The
-[authority chart](../../charts/storage-authority/README.md) now separates explicit
-bootstrap from normal retained-state verification. It consumes existing Secret
-references; scoped backend provisioning and release enrollment remain separate.
-
-## Chat
-
-After a fully approved KServe backend is running, enable `chat.enabled` and run
-`make demo-chat VALUES=...`. The chart deploys a non-root frontend without a service
-account token and connects directly to the named KServe predictor. It has no
-Kubernetes API fallback. The default is ClusterIP:
-
-```sh
-oc -n <namespace> port-forward service/<demo-name>-chat 8765:8080
-```
-
-Open `http://127.0.0.1:8765`. A site may explicitly configure a VPN NodePort.
-Chat readiness only means its HTTP server is running; full E2E must verify the
-actual backend pod, confidential GPU appraisal, encrypted mounts and persistence.
-
-## Retention
-
-No uninstall/destroy command is provided yet. Do not delete a populated namespace
-as a routine retry. Claims and source declarations carry explicit Argo prune/delete
-protection, independent of workload ownership. Preserve authority history and key
-backend records together with retained ciphertext. Never reset authority ownership
-to resolve an ordinary deployment error.
-
-## Registry namespace contract
-
-The current populator deliberately accepts only model repositories inside its own
-workload namespace. Publish there or promote an already verified ciphertext image
-by digest using an OpenShift ImageStreamTag before creating a new model source.
-Cross-namespace registry sources now fail before any claim is created. Promotion
-changes only the registry reference; verify the manifest digest is unchanged.
-Reusing a published artifact is a population regression, not a fresh-publication
-acceptance run.
-
-The registration CRD is vendored from [the upstream validator project](https://github.com/kubernetes-csi/volume-data-source-validator),
-with the exact source revision and file hash in `prerequisites/source-lock.json`.
-The optional warning-event validator controller is not duplicated.
+Open `http://127.0.0.1:8765/`; a site can explicitly choose a private-network
+NodePort. Frontend readiness does not prove backend inference or confidentiality.

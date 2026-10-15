@@ -1,11 +1,14 @@
+# Documentation descriptor, not an installed Kubernetes CRD or auto-discovery API.
 apiVersion: inference.confidentialcontainers.org/v1alpha1
 kind: RuntimeCompatibilityProfile
 metadata:
   name: osc-snp-nvidia-x86_64-v1
 qualification:
   existingRuntimePath: demonstrated
-  freshAddonInstall: pending
-  blankRWFirstUseSidecar: pending
+  freshAddonInstall: passed-on-existing-coco
+  blankRWFirstUseSidecar: passed
+  freshVMReopen: passed
+  evidence: tests/evidence/2026-10-15/fresh-qwen-e2e.json
 requirements:
   architecture: amd64
   tee: snp
