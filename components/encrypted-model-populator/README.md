@@ -1,36 +1,30 @@
-# Encrypted model population
+# Encrypted model publication and population
 
-> Imported implementation notes: historical deployment/test statements below refer
-> to the original experiment. Linked historical material is pinned to its source
-> revision. For this separate add-on, use the [current setup](../../docs/demo/setup.md)
-> and [qualification status](../../docs/implementation-status.md).
+This directory contains two separate roles. **Trusted publication** sees plaintext
+and a model unlock credential. **Population** transports ciphertext and needs no
+model key. The OCI disk artifact is distinct from the vLLM/helper container images.
 
-Development implementation of trusted LUKS/verity publication and untrusted
-ciphertext transport from the internal OCI registry into a CSI raw-block PVC.
-The [guide](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/docs/confidential-storage/model-populator.md) explains the
-layout, permissions, lifecycle and reproduction commands.
+| Entry point | Role |
+| --- | --- |
+| `fetch_qwen.py` | Fetch and verify pinned Qwen3-0.6B inputs |
+| `prepare.py`, `publisher-init` | Build LUKS2 disk + ciphertext verity tree in software QEMU; reopen and verify files |
+| `publish.py` | Package encrypted disk/public metadata and push to OCI by digest |
+| Go controller/importer | Watch PVC dataSourceRef, create prime PVC/importer, verify streamed bytes/flush/readback, remove writer and rebind PV |
+| `third_party/lib-volume-populator` | Pinned population machinery with documented opt-in same-namespace extension |
 
-- `fetch_qwen.py`: verify the existing pinned Qwen3-0.6B revision.
-- `prepare.py` / `publisher-init`: create and verify an encrypted model disk in a
-  disposable software VM, without granting host privileges to the publisher pod.
-- `publish.py`: package ciphertext and public metadata, then push by digest.
-- Go controller/importer: prime PVC, strict streaming import, flush/readback,
-  writer removal, PV rebind and cleanup.
-- `third_party/lib-volume-populator`: pinned Apache-2.0 upstream library plus a
-  documented opt-in same-namespace extension.
+Install the source CRD and controller from
+[`charts/vendor/encrypted-model-populator`](../../charts/vendor/encrypted-model-populator/).
+The fixed registry origin is controller configuration; a source cannot choose an
+arbitrary endpoint. Completed Bound claims are reused without importing again.
+A new claim is a new population and authorization identity.
 
-Run `go test -race github.com/kubernetes-csi/lib-volume-populator/v3/populator-machinery ./...`
-and `python3 -m unittest -v test_publish.py` here. The local TLS tests need loopback
-listener permission. The actual cluster population test is
-[`validate_population.py`](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/tests/confidential-storage/validate_population.py).
+Importer RBAC/device access permits ciphertext writing only. No plaintext model,
+credential or key-bearing preparation appliance enters the registry artifact.
+A successful digest check/Bound PVC proves transport, not trusted freshness or
+permission to decrypt; the guest separately verifies authority-approved content.
 
-No application container or attested guest key-delivery implementation is supplied
-by this component. A Bound PVC and unsigned publisher descriptor do not authorize
-decryption or establish model freshness. Never package a publisher key, plaintext
-filesystem or key-bearing initramfs into the registry layer.
+The same Go image runs controller/importer with separate modes and identities.
+`qs-build` builds and tests it with pinned Go dependencies; `qs-volumes` exercises
+real population. The trusted publisher Job is configured by `charts/model-publisher`.
 
-The standalone `Containerfile` builds a static controller/importer from this source
-with a digest-pinned Go 1.25.5 builder and verified `go.sum` dependencies. Its final
-image contains only the binary and public CA roots. Use this build in a new site's
-registry; the old lab namespace is not an installation prerequisite. The same
-image runs both roles, selected by `--mode` and their separate service accounts.
+See the [component map](../../docs/components.md) and [runtime walkthrough](../../docs/workload-walkthrough.md). Build/deploy through the [manual quickstart](../../docs/demo/quickstart.md).

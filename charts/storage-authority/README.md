@@ -1,7 +1,7 @@
 # Retained storage authority
 
 Deploy in the trusted administration domain. A same-cluster installation is a
-trusted-lab topology; it does not protect authority history against that cluster's
+colocated trust topology; it does not protect authority history against that cluster's
 administrator. This chart does not install a second Trustee or hold model keys.
 
 1. Pin a freshly built authority image. Select a stable `installation`, a

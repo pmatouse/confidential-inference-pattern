@@ -7,7 +7,7 @@ without putting sensitive details in a public issue.
 
 The privileged guest helper, release signer, storage authority and trusted
 producer are part of the trusted computing base. The workload operator must not
-receive a signer or decryption credential. A colocated lab authority is not
+receive a signer or decryption credential. A colocated authority is not
 independent rollback protection against its own host administrator.
 
 The installer never relaxes attestation policies, formats devices or enrolls

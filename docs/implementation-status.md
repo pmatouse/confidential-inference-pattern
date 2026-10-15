@@ -3,8 +3,8 @@
 [Manual quickstart E2E receipt](../tests/evidence/2026-10-15/manual-quickstart-e2e.json), 2026-10-15:
 new add-on namespaces, five image builds, encrypted Qwen publication, keys, PVCs
 and authority history on an **existing** CoCo cluster. Compatible shared CRDs were
-reused; no cluster reinstall. Original Qwen and its paired chat were retired with
-user authorization; the separate `qwen-demo-003` installation was preserved.
+reused; no cluster reinstall. This receipt qualifies the isolated add-on installation,
+not every possible clean-cluster dependency installation path.
 
 | Area | Result |
 | --- | --- |

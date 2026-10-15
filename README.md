@@ -16,6 +16,8 @@ other hardware qualification and production credential/authority lifecycle remai
 
 | Read | Contents |
 | --- | --- |
+| [Workload walkthrough](docs/workload-walkthrough.md) | CR/PVC examples, approval, attestation, mount transfer, disk I/O, inference and shutdown |
+| [Component map](docs/components.md) | Every source directory, running process, interface and key holder |
 | [Architecture](docs/architecture.md) | Components, data paths, trust boundaries, diagram, exact tested stack |
 | [Inputs](docs/inputs.md) | What to supply first, what is generated, credentials and reproducibility |
 | [Demo setup](docs/demo/setup.md) | One-time installation and release sequence |
@@ -40,6 +42,5 @@ The current HTTP chat frontend is outside the TEE; prompt TLS is a separate gap.
 
 Apache-2.0. Imported add-on source/charts are recorded in
 [provenance/import.json](provenance/import.json); vendor images/binaries retain their
-own redistribution terms. Yuval's repository informed the deployment separation;
-its source was not copied. [Original design](docs/confidential-inference-pattern-plan.md)
-and [original runbook specification](docs/qwen-clean-cluster-demo-plan.md) are historical plans.
+own redistribution terms. Installation and architecture documentation are contained
+in this repository; provenance records are for source/license traceability.

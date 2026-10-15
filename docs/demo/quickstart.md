@@ -11,6 +11,10 @@ PVCs and authority history reached `E2EPassed`; [receipt](../../tests/evidence/2
 The existing CoCo cluster and compatible shared CRDs were reused. Both first-boot
 and fresh-VM chat/storage checks passed; this was not a cluster reinstall.
 
+Architecture: [workload walkthrough](../workload-walkthrough.md) and
+[component map](../components.md). These explain what each stage deploys and how
+its control, ciphertext, key and plaintext paths interact.
+
 ## Inputs
 
 | Input | Source / requirement |

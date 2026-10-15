@@ -29,7 +29,7 @@ Tooling: Python 3.12+, pinned `requirements.txt`, Helm 3 and `oc`.
 The trusted build/publisher also needs access to pinned images, source/model files,
 registry and required attestation/certificate services, or equivalent approved mirrors.
 
-## Generate during preparation; do not copy from the lab
+## Generate during preparation
 
 | Output | Produced by / consumed by |
 | --- | --- |

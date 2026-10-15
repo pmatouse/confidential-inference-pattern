@@ -172,8 +172,8 @@ release is deleted. Finalizers and explicit retirement govern destructive cleanu
 
 | Milestone | Changes and existing code to reuse | Exit gate |
 | --- | --- | --- |
-| **1. Shared stage contract and feasibility** | Define versioned inputs/receipts and execution ownership; extend the site schema; spike launch calculation and authority enrollment; factor existing release tools into idempotent CLI operations | No hidden lab files; exact retry/UID/conflict tests; document every public input and external credential |
-| **2. Manual build and bootstrap** | Add `make/quickstart.mk` and `scripts/quickstart.py`; build/push controller, populator, helper, authority and preparation images; create scoped identities, retained authority and dependency preflight | Fresh clone + site inputs produces digest-pinned images and foundation; no prebuilt lab binary, anonymous pull or key-bearing build context |
+| **1. Shared stage contract and feasibility** | Define versioned inputs/receipts and execution ownership; extend the site schema; spike launch calculation and authority enrollment; factor existing release tools into idempotent CLI operations | No undeclared inputs; exact retry/UID/conflict tests; document every public input and external credential |
+| **2. Manual build and bootstrap** | Add `make/quickstart.mk` and `scripts/quickstart.py`; build/push controller, populator, helper, authority and preparation images; create scoped identities, retained authority and dependency preflight | Fresh clone + site inputs produces digest-pinned images and foundation; no undeclared binary, anonymous pull or key-bearing build context |
 | **3. Complete manual release path** | Wrap publisher, provisioner/binder, profile/render/enroll/package/key-enrollment/signer and chat tools; emit commands/receipts; parameterize site mappings | Explicit Make targets prepare fresh encrypted Qwen, RO/RW PVCs, exact Trustee bindings and running KServe/chat without file editing between stages |
 | **4. Manual quickstart E2E and how-to** | Wrap verification and graceful test-VM replacement; collect authority/appraisal evidence; document command → expected output → next action, recovery and access | Execute the guide from empty add-on state with empty build caches; first/reopen tests pass; second invocation preserves keys and initialization history |
 | **5. Release controller** | New `components/inference-release-controller/`, chart and `InferenceRelease` CRD; invoke shared operations with durable reconciliation, leases and scoped Jobs | Equivalent release succeeds without Make orchestration; fault injection proves retry/parity and no key leakage |
@@ -233,7 +233,7 @@ than bypass it. Key rotation and arbitrary workload upgrades are later workflows
 
 1. Start from CoCo with working CPU/GPU attestation and declared registry/CSI/KServe/
    GitOps prerequisites. Create a new add-on namespace, keys, model publication,
-   claims and authority state. No copied lab approvals or prepopulated volumes.
+   claims and authority state. No reused approvals or prepopulated volumes.
 2. Test both entry points on separate fresh release identities. For manual mode,
    follow the Makefile how-to, including builds and pushes; each target prints its
    result and next command. For GitOps, bootstrap once, commit site YAML and observe

@@ -1,5 +1,8 @@
 # Architecture and supported configuration
 
+For the complete execution sequence, read the [workload walkthrough](workload-walkthrough.md)
+and [component map](components.md).
+
 ## What runs
 
 Qwen3-0.6B runs through KServe in a stock confidential GPU VM. A privileged
@@ -61,7 +64,7 @@ remains to be implemented.
 | `/model` | Publisher creates LUKS ciphertext + dm-verity tree. Approved root authenticates the ciphertext **including its LUKS header**. Guest verifies identity, obtains the key, opens RO and checks file hashes. |
 | `/data` | New claim needs explicit first-use approval. Guest journals LUKS format → keyed dm-integrity initialization → ext4 creation → durability barrier. Later VMs reopen the retained volume; they do not format again. |
 | Keys | Standard Trustee gates model/data/helper-pull resources on CPU + GPU evidence, expected launch measurement and exact InitData. Private CDH retrieves them inside the guest. |
-| Application | UID/GID 1001, zero capabilities, no raw devices/private key sockets, read-only root filesystem; administrator exec denied by measured Kata policy. |
+| Application | UID/GID 1001, zero capabilities, no raw storage devices/private key sockets, read-only root filesystem; administrator exec denied by measured Kata policy. |
 
 Storage hardware attestation is unnecessary for this threat model: ciphertext is
 untrusted and authenticated in the guest. Availability remains the storage backend's
@@ -86,7 +89,7 @@ do not establish end-to-end confidentiality for prompts; guest-terminated TLS is
 | VM sizing | Current renderer fixes 8 vCPUs and 64 GiB guest RAM; host needs additional platform/runtime capacity |
 | Storage | Tested `lvms-vg1` / TopoLVM, raw Block, `ReadWriteOncePod`, `Immediate`; model 2 GiB, data 1 GiB, authority 1 GiB in demo |
 | Producer | Separate trusted CPU workload; chart limits 4 CPUs / 16 GiB RAM with 12 GiB memory-backed build scratch |
-| Model / application | Pinned Qwen3-0.6B and NVIDIA vLLM image; exact digests in the [receipt](../tests/evidence/2026-10-15/fresh-qwen-e2e.json) |
+| Model / application | Pinned Qwen3-0.6B and NVIDIA vLLM image; exact digests in the [receipt](../tests/evidence/2026-10-15/manual-quickstart-e2e.json) |
 
 Intel TDX, other GPU models, other OSC/vLLM versions, other CSI implementations,
 WFFC, multi-GPU and multi-replica serving are **not qualified here**. The installer

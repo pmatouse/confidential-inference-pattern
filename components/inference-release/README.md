@@ -17,7 +17,7 @@ Synthetic tests cover request replacement, wrong images, relaxed application
 profiles, deterministic output and controller acceptance. They do not establish
 that a new runtime profile works on hardware. A qualified profile must bind actual
 stock image metadata, guest ABI/mount shape, injected environment, launch identity
-and NVIDIA evidence. No lab VM state or old signed approval is a valid substitute.
+and NVIDIA evidence. An unrelated VM state or signed approval is not a valid substitute.
 
 The draft wraps the declared application command in the sidecar rendezvous
 protocol. Optional `startupChecks` verify model hashes, mount modes, application
@@ -73,7 +73,9 @@ The URI encodings map is `{"kbs:///repository/type/tag": "raw32"}` (or
 keys in these files. Real compatibility profiles, trust pins and publisher metadata
 are required; the synthetic fixtures in tests must never be deployed.
 
-The new live demo has fresh publication, populated/blank PVCs, retained metadata
-enrollment and scoped Vault/ESO key provisioning. Full hardware qualification
-requires the inference and fresh-VM persistence gates; see the current evidence
-before treating a profile as qualified.
+The [manual quickstart](../../docs/demo/quickstart.md) invokes these tools in order.
+Its [E2E receipt](../../tests/evidence/2026-10-15/manual-quickstart-e2e.json) covers
+fresh publication, initialized/reopened PVCs, attestation and real inference on
+the qualified profile. See the [walkthrough](../../docs/workload-walkthrough.md)
+for all runtime data flows and the [component map](../../docs/components.md) for
+the distinction between release preparation and guest execution.

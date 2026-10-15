@@ -1,160 +1,40 @@
-# Stock-Kata storage add-on
+# Guest storage sidecar
 
-This is the add-on implementation imported from the earlier lab and being
-packaged for a separate installation. See [current setup](../../docs/demo/setup.md)
-and the [implementation ledger](../../docs/implementation-status.md) for what has
-actually passed in this repository. Earlier lab evidence is not a fresh E2E run.
+`runtime.py` supervises encrypted storage inside a stock confidential Kata VM.
+It is a privileged guest container; the application remains UID/GID 1001,
+read-only-root, without capabilities, privilege escalation or raw storage devices.
+The vLLM image is unchanged; the measured command waits for storage before exec.
 
-This moves the storage integration into a trusted, privileged **guest container**.
-The stock Kata runtime, agent, kernel and initrd are not replaced. The application
-image is unchanged; its reviewed startup command waits for storage. vLLM remains
-UID/GID 1001, drops every capability, disallows privilege escalation and has a
-read-only root filesystem. Only the helper receives raw block devices.
+1. Accept the application rendezvous after stock Kata attaches its GPU.
+2. Start private, unchanged AA/CDH binaries extracted from the pinned stock initrd.
+   AA verifies InitData against SNP HOST_DATA. Refuse the public guest REST API.
+3. Load approved matching storage modules; start the Rust storage service with
+   `--sidecar-parent` on its root-private socket.
+4. Authenticate the consumer using SO_PEERCRED, exact command, UID/GID, capabilities
+   and NoNewPrivs; retain pidfd, root and mount-namespace descriptors.
+5. Activate all measured volume bindings. Clone private mounts with `open_tree`,
+   enter the consumer namespace, attach using `move_mount`, enforce flags and send READY.
+6. On shutdown, stop the consumer, remove its mounts, close storage, then release
+   authority ownership. Uncertain cleanup retains ownership; supervisor failure
+   kills the consumer rather than leaving it unsupervised.
 
-```mermaid
-flowchart LR
-  OCI[Internal OCI registry: encrypted model disk] --> Pop[Existing volume populator]
-  Pop --> RO[Read-only model block PVC]
-  RW[Retained read-write block PVC] --> Kata[Stock CSI / CRI / Kata block transport]
-  RO --> Kata
-  subgraph VM[Stock SNP GPU confidential VM]
-    H[Privileged storage sidecar]
-    AA[Unmodified stock AA and CDH: private Unix sockets]
-    S[Add-on storage service]
-    M[dm-verity + read-only LUKS + ext4]
-    D[LUKS + keyed dm-integrity + ext4]
-    App[Unprivileged original vLLM image]
-    H --> AA
-    H --> S
-    S --> M
-    S --> D
-    M -->|detached mount into application namespace| App
-    D -->|detached mount into application namespace| App
-  end
-  Kata --> H
-  AA <-->|CPU and GPU evidence; attested key delivery| KBS[Standard Trustee]
-  S <-->|signed permits / ownership / initialization journal| Authority[Existing storage authority]
-```
+The shared PID namespace is inside the guest, not the host. The rendezvous socket
+returns readiness, not keys. AA/CDH and service sockets remain private to the helper.
+The helper is trusted VM root; this design isolates storage privileges from the
+app, not from malicious code running as guest root.
 
-The sidecar copies the **unchanged** AA/CDH executables and their libraries from
-the pinned installed GPU initrd into its own image. It starts private instances
-after the application container has been created, so the stock runtime has
-already attached and initialized the GPU. This is necessary because AA selects
-its additional GPU attester at startup. No new network key endpoint is exposed.
-The supported guest-components kernel parameter disables the guest REST API;
-the helper also refuses startup if port 8006 is listening.
+## Build interface
 
-The public ConfigMap carries the same InitData as the Pod annotation. Before
-using the storage configuration, the unchanged SNP AA checks that InitData against
-hardware HOST_DATA. Trustee and the authority must separately approve its exact
-hash and the stock guest launch measurement. Merely starting AA does **not** prove
-that Trustee accepted the CPU/GPU evidence.
+- `prepare-payload.py`: verify and extract stock AA/CDH, libraries and pinned tools/modules.
+- `stage-service.py`, `build-service.sh`: stage unchanged upstream protocol definitions
+  and build the add-on Rust executable with `trustee-rcar` (includes private CDH).
+- `prepare-build.py`: package only the supervisor, executable and public payload.
+- `policy.py`: render exact stock-agent request policy from reviewed runtime/image metadata.
+- `test_runtime.py`: Linux supervisor/child shutdown regression.
 
-## Build and prepare
+No key, plaintext model or cluster credential belongs in the image. OpenShift build
+metadata affects the measured environment, so rebuilding requires a fresh package
+and approval. The SCC/admission guard restricts the service account to approved
+images/runtime and prevents application privileges or host namespace access.
 
-1. `prepare-payload.py --base STOCK_GPU_INITRD --tools PUBLIC_TOOLS_TAR --output PAYLOAD.tar.gz`
-   checks the pinned stock initrd and public tool bundle. It extracts AA, CDH,
-   shared libraries and the stock dm-bufio module, plus the existing public
-   cryptsetup/e2fsprogs tools and matching integrity modules. It never modifies
-   the initrd. Inspect the generated inventory before publishing.
-2. In the pinned Linux compiler environment, stage the adjacent storage components
-   with `stage-service.py --upstream PINNED_CHECKOUT --output BUILD_DIRECTORY`,
-   then run the equivalent locked Cargo test/build in that directory. Only unchanged
-   upstream protocol definitions are compiled; the legacy patched KBS client was
-   removed. `build-service.sh` documents the locked compiler commands.
-   **`--features trustee-rcar` is required**, including its private-CDH dependency.
-3. Use `prepare-build.py` with the SHA-256 read directly from the successful
-   compiler output, then build `Containerfile` with exactly four context files: `Containerfile`,
-   `runtime.py`, `confidential-storage-service`, and `payload.tar.gz`. No volume
-   keys, authority credentials, model files or cluster configuration belong in
-   this context. Pin the resulting image digest.
-4. Install the dedicated identity and admission guard with the Helm chart
-   [`confidential-storage-sidecar`](../../charts/vendor/confidential-storage-sidecar/).
-   Its guard must be present before granting access to its SCC. It restricts the
-   service account to stock Kata RuntimeClasses and the reviewed helper/application
-   images, rejects host namespaces and API tokens, and rejects raw devices or
-   elevated privileges on the application container.
-5. Run `prepare-qwen.py --help` and supply the current **public** preparation,
-   KServe manifest, public AA/CDH bootstrap ConfigMap, new image digest and actual
-   OpenShift build name. The generated package is only a candidate. It does not
-   update Trustee, approve authority state, touch a PVC, or deploy a workload.
-
-OpenShift injects its build name into the image environment. The exact value is
-part of the reviewed helper policy; changing a build requires regenerating the
-profile and InitData. The policy uses the stock runtime's captured OCI request
-shapes. Different runtime/image versions require reviewing new request shapes,
-not relaxing all request checks.
-
-The internal registry must allow the guest to pull the pinned add-on image.
-Host pull credentials are not automatically passed into the confidential guest.
-The fresh demo uses a dedicated registry reader service account in the enrollment
-namespace and a Role granting only `get` on `imagestreams/layers` for the helper
-ImageStream. Its short-lived credential is enrolled through Vault/ESO into Trustee;
-CDH obtains it only after the CPU/GPU and InitData checks succeed. There is no
-anonymous pull grant. Renew and re-enroll the credential before its expiry;
-automatic renewal remains an integration gap.
-
-## Mount and lifecycle boundary
-
-The pod shares its guest PID namespace, not the host PID namespace. The helper
-accepts a Unix-socket rendezvous from the measured application command, checks
-SO_PEERCRED, UID/GID, zero effective capabilities and `NoNewPrivs`, and pins the
-process with a pidfd and opened root/mount-namespace descriptors.
-
-The storage service retains its authority, manifest, initialization and key
-handling code. Its optional `--sidecar-parent` mode admits only its root parent
-process with the pinned executable inode and verifies that the parent has not
-changed. The original agent integration remains the default. This modifies an
-add-on component, not Kata.
-
-After attested activation, the supervisor clones each private mount with
-`open_tree`, enters the application's mount namespace/root and attaches the
-detached tree with `move_mount`. It then enforces read-only/read-write and
-`nodev,nosuid,noexec` flags before acknowledging startup. The application sees
-`/models/qwen` and `/data`; it receives no disk, mapper-control or key-service
-socket. Plaintext mount targets and rendezvous storage are guest-memory volumes.
-
-Stock Kata signals the entire container cgroup on stop. Private children block
-TERM/INT until the supervisor finishes volume closure; the helper installs its
-signal handlers before bootstrap. The Linux `test_runtime.py` regression covers
-child survival during this stop sequence.
-
-The helper waits for the application to exit, removes its transferred mounts and
-asks the service to close both volumes. An uncertain teardown retains authority
-ownership; it must not automatically authorize a second writer. If supervision
-fails, the application is killed. The helper is part of the trusted computing
-base and has privileges within the guest; moving it to a sidecar does not remove
-the need to trust the mount manager or eliminate CAP_SYS_ADMIN entirely.
-
-Existing initialized `/data` must retain its key, initialization identity,
-filesystem and authority journal. A policy upgrade requires closed Ready records;
-never replace the retained authority database or reformat the existing PVC.
-
-## Verification
-
-The stock-engine test harness and captured request fixtures live under
-[`tests/confidential-storage/stock-agent-sidecar`](https://github.com/pmatouse/coco-pattern-edge-rtx6k/blob/ebfaf34608dccc383234c38aa35ab1404b96eb95/tests/confidential-storage/stock-agent-sidecar).
-Generate cases with `prepare-policy-tests.py OUTPUT` and evaluate them using
-`policy-check` against the exact stock Regorus revision. Tests cover intended
-requests and injection of commands, privileges, raw/control devices, unsafe
-mounts, file-copy traversal, exec and policy replacement.
-
-Required rollout evidence additionally includes:
-
-- Unchanged stock boot artifacts, actual QEMU arguments and independently
-  calculated launch measurement; unchanged application image digest.
-- CPU **and** GPU appraisal by standard Trustee, with exact InitData binding.
-- Real populated RO model PVC and all producer file hashes. The real workload
-  checks the RO mount flag; the separate synthetic sidecar test also tests `EROFS`.
-- Existing RW PVC reopened without formatting; persistence across fresh VMs.
-- GPU inference and storage chatbot response; original Qwen remains healthy.
-- Administrator `oc exec` denied, and application unable to access raw devices,
-  private sockets or helper key memory.
-
-The `ConfidentialVolume` controller now reconciles an approved sidecar deployment
-package into KServe. Define the volumes and `ConfidentialWorkload`, let the
-controller publish its binding request, then prepare the measured package and
-complete authority/Trustee enrollment. An offline signature approves the exact
-package; the controller verifies it and creates the workload and public InitData
-ConfigMap. Enrollment, policy review and signing remain explicit trusted steps;
-the controller does not possess storage keys or approval-signing credentials.
+See the [component map](../../docs/components.md) and [runtime walkthrough](../../docs/workload-walkthrough.md). Build/deploy through the [manual quickstart](../../docs/demo/quickstart.md).
