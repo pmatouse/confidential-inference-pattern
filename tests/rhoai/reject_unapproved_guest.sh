@@ -46,7 +46,7 @@ x=json.loads((pathlib.Path(os.environ['STATE_DIR'])/'negative-status.json').read
 assert any('Get resource failed' in c['state'].get('waiting',{}).get('message','') for c in x['status'].get('containerStatuses',[]))
 CHECK
   then
-    oc logs -n trustee-operator-system deployment/trustee-deployment -c kbs --tail=500 > "$STATE_DIR/negative-trustee.log"
+    oc logs -n trustee-operator-system deployment/trustee-deployment --all-pods=true -c kbs --tail=500 > "$STATE_DIR/negative-trustee.log"
     if python3 - <<'CORRELATE'
 import json,pathlib,os,re
 p=pathlib.Path(os.environ['STATE_DIR']);identity=json.loads((p/'negative-identities.json').read_text());s=(p/'negative-trustee.log').read_text();pod=json.loads((p/'negative-status.json').read_text())
