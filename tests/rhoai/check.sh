@@ -26,4 +26,15 @@ for obj in objects:
   for name,value in obj['data'].items():
    assert value.encode()==(r/'charts/rhoai-confidential-qwen/files'/name).read_bytes(),f'Measured file bytes changed during rendering: {name}'
 print('Pinned upstream decryptor and exact measured ConfigMap bytes verified')
+platform=list(yaml.safe_load_all(subprocess.check_output([os.environ['HELM'],'template','rhoai',str(r/'charts/rhoai-platform')],text=True)))
+sub=next(o for o in platform if o['kind']=='Subscription')
+jobs={o['metadata']['name']:o for o in platform if o['kind']=='Job'}
+def wave(o): return int(o['metadata']['annotations']['argocd.argoproj.io/sync-wave'])
+assert wave(sub)==wave(jobs['rhoai-dependency-operator']), 'Manual approval would deadlock across waves'
+dsc=next(o for o in platform if o['kind']=='DataScienceCluster')
+assert wave(sub)<wave(dsc)<wave(jobs['rhoai-dependency-serving'])
+assert dsc['metadata']['annotations']['argocd.argoproj.io/sync-options']=='SkipDryRunOnMissingResource=true'
+for job in jobs.values():
+ assert job['spec']['template']['spec']['containers'][0]['args'][0].rstrip()==(r/'charts/rhoai-platform/files/bootstrap.py').read_text().rstrip()
+print('RHOAI operator approval, API readiness and serving configuration are sequenced')
 PY

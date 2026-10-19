@@ -2,12 +2,16 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: {{ .Values.operator.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: '-30'
 ---
 apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
 metadata:
   name: rhoai
   namespace: {{ .Values.operator.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: '-20'
 spec: {}
 ---
 apiVersion: operators.coreos.com/v1alpha1
@@ -15,6 +19,10 @@ kind: Subscription
 metadata:
   name: rhods-operator
   namespace: {{ .Values.operator.namespace }}
+  annotations:
+    # The approval hook runs in the SAME wave: a manual Subscription may remain
+    # Progressing until its InstallPlan is approved.
+    argocd.argoproj.io/sync-wave: '0'
 spec:
   channel: {{ .Values.operator.channel }}
   installPlanApproval: Manual

@@ -27,6 +27,55 @@ The cluster must reach Red Hat registries, the pinned Hugging Face model revisio
 and the CPU/GPU attestation collateral endpoints (or use the pattern's documented
 collateral caches). DNS and HTTPS ingress must be reachable by the demo audience.
 
+## Dependencies and GitOps ownership
+
+Install the configured CoCo pattern once. Its ClusterGroup includes the CoCo
+operators and configuration plus the `rhoai-platform` Argo CD Application. RHOAI
+is enabled during bootstrap, before model-specific preparation. There is no
+separate administrator installation of the RHOAI operator.
+
+Validated Patterns represents operators with OLM subscriptions and configuration
+with Argo CD applications. This extension keeps the RHOAI Subscription,
+OperatorGroup and DataScienceCluster together in the existing `rhoai-platform`
+chart, with one GitOps owner. Do not also declare `rhods-operator` under
+`clusterGroup.subscriptions`: that would give the same Subscription two owners.
+CoCo is the base pattern being extended, rather than a second nested Pattern
+installation or a second copy of its shared operators.
+
+Argo CD performs the following sequence automatically:
+
+1. Create the RHOAI namespace, OperatorGroup, restricted bootstrap RBAC and
+   Subscription.
+2. Run a bounded Sync hook alongside the Subscription. Keep OLM approval set to
+   `Manual`, but automatically approve the plan only when its entire CSV list
+   matches the single pinned `rhods-operator.3.6.0-ea.2` release. A changed release,
+   additional bundle or existing different RHOAI version stops the hook for
+   explicit review. `startingCSV` alone would not prevent future upgrades.
+3. Wait for the CSV to succeed and the DataScienceCluster v2 API to be served.
+4. Apply the DataScienceCluster with KServe enabled, then wait for Ready and the
+   required LLMInferenceService APIs. The hooks use a stock Red Hat UBI Python
+   image and embedded scripts; they add no operator or derivative image.
+
+The operator approval hook shares the Subscription's sync wave to avoid waiting
+for approval before the approval hook can run. DataScienceCluster uses a later
+wave and skips dry-run only while its CRD is absent. Readiness checks supplement
+ordering; merely creating a Subscription is not proof that serving is usable.
+
+| Automatic pattern dependencies | Explicit model/site preparation |
+|---|---|
+| CoCo operators, runtime, Trustee and storage from the normal base configuration | Hardware/firmware setup, entitlement and normal CoCo secret/reference inputs |
+| RHOAI operator installation, pinned initial approval and serving configuration | Build the derivative image or provide its reviewed digest |
+| Argo CD reconciliation of the configured application | Enroll keys, publish the encrypted model, generate and commit the measured binding and site values |
+
+The application and model publisher remain disabled for a new site until
+`rhoai-configure-owner.sh ready` publishes their inputs. Bootstrap reruns preserve
+already-enabled applications. The temporary dependency hooks are removed on
+success; their completion is recorded in the Argo sync operation. Later RHOAI
+upgrades still require an explicit Git change and review of the version pin.
+
+Framework references: [ClusterGroup subscriptions and applications](https://validatedpatterns.io/learn/clustergroup-in-values-files/)
+and [sequencing with sync waves and hooks](https://validatedpatterns.io/blog/2024-11-07-clustergroup-sequencing/).
+
 ## Ordered workflow
 
 Use a private state directory. Set `KUBECONFIG` to the intended cluster and review
@@ -47,19 +96,22 @@ export REGISTRY_AUTH_FILE=/secure/path/registry-auth.json
    secret generation, reference calculation and installation workflow. Set `COCO_CHECKOUT` and run `scripts/rhoai-configure-owner.sh bootstrap`.
    This installs the Trustee configuration adapter through the existing owner,
    reserves the demo key class before enrollment, disables competing sample
-   inference applications and leaves the new apps disabled until their values
-   are ready. Commit and push that fork. Existing installations must orphan the
+   inference applications and enables RHOAI as a platform dependency. The model
+   publisher and Qwen application stay disabled until their values are ready.
+   Commit and push that fork. Existing installations must orphan the
    old KServe Applications before retiring their owner: deleting their CRDs can
    destroy RHOAI resources. The adapter targets the pinned 0.10.x Trustee chart;
    review its configuration when rebasing onto a newer normal CoCo pattern.
    Set `COCO_CHECKOUT` to the checkout and run
-   `scripts/rhoai-demo.sh foundation`. For an existing CoCo installation,
+   `scripts/rhoai-demo.sh foundation`, which installs the normal pattern and waits
+   for its RHOAI dependency. For an existing CoCo installation,
    `scripts/rhoai-demo.sh preflight` checks the necessary objects and detects a
    competing upstream KServe deployment.
-2. Run `scripts/rhoai-demo.sh platform`. This installs the pinned RHOAI CSV with
-   manual InstallPlan approval and enables only its serving components. It waits
-   for the APIs before proceeding. The demo has no external inference gateway;
-   the chat proxy accesses vLLM over guest loopback.
+2. Check the `rhoai-platform` Argo Application is Synced/Healthy. Optionally run
+   `scripts/rhoai-demo.sh platform` to wait for the pinned CSV, DataScienceCluster
+   and serving API. This command is read-only; Argo CD performs the installation
+   and guarded approval automatically. The demo has no external inference
+   gateway; the chat proxy accesses vLLM over guest loopback.
 3. Run `scripts/rhoai-demo.sh build`. OpenShift builds the small initializer
    derivative from the exact Red Hat base digest plus merged KServe PR 6219. The
    resulting immutable digest is saved in `STATE_DIR/initializer-image`.
@@ -85,7 +137,8 @@ export REGISTRY_AUTH_FILE=/secure/path/registry-auth.json
    through the trusted owner.
 7. Run `scripts/rhoai-configure-owner.sh ready`, then commit and push the CoCo
    fork. It publishes the measured binding and public site values, enables the
-   three RHOAI Applications and keeps Trustee under its existing owner. Set the
+   model publisher and Qwen Applications while retaining the already-enabled
+   RHOAI platform Application, and keeps Trustee under its existing owner. Set the
    Pattern's Git revision to that branch using the normal pattern installer.
    Wait for the ExternalSecret, RVPS and resource policy to converge, then the
    confidential application. If updating an existing guest identity, restart

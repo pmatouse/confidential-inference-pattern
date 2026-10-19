@@ -36,20 +36,23 @@ case "${1:-help}" in
     git -C "$COCO_CHECKOUT" diff --exit-code
     (cd "$COCO_CHECKOUT" && ./pattern.sh make install)
     "$0" preflight
+    "$0" platform
     ;;
   platform)
-    "$0" preflight
-    "$HELM" template rhoai "$ROOT/charts/rhoai-platform" | oc apply -f -
-    for ((i=0; i<120; i++)); do
-      plan=$(oc get subscription.operators.coreos.com rhods-operator -n redhat-ods-operator -o jsonpath='{.status.installPlanRef.name}')
-      [ -n "$plan" ] && break
+    # Installation belongs to Argo CD. This optional command only waits/checks.
+    for ((i=0; i<360; i++)); do
+      csv=$(oc get csv/rhods-operator.3.6.0-ea.2 -n redhat-ods-operator --ignore-not-found -o name)
+      [ -n "$csv" ] && break
       sleep 5
     done
-    [ -n "${plan:-}" ] || { echo 'RHOAI InstallPlan was not resolved'; exit 1; }
-    oc get installplan "$plan" -n redhat-ods-operator -o json | python3 -c 'import json,sys; p=json.load(sys.stdin); assert "rhods-operator.3.6.0-ea.2" in p["spec"]["clusterServiceVersionNames"], "Catalog resolved an unexpected RHOAI version"'
-    oc patch installplan "$plan" -n redhat-ods-operator --type=merge -p '{"spec":{"approved":true}}'
+    [ -n "${csv:-}" ] || { echo 'RHOAI is not installed; inspect the rhoai-platform Argo application'; exit 1; }
     oc wait --for=jsonpath='{.status.phase}'=Succeeded csv/rhods-operator.3.6.0-ea.2 -n redhat-ods-operator --timeout=15m
-    "$HELM" template rhoai "$ROOT/charts/rhoai-platform" --set components.enabled=true | oc apply -f -
+    for ((i=0; i<180; i++)); do
+      dsc=$(oc get datasciencecluster/default-dsc --ignore-not-found -o name)
+      [ -n "$dsc" ] && break
+      sleep 5
+    done
+    [ -n "${dsc:-}" ] || { echo 'RHOAI DataScienceCluster is not configured; inspect rhoai-platform'; exit 1; }
     oc wait --for=condition=Ready datasciencecluster/default-dsc --timeout=15m
     oc wait --for=condition=Established crd/llminferenceservices.serving.kserve.io --timeout=5m
     ;;

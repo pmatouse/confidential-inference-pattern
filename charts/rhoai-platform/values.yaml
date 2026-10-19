@@ -5,4 +5,8 @@ operator:
   catalog: redhat-operators
   catalogNamespace: openshift-marketplace
 components:
-  enabled: false
+  enabled: true
+bootstrap:
+  # Stock Red Hat Python image; no second derivative image is needed.
+  image: registry.access.redhat.com/ubi9/python-312@sha256:56fad467cb1e41666f0028b7fd71107df0556bcc9ecfc577597858c85618f55c
+  timeoutSeconds: 1800

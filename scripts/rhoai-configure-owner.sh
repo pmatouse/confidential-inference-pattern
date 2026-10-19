@@ -45,9 +45,9 @@ trustee_file.write_text(yaml.safe_dump(trustee,sort_keys=False))
 for name in ['kserve','kserve-crd','confidential-inference','qwen-chat','encrypted-inference','hello-openshift','kbs-access-curl','kbs-access-sealed']:
  apps.setdefault(name,{})['disabled']=True
 for name,namespace,values,wave in [('rhoai-platform','redhat-ods-operator','platform','30'),('rhoai-model-publisher',os.environ.get('PUBLISHER_NAMESPACE','rhoai-model-publisher'),'publisher','32'),('rhoai-confidential-qwen',os.environ.get('DEMO_NAMESPACE','rhoai-confidential-qwen'),'qwen','40')]:
- app={'name':name,'namespace':namespace,'project':'hub','repoURL':os.environ['ADDON_REPO'],'path':'charts/'+name,'chartVersion':os.environ['ADDON_REVISION'],'extraValueFiles':['/overrides/values-rhoai-'+values+'.yaml'],'annotations':{'argocd.argoproj.io/sync-wave':wave},'disabled':mode!='ready'}
+ app={'name':name,'namespace':namespace,'project':'hub','repoURL':os.environ['ADDON_REPO'],'path':'charts/'+name,'chartVersion':os.environ['ADDON_REVISION'],'extraValueFiles':['/overrides/values-rhoai-'+values+'.yaml'],'annotations':{'argocd.argoproj.io/sync-wave':wave},'disabled':mode!='ready' and name!='rhoai-platform'}
  # Bootstrap must not stop an already configured, ready installation.
- if mode=='bootstrap' and name in apps:continue
+ if mode=='bootstrap' and name in apps and name!='rhoai-platform':continue
  apps[name]=app
 (owner/'overrides/values-rhoai-platform.yaml').write_text('components:\n  enabled: true\n')
 (owner/'overrides/values-rhoai-publisher.yaml').write_text(yaml.safe_dump({'publish':False,'storageClass':os.environ.get('STORAGE_CLASS','lvms-vg1')}))

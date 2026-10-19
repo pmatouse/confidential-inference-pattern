@@ -35,6 +35,20 @@ storage. RHOAI owns the serving controllers. The add-on supplies Helm-rendered
 passthrough Route and application configuration. It does not deploy the previous
 custom CSI, model populator, storage authority or release controllers.
 
+The CoCo ClusterGroup enables the `rhoai-platform` Argo Application during
+bootstrap. That chart installs the RHOAI operator and serving configuration as a
+pattern dependency. Bounded Sync hooks approve only the explicitly pinned initial
+InstallPlan, wait for the operator API, then wait for the configured serving
+components. An existing different version or a plan containing an unexpected
+bundle is rejected. The Subscription stays on Manual approval to prevent
+unreviewed future upgrades. These installation hooks run on a stock UBI image;
+the RHOAI initializer remains the only derivative image in the extension.
+
+Model-specific work remains explicit: building the image, enrolling keys,
+publishing ciphertext and generating the measured workload identity. Committing
+the resulting public values enables the model and chat applications. See
+[dependency ownership and installation](install.md#dependencies-and-gitops-ownership).
+
 The chat container is part of the RHOAI workload template. The initializer is
 explicitly configured (`storageInitializer.enabled: false`) to preserve the
 LUKS mount handoff; it invokes the published initializer entrypoint with
