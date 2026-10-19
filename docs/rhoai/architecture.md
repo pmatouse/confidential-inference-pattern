@@ -61,6 +61,16 @@ API or inference gateway is needed. RHOAI API authentication is disabled for
 this loopback-only demo backend; no HTTPRoute is requested. The chat demo has no
 user login and must be placed on the intended demo network.
 
+The browser interface reuses the earlier CoCo Qwen chat application
+(`charts/coco-supported/qwen-chat/files/qwen-chat.html` in the CoCo owner), with
+conversation bubbles, suggested prompts, keyboard submission and a new-chat
+control. The frontend adapts to the existing guest proxy's OpenAI-style response;
+it keeps history only in this browser tab and limits the context sent to the
+small model. It loads no external fonts, scripts or services. The guest proxy
+uses a nonce-based content security policy and does not log conversations.
+Changing either frontend or proxy requires regenerating the measured guest
+identity and Trustee binding before rolling out a new VM. No new image is needed.
+
 ## Storage and restart behavior
 
 The OSC helper opens a raw block PVC inside the guest and keeps its mount alive

@@ -1,6 +1,7 @@
 """Small internal-network chat proxy. No Kubernetes credentials or exec fallback."""
 import json
 import os
+import secrets
 from pathlib import Path
 from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
 import urllib.request
@@ -8,6 +9,7 @@ from urllib.parse import urlsplit
 BACKEND=os.environ['INFERENCE_BACKEND'].rstrip('/')
 MODEL=os.environ['INFERENCE_MODEL']
 MAX_BODY=32768
+NONCE=secrets.token_urlsafe(24)
 class Handler(BaseHTTPRequestHandler):
     def log_message(self,*args):pass # Do not record prompts or generated content.
     def send(self,status,data,content_type='application/json'):
@@ -16,7 +18,8 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header('Content-Length',str(len(data)))
         self.send_header('Cache-Control','no-store')
         self.send_header('X-Content-Type-Options','nosniff')
-        self.send_header('Content-Security-Policy',"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'")
+        self.send_header('Referrer-Policy','no-referrer')
+        self.send_header('Content-Security-Policy',"default-src 'none'; connect-src 'self'; script-src 'nonce-"+NONCE+"'; style-src 'nonce-"+NONCE+"'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'")
         self.end_headers();self.wfile.write(data)
     def do_GET(self):
         if self.path=='/healthz':
@@ -25,7 +28,7 @@ class Handler(BaseHTTPRequestHandler):
                     if response.status!=200:raise ValueError()
                 self.send(200,b'{"status":"ok"}')
             except Exception:self.send(503,b'{"status":"inference unavailable"}')
-        elif self.path=='/':self.send(200,(Path(os.environ.get('CHAT_FILES','/app'))/'index.html').read_bytes(),'text/html; charset=utf-8')
+        elif self.path=='/':self.send(200,(Path(os.environ.get('CHAT_FILES','/app'))/'index.html').read_text().replace('__NONCE__',NONCE).encode(),'text/html; charset=utf-8')
         else:self.send(404,b'{}')
     def do_POST(self):
         if self.path!='/api/chat':return self.send(404,b'{}')

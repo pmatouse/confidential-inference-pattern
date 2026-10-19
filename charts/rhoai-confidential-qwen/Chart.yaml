@@ -2,4 +2,4 @@ apiVersion: v2
 name: rhoai-confidential-qwen
 description: Confidential Qwen and chat using RHOAI and OSC preview features
 type: application
-version: 0.1.0
+version: 0.1.1

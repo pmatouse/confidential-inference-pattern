@@ -1,4 +1,53 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Confidential Qwen demo</title>
-<style>body{font:16px system-ui;max-width:780px;margin:40px auto;padding:0 20px;background:#101820;color:#edf1f4}h1{font-size:28px}textarea{width:100%;height:90px;box-sizing:border-box;padding:12px;font:inherit}button{padding:10px 20px;margin:12px 0;cursor:pointer}#log{white-space:pre-wrap;line-height:1.6}.note{color:#aabac7}</style>
-<h1>Confidential Qwen demo</h1><p class="note">Qwen3 and this chat server run together in a confidential VM, using Red Hat OpenShift AI preview model loading and encrypted storage. This page does not independently verify attestation.</p><div id="log" aria-live="polite"></div><form id="chat"><label for="prompt">Message</label><textarea id="prompt" required maxlength="8192"></textarea><button id="send">Send</button></form><div id="status" role="status"></div>
-<script>const messages=[];document.querySelector('#chat').onsubmit=async e=>{e.preventDefault();const p=document.querySelector('#prompt'),b=document.querySelector('#send'),s=document.querySelector('#status'),l=document.querySelector('#log');if(!p.value.trim())return;messages.push({role:'user',content:p.value});l.textContent+='You: '+p.value+'\n\n';p.value='';b.disabled=true;s.textContent='Generating…';try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:messages.slice(-20)})});const data=await r.json();if(!r.ok)throw Error(data.error||'Request failed');const text=data.choices[0].message.content;messages.push({role:'assistant',content:text});l.textContent+='Qwen: '+text+'\n\n';s.textContent='';}catch(err){messages.pop();s.textContent=err.message;}finally{b.disabled=false;p.focus();}};</script></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chat with Qwen</title>
+<style nonce="__NONCE__">
+:root{font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#eceeea;background:#121614;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0}main{max-width:850px;margin:auto;height:100dvh;display:flex;flex-direction:column;padding:0 24px}
+header{display:flex;align-items:center;justify-content:space-between;padding:24px 0;border-bottom:1px solid #303a33;gap:12px}.identity{display:flex;align-items:center;gap:14px}.mark{background:#b9e9bd;color:#163421;border-radius:14px;width:44px;height:44px;display:grid;place-items:center;font-weight:750;font-size:24px}h1{font-size:20px;margin:0 0 5px;font-weight:600}.subtitle{font-size:12px;color:#adb9af}.dot{color:#b9e9bd;margin-right:5px}
+button{font:inherit;cursor:pointer;border:1px solid #3d4b40;border-radius:10px;padding:10px 14px;background:transparent;color:inherit}button:hover{background:#29352c}button:disabled{opacity:.45;cursor:default}#messages{flex:1;overflow:auto;padding:26px 0;scroll-behavior:smooth}.welcome{padding:9vh 0 20px;max-width:580px;margin:auto}h2{font-size:34px;letter-spacing:-1px;line-height:1.15;font-weight:500;margin:0 0 16px}.welcome p{color:#adb9af;line-height:1.6}.suggestions{display:flex;flex-wrap:wrap;gap:8px;margin-top:25px}.suggestions button{font-size:13px;text-align:left}
+.message{margin:0 0 26px;line-height:1.65;font-size:15px;overflow-wrap:anywhere}.role{font-size:11px;text-transform:uppercase;letter-spacing:1.3px;color:#a8b3aa;margin:0 0 7px}.content{white-space:pre-wrap}.message.user .content{background:#24342a;border:1px solid #334b3b;padding:13px 17px;border-radius:14px;display:inline-block}.message.user{text-align:right}.message.user .content{text-align:left}.message.assistant .content{padding-right:22px}.message.pending{color:#b4c9b8}.message.error{color:#f4b2a7}.notice{color:#adb9af;font-size:12px;margin-top:8px}
+footer{padding:14px 0 18px;border-top:1px solid #303a33}form{display:flex;align-items:flex-end;gap:12px;background:#1b231e;border:1px solid #435749;border-radius:15px;padding:12px}textarea{font:inherit;background:none;border:0;outline:0;resize:none;width:100%;line-height:1.5;min-height:52px;max-height:180px;color:inherit}textarea:focus-visible{outline:1px solid #8db594;outline-offset:3px;border-radius:3px}#send{background:#b9e9bd;color:#173321;border:0;font-weight:600;flex-shrink:0}#send:hover{background:#d0f2d2}.footnote{font-size:11px;color:#94a297;margin:10px 4px 0;display:flex;justify-content:space-between;gap:10px}#status{color:#bacabd}
+@media(max-width:500px){main{padding:0 15px}header{padding:18px 0}h2{font-size:28px}.footnote{display:block;line-height:1.6}.identity{gap:9px}.mark{width:36px;height:36px}.subtitle{font-size:10px}}
+</style>
+</head>
+<body><main>
+<header><div class="identity"><div class="mark" aria-hidden="true">Q</div><div><h1>Chat with Qwen</h1><div class="subtitle"><span class="dot">●</span>Qwen3 · 0.6B · Your confidential GPU</div></div></div><button id="clear" type="button">New chat</button></header>
+<section id="messages" aria-label="Conversation" aria-live="polite"><div class="welcome" id="welcome"><h2>A small model.<br>Your own GPU.</h2><p>Ask a question or try a short task. Qwen and this chat run together in a confidential VM on your OpenShift cluster. The encrypted model is unlocked after attestation.</p><div class="suggestions"><button type="button">Explain confidential computing simply.</button><button type="button">Write a short haiku about GPUs.</button><button type="button">Calculate 2 + 2.</button></div></div></section>
+<footer><form id="chat"><textarea id="prompt" rows="2" maxlength="3000" placeholder="Message Qwen…" aria-label="Message Qwen" required></textarea><button id="send" type="submit">Send ↑</button></form><div class="footnote"><span>Enter to send · Shift+Enter for a new line · History stays in this tab</span><span id="status">Connected</span></div></footer>
+</main>
+<script nonce="__NONCE__">
+const list=document.querySelector('#messages'), prompt=document.querySelector('#prompt'), send=document.querySelector('#send'), clear=document.querySelector('#clear'), status=document.querySelector('#status');
+let history=[], busy=false;
+function message(role,text,extra=''){
+ const item=document.createElement('article');item.className='message '+role+' '+extra;
+ const label=document.createElement('div');label.className='role';label.textContent=role==='user'?'You':'Qwen';
+ const body=document.createElement('div');body.className='content';body.textContent=text;
+ item.append(label,body);list.append(item);list.scrollTop=list.scrollHeight;return item;
+}
+function setBusy(value){busy=value;send.disabled=value;clear.disabled=value;status.textContent=value?'Thinking…':'Connected';}
+async function submit(event){
+ event.preventDefault();const text=prompt.value.trim();if(!text||busy)return;
+ document.querySelector('#welcome')?.remove();message('user',text);prompt.value='';setBusy(true);
+ const pending=message('assistant','Thinking…','pending');
+ let requestHistory=[...history,{role:'user',content:text}].slice(-9);
+ while(requestHistory.length>1&&requestHistory.reduce((sum,item)=>sum+item.content.length,0)>5000)requestHistory=requestHistory.slice(2);
+ try{
+  const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:requestHistory.slice(-9)})});
+  const result=await response.json();if(!response.ok)throw new Error(result.error||'Request failed');
+  const choice=result.choices[0], data={message:choice.message.content,finish_reason:choice.finish_reason,usage:result.usage};
+  pending.remove();const item=message('assistant',data.message);history=[...requestHistory,{role:'assistant',content:data.message}].slice(-10);
+  if(data.finish_reason==='length'){const note=document.createElement('div');note.className='notice';note.textContent='Response limit reached. Ask Qwen to continue.';item.append(note);}
+  status.textContent=data.usage?data.usage.completion_tokens+' tokens':'Connected';
+ }catch(error){pending.remove();message('assistant',error.message,'error');prompt.value=text;status.textContent='Request failed';}
+ finally{busy=false;send.disabled=false;clear.disabled=false;prompt.focus();list.scrollTop=list.scrollHeight;}
+}
+document.querySelector('#chat').addEventListener('submit',submit);
+prompt.addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();document.querySelector('#chat').requestSubmit();}});
+clear.addEventListener('click',()=>{history=[];list.replaceChildren();status.textContent='New chat';prompt.value='';prompt.focus();});
+document.querySelectorAll('.suggestions button').forEach(button=>button.addEventListener('click',()=>{prompt.value=button.textContent;document.querySelector('#chat').requestSubmit();}));
+prompt.focus();
+</script>
+</body></html>
