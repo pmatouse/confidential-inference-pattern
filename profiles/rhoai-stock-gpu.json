@@ -1,0 +1,17 @@
+{
+  "name": "ocp-4.22.15-stock-snp-nvidia-8vcpu",
+  "openShiftVersion": "4.22.15",
+  "oscCSV": "sandboxed-containers-operator.v1.13.0",
+  "trusteeCSV": "trustee-operator.v1.2.0",
+  "runtimeClassName": "kata-cc-nvidia-gpu",
+  "vcpus": 8,
+  "memoryMiB": 65536,
+  "kernelOverride": "",
+  "launchMeasurement": "81b9d5db6c10b0b9297b448d917044261f9bd0d6cceceafd1b4680058b365c5ac77a4d82ca77c4ac10c838e32536eddb",
+  "artifactSHA256": {
+    "ovmf_snp": "1aa196fe94e56809aa668fc4eabfc50923131288e018bcf0c6ab4dd3581bd850",
+    "vmlinuz": "0317da8a23853124ed4e4da6c56254f40a741ff4507e1afbbcb7f32e5c097206",
+    "nvidiaConfidentialInitrd": "abd755287282a268578687137bf437caeda6139c1a654f18d13f8a72a68892ca"
+  },
+  "referenceWorkflow": "CoCo scripts/collect-edge-cpu-gpu-reference-values.py at 46739d169293934ba253fc956b537f0012ec84c2; required to match the independently provisioned firmware-reference-values Secret before enrollment"
+}

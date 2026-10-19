@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kbs-config
+  namespace: trustee-operator-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+    kbs.confidentialcontainers.org/migrated-from-v1.1.0: v1.2.0
+data:
+  kbs-config.toml: |
+    [http_server]
+    sockets = ["0.0.0.0:8080"]
+    {{- if .Values.kbs.workerCount }}
+    worker_count = {{ .Values.kbs.workerCount }}
+    {{- end }}
+    insecure_http = false
+    private_key = "/etc/https-key/tls.key"
+    certificate = "/etc/https-cert/tls.crt"
+
+    [admin]
+    authorization_mode = "DenyAll"
+
+    [attestation_token]
+    insecure_header_jwk = false
+    attestation_token_type = "CoCo"
+    trusted_certs_paths = ["/etc/attestation-cert/tls.crt"]
+
+    [attestation_service]
+    type = "coco_as_builtin"
+
+    [attestation_service.attestation_token_broker]
+
+    [attestation_service.attestation_token_broker.signer]
+    key_path = "/etc/attestation-cert/tls.key"
+    cert_path = "/etc/attestation-cert/tls.crt"
+
+    [attestation_service.attestation_token_config]
+    duration_min = 5
+
+    [attestation_service.rvps_config]
+    type = "BuiltIn"
+    storage_type = "LocalJson"
+    file_dir_path = "/opt/confidential-containers/storage/local_json"
+    {{- if .Values.kbs.gpu.enabled }}
+
+    [attestation_service.verifier_config.nvidia_verifier]
+    type = "Remote"
+    {{- end }}
+    {{- if .Values.kbs.tdx.enabled }}
+
+    [attestation_service.verifier_config.dcap_verifier]
+    collateral_service = "{{ .Values.kbs.tdx.collateralService }}"
+    tcb_update_type = "early"
+    {{- end }}
+    {{- if .Values.kbs.snp.enabled }}
+
+    [attestation_service.verifier_config.snp_verifier]
+    vcek_sources = [{ type = "OfflineStore" }]
+    {{- end }}
+
+    [[plugins]]
+    name = "resource"
+    storage_backend_type = "kvstorage"
+
+    [storage_backend]
+    storage_type = "LocalFs"
+
+    [storage_backend.backends.local_fs]
+    dir_path = "/opt/confidential-containers/storage"
+
+    [storage_backend.backends.local_json]
+    dir_path = "/opt/confidential-containers/storage/local_json"

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: rhoai-platform
+description: Pinned Red Hat OpenShift AI preview for the CoCo Qwen demo
+type: application
+version: 0.1.0

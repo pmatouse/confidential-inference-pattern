@@ -1,0 +1,61 @@
+apiVersion: confidentialcontainers.org/v1alpha1
+kind: KbsConfig
+metadata:
+  name: kbsconfig
+  namespace: trustee-operator-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "7"
+spec:
+  kbsConfigMapName: kbs-config
+  kbsAuthSecretName: kbs-auth-public-key
+  kbsDeploymentType: AllInOneDeployment
+  kbsRvpsRefValuesConfigMapName: rvps-reference-values
+  kbsSecretResources:
+    {{- range .Values.kbs.secretResources }}
+    - "{{ .name }}"
+    {{- end }}
+    {{- range .Values.kbs.extraSecrets }}
+    - "{{ . }}"
+    {{- end }}
+    {{- if eq .Values.global.coco.securityPolicyFlavour "signed" }}
+    - "cosign-keys"
+    {{- end }}
+    - "security-policy"
+    - "attestation-status"
+    - "signing-key"
+  kbsHttpsKeySecretName: kbs-https-key
+  kbsHttpsCertSecretName: kbs-https-certificate
+  kbsResourcePolicyConfigMapName: resource-policy
+  kbsAttestationPolicyConfigMapName: attestation-policy
+  kbsAttestationCertSecretName: attestation-cert
+  kbsAttestationKeySecretName: attestation-cert
+
+
+  # IBM SE specific configuration (optional)
+  # ibmSEConfigSpec:
+  #   certStorePvc: <persistent-volume-claim>
+
+  # Override attestation policy (optional)
+  # kbsAttestationPolicyConfigMapName: attestation-policy
+
+  # Inject environment variables (optional)
+  # Enable DEBUG logging in trustee pods
+  KbsEnvVars:
+    RUST_LOG: debug
+
+  # service type (optional, it defaults to ClusterIP)
+  kbsServiceType: ClusterIP
+
+  # Local certificate cache for offline attestation verifiers
+  {{- if or .Values.kbs.tdx.enabled (and .Values.kbs.snp.enabled .Values.kbs.snp.vcekSecrets) }}
+  kbsLocalCertCacheSpec:
+    secrets:
+    {{- if .Values.kbs.tdx.enabled }}
+    - secretName: tdx-collateral
+      mountPath: "{{ .Values.kbs.tdx.collateralMountPath }}"
+    {{- end }}
+    {{- range .Values.kbs.snp.vcekSecrets }}
+    - secretName: "{{ .secretName }}"
+      mountPath: "/opt/confidential-containers/attestation-service/kds-store/vcek/{{ .hwid }}"
+    {{- end }}
+  {{- end }}

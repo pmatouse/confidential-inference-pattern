@@ -1,0 +1,23 @@
+{{- if ne .Values.global.secretStore.backend "none" }}
+---
+apiVersion: "external-secrets.io/v1"
+kind: ExternalSecret
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  name: attestation-status-eso
+  namespace: trustee-operator-system
+spec:
+  refreshInterval: 15s
+  secretStoreRef:
+    name: {{ .Values.secretStore.name }}
+    kind: {{ .Values.secretStore.kind }}
+  data:
+  target:
+    name: attestation-status
+    template:
+      type: generic
+  dataFrom:
+  - extract:
+      key: {{ .Values.global.coco.attestationStatus }}
+{{- end }}

@@ -1,0 +1,10 @@
+apiVersion: v2
+description: A Helm chart to provide an opinionated deployment of Trustee in a validated
+  pattern
+keywords:
+- pattern
+- trustee
+- confidential-computing
+- confidential-containers
+name: trustee
+version: 0.10.3-rhoai.1

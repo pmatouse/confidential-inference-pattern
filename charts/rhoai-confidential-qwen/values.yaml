@@ -1,0 +1,25 @@
+name: qwen
+runtimeClassName: kata-cc-nvidia-gpu
+replicas: 1
+model:
+  name: qwen3-0.6b
+  uri: http://encrypted-model.rhoai-model-publisher.svc:8080/qwen.tar
+  keyResource: kbs:///default/rhoai-qwen-secrets/model-key
+storage:
+  claimName: qwen-model-exclusive
+  className: lvms-vg1
+  size: 20Gi
+  passphraseResource: kbs:///default/rhoai-qwen-secrets/luks-passphrase
+guest:
+  memoryMiB: 65536
+  vcpus: 8
+  initdata: ''
+chat:
+  hostname: ''
+  tlsCertResource: kbs:///default/rhoai-qwen-secrets/tls-cert
+  tlsKeyResource: kbs:///default/rhoai-qwen-secrets/tls-key
+images:
+  vllm: registry.redhat.io/rhaii-fast/vllm-cuda-rhel9@sha256:97c7d6f66f3f0897b3ff10ddd135de930d45bdd116cf41a43e3ad7270029116a
+  storageHelper: registry.redhat.io/openshift-sandboxed-containers/osc-storage-helper@sha256:c65fb8f12888705d4989d6b8f0e4e3f144224b43f72b609d5f496e77b3b73917
+  initializer: ''
+  chat: registry.access.redhat.com/ubi9/python-312@sha256:56fad467cb1e41666f0028b7fd71107df0556bcc9ecfc577597858c85618f55c

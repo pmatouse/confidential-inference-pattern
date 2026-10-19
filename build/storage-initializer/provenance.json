@@ -1,0 +1,8 @@
+{
+  "base": "registry.redhat.io/rhoai/odh-kserve-storage-initializer-rhel9@sha256:33def048f85820f43495cac53115f902a5b18bb98d516ac6ac1e9a6905647a6d",
+  "upstreamPullRequest": "https://github.com/kserve/kserve/pull/6219",
+  "upstreamCommit": "ddc9a5c225ae291d851d50e9fdc4daf7c2bfc104",
+  "file": "python/storage/kserve_storage/confidential/jwe_decryptor.py",
+  "support": "Demo-only derivative of the RHOAI 3.6 EA2 image; not a Red Hat supported image",
+  "sha256": "d347e32ba69131a44fa93b845f2e7be67cdacbd3d09dee487f127a23fca342a9"
+}

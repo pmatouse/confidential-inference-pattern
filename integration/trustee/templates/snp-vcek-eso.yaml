@@ -1,0 +1,25 @@
+{{- if .Values.kbs.snp.enabled }}
+{{- range .Values.kbs.snp.vcekSecrets }}
+---
+apiVersion: "external-secrets.io/v1"
+kind: ExternalSecret
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  name: {{ .secretName }}-eso
+  namespace: trustee-operator-system
+spec:
+  refreshInterval: 15s
+  secretStoreRef:
+    name: {{ $.Values.secretStore.name }}
+    kind: {{ $.Values.secretStore.kind }}
+  target:
+    name: {{ .secretName }}
+    template:
+      type: Opaque
+  dataFrom:
+  - extract:
+      key: 'secret/data/hub/snpVcek-{{ .hwid }}'
+      decodingStrategy: Base64
+{{- end }}
+{{- end }}

@@ -1,3 +1,22 @@
+# RHOAI confidential Qwen demo
+
+This branch replaces the demo deployment path with Red Hat OpenShift AI 3.6 EA2
+confidential model loading, the stock OSC encrypted-volume helper and Red Hat AI
+Inference Server. Qwen and the existing chat proxy run in one confidential VM;
+TLS terminates there. The only image derivative contains merged KServe PR 6219.
+
+Start with the [installation workflow](docs/rhoai/install.md), then review the
+[architecture and trust boundaries](docs/rhoai/architecture.md). Use
+`scripts/rhoai-demo.sh` for the ordered installation and real-chat checks.
+The normal CoCo pattern remains the owner of shared operators and Trustee.
+
+The earlier custom storage implementation remains in repository history and
+legacy targets; the RHOAI workflow does not install it. This is a preview demo,
+not a supported production deployment. See the validation record for the exact
+hardware tests performed.
+
+---
+
 # Confidential inference pattern
 
 Experimental add-on installed **after CoCo Validated Pattern**. Qwen3-0.6B runs

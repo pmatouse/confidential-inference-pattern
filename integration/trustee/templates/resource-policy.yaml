@@ -1,0 +1,21 @@
+{{- $bindings := .Values.kbs.resourcePolicy.modelKeyBindings | default dict -}}
+{{- $guests := .Values.kbs.resourcePolicy.confidentialGuestBindings | default dict -}}
+{{- range $tag, $binding := merge (deepCopy $bindings) $guests -}}
+{{- if not (regexMatch "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$" $tag) -}}
+{{- fail "modelKeyBindings requires valid resource tags" -}}
+{{- end -}}
+{{- if or (ne (len $binding) 2) (not (regexMatch "^[0-9a-f]{96}$" ($binding.launchMeasurement | default ""))) (not (regexMatch "^[0-9a-f]{64}$" ($binding.initData | default ""))) -}}
+{{- fail "modelKeyBindings requires exactly a SHA-384 SNP launchMeasurement and SHA-256 initData" -}}
+{{- end -}}
+{{- end -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: resource-policy
+  namespace: trustee-operator-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+    kbs.confidentialcontainers.org/migrated-from-v1.1.0: v1.2.0
+data:
+  resource-policy.rego: |
+{{ .Files.Get "files/resource-policy.rego" | replace "model_key_bindings := {}" (printf "model_key_bindings := %s" (toPrettyJson $bindings)) | replace "confidential_guest_bindings := {}" (printf "confidential_guest_bindings := %s" (toPrettyJson $guests)) | indent 4 }}

@@ -1,0 +1,23 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: storage-initializer-streaming
+  namespace: rhoai-confidential-qwen
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: storage-initializer-streaming
+  namespace: rhoai-confidential-qwen
+spec:
+  runPolicy: Serial
+  source:
+    type: Binary
+    binary: {}
+  strategy:
+    type: Docker
+    dockerStrategy: {}
+  output:
+    to:
+      kind: ImageStreamTag
+      name: storage-initializer-streaming:pr-6219

@@ -1,0 +1,189 @@
+package agent_policy
+import rego.v1
+
+profile := __PROFILE__
+default AllowRequestsFailingPolicy := false
+default CreateContainerRequest := false
+default CreateSandboxRequest := false
+default CopyFileRequest := false
+default ExecProcessRequest := false
+default SetPolicyRequest := false
+default WriteStreamRequest := false
+default AddSwapRequest := false
+default AddSwapPathRequest := false
+default StartTracingRequest := false
+default StopTracingRequest := false
+default GetDiagnosticDataRequest := false
+default UpdateContainerRequest := false
+default UpdateEphemeralMountsRequest := false
+default RemoveStaleVirtiofsShareMountsRequest := false
+default SetGuestDateTimeRequest := false
+default ReseedRandomDevRequest := false
+default StartContainerRequest := true
+default RemoveContainerRequest := true
+default DestroySandboxRequest := true
+default SignalProcessRequest := true
+default WaitProcessRequest := true
+default ReadStreamRequest := true
+default CloseStdinRequest := true
+default StatsContainerRequest := true
+default GuestDetailsRequest := true
+default GetOOMEventRequest := true
+default GetMetricsRequest := true
+default UpdateInterfaceRequest := true
+default UpdateRoutesRequest := true
+default AddARPNeighborsRequest := true
+default ListInterfacesRequest := true
+default ListRoutesRequest := true
+default OnlineCPUMemRequest := true
+default MemHotplugByProbeRequest := true
+
+CreateSandboxRequest if {
+    input.guest_hook_path == ""
+    count(input.kernel_modules) == 0
+    regex.match("^[a-f0-9]{64}$", input.sandbox_id)
+}
+
+# Only host-file staging is writable by the host. Verified application copies
+# live in guest tmpfs, outside this tree, and are checked before execution.
+copy_path if {
+    regex.match("^/run/kata-containers/shared/containers/[a-f0-9]{64}-[a-f0-9]{16}-(resolv.conf|hostname|[.]containerenv|hosts|passwd|group|termination-log|scripts|chat|secrets|tls-cert|demo|app|tls)(/[A-Za-z0-9_.:-]+)*$", input.path)
+    not ".." in split(input.path, "/")
+    not "." in split(input.path, "/")
+}
+CopyFileRequest if {
+    copy_path
+    input.file_type in {"Regular", "Directory"}
+    input.file_size >= 0
+    input.file_size <= 1048576
+}
+CopyFileRequest if {
+    copy_path
+    input.file_type == "Symlink"
+    count(split(input.path, "/")) > 6
+    regex.match("^[A-Za-z0-9_.:/-]+$", input.symlink_target)
+    not startswith(input.symlink_target, "/")
+    not ".." in split(input.symlink_target, "/")
+    not "." in split(input.symlink_target, "/")
+}
+
+environment_allowed(value, settings) if { value in settings.environment }
+environment_allowed(value, settings) if {
+    regex.match("^HOSTNAME=qwen-kserve-[a-z0-9-]+$", value)
+}
+
+common if {
+    regex.match("^[a-f0-9]{64}$", input.container_id)
+    input.OCI.Root.Path == sprintf("/run/kata-containers/%s/rootfs", [input.container_id])
+    input.OCI.Hooks == null
+    input.string_user == null
+    input.OCI.Process.Terminal == false
+    input.OCI.Process.Cwd == "/"
+    input.OCI.Process.User.UID == 0
+    input.OCI.Process.User.GID == 0
+    input.OCI.Annotations["io.kubernetes.pod.namespace"] == profile.namespace
+    count(input.shared_mounts) == 0
+    every ns in input.OCI.Linux.Namespaces {
+        ns.Type in {"ipc", "uts", "mount"}
+        ns.Path == ""
+    }
+    count(input.OCI.Linux.UIDMappings) == 0
+    count(input.OCI.Linux.GIDMappings) == 0
+    every key, value in input.OCI.Linux.Sysctl {
+        key == "net.ipv4.ping_group_range"
+        value == "0 2147483647"
+    }
+    input.OCI.Linux.RootfsPropagation == ""
+}
+
+image_storage(image) if {
+    images := [s | some s in input.storages; s.driver == "image_guest_pull"]
+    count(images) == 1
+    images[0].source == image
+    images[0].mount_point == input.OCI.Root.Path
+    images[0].fstype == "overlay"
+    images[0].shared == false
+    count(images[0].driver_options) == 1
+    metadata := json.unmarshal(trim_prefix(images[0].driver_options[0], "image_guest_pull=")).metadata
+    metadata["io.katacontainers.pkg.oci.container_type"] == input.OCI.Annotations["io.katacontainers.pkg.oci.container_type"]
+}
+storage_allowed(s) if { s.driver == "image_guest_pull" }
+storage_allowed(s) if {
+    s.driver == "ephemeral"
+    s.fstype == "tmpfs"
+    startswith(s.mount_point, "/run/kata-containers/sandbox/")
+    not ".." in split(s.mount_point, "/")
+}
+
+# The host may supply only ordinary runtime files and guest-memory volumes at
+# these destinations. Executable/library paths and the LUKS mount are excluded.
+mount_allowed(m, settings) if {
+    m.type_ in {"proc", "tmpfs", "devpts", "mqueue", "sysfs", "cgroup", "cgroup2"}
+    m.destination in {"/proc", "/dev", "/dev/pts", "/dev/mqueue", "/sys", "/sys/fs/cgroup"}
+    m.source in {"proc", "tmpfs", "devpts", "mqueue", "sysfs", "cgroup", "cgroup2"}
+}
+mount_allowed(m, settings) if {
+    m.type_ == "bind"
+    m.destination in settings.bindDestinations
+    not m.destination in {"/dev/shm", "/tmp", "/home", "/models"}
+    regex.match("^/run/kata-containers/(shared/containers|sandbox)/[A-Za-z0-9_./-]+$", m.source)
+    not ".." in split(m.source, "/")
+}
+mount_allowed(m, settings) if {
+    m.type_ == "bind"
+    m.destination in settings.bindDestinations
+    m.destination in {"/dev/shm", "/tmp", "/home", "/models"}
+    some s in input.storages
+    s.driver == "ephemeral"
+    s.fstype == "tmpfs"
+    m.source == s.mount_point
+}
+
+CreateContainerRequest if {
+    common
+    name := input.OCI.Annotations["io.kubernetes.container.name"]
+    settings := profile.containers[name]
+    input.OCI.Process.Args == settings.args
+    image_storage(settings.image)
+    every value in input.OCI.Process.Env { environment_allowed(value, settings) }
+    every value in settings.requiredEnvironment { value in input.OCI.Process.Env }
+    every s in input.storages { storage_allowed(s) }
+    every m in input.OCI.Mounts { mount_allowed(m, settings) }
+    count({m.destination | some m in input.OCI.Mounts}) == count(input.OCI.Mounts)
+    devices_allowed(name)
+}
+
+devices_allowed(name) if {
+    name in {"POD", "check-ready", "storage-initializer", "chat"}
+    count(input.devices) == 0
+    count(input.OCI.Linux.Devices) == 0
+    count({k | some k, _ in input.OCI.Annotations; startswith(k, "cdi.k8s.io/")}) == 0
+}
+devices_allowed("format-disk") if {
+    count(input.devices) == 1
+    input.devices[0].container_path == "/dev/block-device"
+    input.devices[0].type_ == "scsi"
+    input.devices[0].options == []
+    every d in input.OCI.Linux.Devices { d.Path == "/dev/block-device"; d.Type == "b" }
+    count({k | some k, _ in input.OCI.Annotations; startswith(k, "cdi.k8s.io/")}) == 0
+}
+devices_allowed("main") if {
+    # A device already attached to the sandbox is omitted from this request.
+    # Stock Kata CDI must still select exactly one approved guest GPU below.
+    count(input.devices) <= 1
+    every device in input.devices { device.type_ == "vfio-pci-gk" }
+    count(input.OCI.Linux.Devices) == 0
+    cdi := {k: v | some k, v in input.OCI.Annotations; startswith(k, "cdi.k8s.io/")}
+    count(cdi) == 1
+    every k, v in cdi {
+        regex.match("^cdi.k8s.io/vfio[0-9]{1,5}$", k)
+        v == "nvidia.com/gpu=0"
+    }
+}
+
+# The agent creates sandbox/shm itself, without a per-container storage entry.
+mount_allowed(m, settings) if {
+    m.type_ == "bind"
+    m.destination == "/dev/shm"
+    m.source == "/run/kata-containers/sandbox/shm"
+}

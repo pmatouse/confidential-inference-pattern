@@ -1,0 +1,182 @@
+apiVersion: serving.kserve.io/v1alpha2
+kind: LLMInferenceServiceConfig
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: coco-encrypted-storage
+spec:
+  storageInitializer:
+    enabled: false
+  template:
+    serviceAccountName: {{ .Values.name }}
+    automountServiceAccountToken: false
+    enableServiceLinks: false
+    runtimeClassName: {{ .Values.runtimeClassName }}
+    shareProcessNamespace: true
+    securityContext:
+      runAsUser: 0
+      runAsGroup: 0
+      runAsNonRoot: false
+    volumes:
+      - name: home
+        emptyDir: {medium: Memory, sizeLimit: 1Gi}
+      - name: model-cache
+        emptyDir: {medium: Memory, sizeLimit: 1Gi}
+      - name: tmp-dir
+        emptyDir: {medium: Memory, sizeLimit: 1Gi}
+      - name: luks-block
+        persistentVolumeClaim:
+          claimName: {{ .Values.storage.claimName }}
+      - name: storage-ipc
+        emptyDir: {medium: Memory, sizeLimit: 2Gi}
+      - name: scripts
+        configMap: {name: {{ .Values.name }}-scripts}
+      - name: chat
+        configMap: {name: {{ .Values.name }}-chat}
+    initContainers:
+      - name: format-disk
+        image: {{ .Values.images.storageHelper | quote }}
+        restartPolicy: Always
+        workingDir: /
+        command: {{ include "qwen.command" (dict "root" . "role" "format-disk" "entry" "format.sh") }}
+        env:
+          - name: LUKS_RESOURCE
+            value: {{ .Values.storage.passphraseResource | quote }}
+        securityContext:
+          privileged: true
+          runAsUser: 0
+          runAsNonRoot: false
+          allowPrivilegeEscalation: true
+        resources:
+          requests: {cpu: 100m, memory: 256Mi}
+          limits: {cpu: "2", memory: 2Gi}
+        volumeDevices:
+          - {name: luks-block, devicePath: /dev/block-device}
+        volumeMounts:
+          - {name: storage-ipc, mountPath: /dev/shm}
+          - {name: scripts, mountPath: /opt/demo, readOnly: true}
+      - name: check-ready
+        image: {{ .Values.images.storageHelper | quote }}
+        command: [/usr/local/bin/luks-helper, wait-ready]
+        securityContext:
+          privileged: true
+          runAsUser: 0
+          runAsNonRoot: false
+        volumeMounts:
+          - {name: storage-ipc, mountPath: /dev/shm}
+      - name: storage-initializer
+        image: {{ required "Set images.initializer to the built image digest" .Values.images.initializer | quote }}
+        workingDir: /
+        command: {{ include "qwen.command" (dict "root" . "role" "storage-initializer" "entry" "initialize.sh") }}
+        env:
+          - {name: CONFIDENTIAL_ENABLED, value: "true"}
+          - name: CONFIDENTIAL_RESOURCE_ID
+            value: {{ .Values.model.keyResource | quote }}
+          - name: MODEL_URI
+            value: {{ .Values.model.uri | quote }}
+        securityContext:
+          privileged: true
+          runAsUser: 0
+          runAsNonRoot: false
+          allowPrivilegeEscalation: true
+        resources:
+          requests: {cpu: "1", memory: 512Mi}
+          limits: {cpu: "4", memory: 1Gi}
+        volumeMounts:
+          - {name: storage-ipc, mountPath: /dev/shm}
+          - {name: scripts, mountPath: /opt/demo, readOnly: true}
+    containers:
+      - name: main
+        image: {{ .Values.images.vllm | quote }}
+        workingDir: /
+        command: {{ include "qwen.command" (dict "root" . "role" "main" "entry" "vllm.sh") }}
+        env:
+          - {name: LD_LIBRARY_PATH, value: /usr/lib64}
+          - {name: LD_PRELOAD, value: /usr/lib64/libcuda.so.1}
+          - {name: VLLM_USE_V2_MODEL_RUNNER, value: "0"}
+        securityContext:
+          privileged: true
+          runAsUser: 0
+          runAsNonRoot: false
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: true
+          capabilities: {drop: []}
+        resources:
+          requests: {cpu: "8", memory: 48Gi, nvidia.com/pgpu: "1"}
+          limits: {cpu: "8", memory: 48Gi, nvidia.com/pgpu: "1"}
+        volumeMounts:
+          - {name: storage-ipc, mountPath: /dev/shm}
+          - {name: scripts, mountPath: /opt/demo, readOnly: true}
+        # vLLM listens only on guest loopback; the chat proxy exposes TLS.
+        readinessProbe:
+          httpGet: {path: /healthz, port: 8443, scheme: HTTPS}
+          periodSeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet: {path: /healthz, port: 8443, scheme: HTTPS}
+          periodSeconds: 30
+          timeoutSeconds: 5
+        startupProbe:
+          httpGet: {path: /healthz, port: 8443, scheme: HTTPS}
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 180
+      - name: chat
+        image: {{ .Values.images.chat | quote }}
+        workingDir: /
+        command: {{ include "qwen.command" (dict "root" . "role" "chat" "entry" "chat.sh") }}
+        env:
+          - {name: INFERENCE_BACKEND, value: "http://127.0.0.1:8000"}
+          - name: INFERENCE_MODEL
+            value: {{ .Values.model.name | quote }}
+          - {name: PYTHONDONTWRITEBYTECODE, value: "1"}
+          - name: TLS_CERT_RESOURCE
+            value: {{ .Values.chat.tlsCertResource | quote }}
+          - name: TLS_KEY_RESOURCE
+            value: {{ .Values.chat.tlsKeyResource | quote }}
+        securityContext:
+          runAsUser: 0
+          runAsNonRoot: false
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities: {drop: [ALL]}
+        ports: [{name: chat-https, containerPort: 8443}]
+        resources:
+          requests: {cpu: 100m, memory: 128Mi}
+          limits: {cpu: "1", memory: 256Mi}
+        readinessProbe:
+          httpGet: {path: /healthz, port: 8443, scheme: HTTPS}
+          periodSeconds: 10
+        volumeMounts:
+          - {name: storage-ipc, mountPath: /dev/shm}
+          - {name: scripts, mountPath: /opt/demo, readOnly: true}
+          - {name: chat, mountPath: /app, readOnly: true}
+---
+apiVersion: serving.kserve.io/v1alpha2
+kind: LLMInferenceService
+metadata:
+  annotations:
+    security.opendatahub.io/enable-auth: "false"
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Values.name }}
+spec:
+  replicas: {{ .Values.replicas }}
+  rolloutStrategy:
+    maxSurge: 0
+    maxUnavailable: 1
+  baseRefs:
+    - name: coco-encrypted-storage
+  model:
+    name: {{ .Values.model.name }}
+    uri: {{ .Values.model.uri | quote }}
+    confidential:
+      enabled: true
+      resourceId: {{ .Values.model.keyResource | quote }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.name }}-confidential
+    coco.io/skip-initdata: "true"
+  annotations:
+    io.katacontainers.config.hypervisor.default_memory: {{ .Values.guest.memoryMiB | quote }}
+    io.katacontainers.config.hypervisor.default_vcpus: {{ .Values.guest.vcpus | quote }}
+    io.katacontainers.config.hypervisor.kernel_params: ""
+    io.katacontainers.config.runtime.create_container_timeout: "900"
+    io.katacontainers.config.hypervisor.cc_init_data: {{ required "Provide measured guest.initdata" .Values.guest.initdata | quote }}

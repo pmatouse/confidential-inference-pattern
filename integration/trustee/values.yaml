@@ -1,0 +1,153 @@
+---
+# Secret store configuration
+# Default configuration is vault
+secretStore:
+  name: "vault-backend"
+  kind: "ClusterSecretStore"
+
+
+global:
+  secretStore:
+    # Secret store backend, typically overridden by values-global.yaml
+    backend: ""
+  # must be global as needs to be propagated to ansible playbooks.
+  # SHOULD be set in values-global.yaml
+  coco:
+    securityPolicy: secret/data/hub/securityPolicyConfig
+    securityPolicyFlavour: "insecure" # insecure, signed or reject is expected.
+    attestationStatus: secret/data/hub/attestationStatus
+    secured: false # true or false. If true, the cluster will be secured. If false, the cluster will be insecure.
+
+# KBS (Key Broker Service) configuration
+kbs:
+  # Security policy is an expected secret and is required to be pushed into the KBS
+  # presumes security policy flavour is signed
+  cosignKeys: secret/data/hub/coSignKeys
+
+  # Dynamic secret resources list - add new secrets here
+  # Each entry generates an ESO and gets added to kbsSecretResources
+  # requires a name of the secret and a key to retrieve using ESO, typically from vault.
+  secretResources:
+    # Example:
+    - name: "kbsres1"
+      key: "secret/data/hub/kbsres1"
+    - name: "passphrase"
+      key: "secret/data/hub/passphrase"
+  # Pre-existing secrets to add to kbsSecretResources without creating
+  # ExternalSecrets. Use this for secrets that are created outside the
+  # Vault/ESO flow (e.g. by imperative jobs, cert-manager, or other
+  # controllers). Only the secret name is needed; the secret must already
+  # exist in the trustee-operator-system namespace.
+  extraSecrets:
+    - credential
+
+  # Number of HTTP worker threads for the KBS server.
+  # If unset, the KBS binary defaults to one worker per logical CPU core,
+  # which can cause "too many open files" crashes on high-core-count systems
+  # where the container's nofile ulimit is lower than the worker count.
+  # Set this to a reasonable value (e.g., 4-8) on systems with many cores.
+  # workerCount: 4
+
+  # NVIDIA GPU confidential computing configuration
+  gpu:
+    enabled: false
+
+  # Intel TDX (Trust Domain Extensions) configuration
+  tdx:
+    # Enable TDX attestation support
+    enabled: false
+    # DCAP collateral service URL for quote verification.
+    # Default is file:// mode for offline/disconnected environments:
+    #   Reads pre-collected collateral JSON from the KBS pod filesystem,
+    #   mounted via kbsLocalCertCacheSpec from the tdx-collateral Secret.
+    # For connected mode, override with:
+    #   https://api.trustedservices.intel.com/sgx/certification/v4/
+    # For Azure: https://global.acccache.azure.net/sgx/certification/v4/
+    collateralService: "file:///opt/confidential-containers/attestation-service/tdx/platform_collaterals.json"
+    # Mount path for kbsLocalCertCacheSpec — where the tdx-collateral Secret
+    # is mounted into the KBS pod. Must match the directory portion of the
+    # file:// URL in collateralService.
+    collateralMountPath: "/opt/confidential-containers/attestation-service/tdx"
+    # Key name in the Vault secret = filename under collateralMountPath.
+    # Must match the filename portion of the file:// URL in collateralService.
+    collateralFileName: "platform_collaterals.json"
+
+  # AMD SEV-SNP bare metal attestation configuration
+  snp:
+    # Enable SNP offline attestation (VCEK certificate cache)
+    # When enabled, adds snp_verifier with OfflineStore to KBS config
+    # and mounts VCEK secrets into the KBS pod via kbsLocalCertCacheSpec.
+    enabled: false
+    # VCEK secrets list — populated by `make snp-gen-overrides` in coco-pattern.
+    # Each entry maps a node's hardware ID to a K8s secret containing vcek.der.
+    # Collected via: make snp-collect-vcek-urls (cluster) + make snp-download-vcek (internet)
+    vcekSecrets: []
+    # Example:
+    # - hwid: "abc123def456..."
+    #   secretName: "snp-vcek-abc123def456"
+
+  # Private registry CA certificate injection
+  # Enable to inject private registry CA cert into imperative namespace for
+  # initdata generation. Requires registryCaCert in Vault.
+  registryCa:
+    enabled: false
+
+  # Bare metal attestation configuration
+  # Enables firmware reference value collection and enforcement
+  baremetal:
+    # Enable bare metal firmware reference values (Intel TDX / AMD SEV-SNP)
+    # When enabled, creates ExternalSecret to pull firmware measurements from Vault
+    # Requires firmware values pushed to secret/data/hub/firmwareReferenceValues
+    # See docs/firmware-reference-values.md in coco-pattern for collection workflow
+    enabled: false
+
+  # Azure SEV-SNP platform configuration reference values
+  # These are used by the attestation policy to verify the CVM configuration.
+  # The values below are defaults for Azure DCasv5-series VMs (AMD SEV-SNP).
+  #
+  # These are Azure platform constants that describe the SEV-SNP policy
+  # enforced by Azure for confidential VMs. They may vary by:
+  #
+  #   VM Series       | SMT | TSME | ABI Minor | Notes
+  #   ----------------|-----|------|-----------|------
+  #   DCasv5 (Genoa)  | true| true | 31        | Standard CoCo peer-pod VMs
+  #   DCadsv5 (Genoa) | true| true | 31        | With local NVMe
+  #   ECasv5 (Genoa)  | true| true | 31        | Memory-optimized
+  #   DCesv5 (Milan)  | true| true | 31        | Earlier generation, may differ
+  #
+  # The SNP launch measurement (snpLaunchMeasurement) is a hash of the
+  # Azure UEFI firmware + vTPM initial state. It is static per Azure CVM
+  # firmware generation but will change when Azure updates the firmware.
+  # It is NOT derived from the workload image — it is an Azure platform
+  # constant for the VM type.
+  #
+  # If attestation fails on configuration/executables claims, check the
+  # trustee logs for the actual values reported by the VM and update these.
+  azure:
+    snpLaunchMeasurement: "qnydpVwThuWxZTsSWXi+2ns/laha6w+d2723g84FaijJ0CHaI5w0pYw6ZXZUJw7v"
+    smtEnabled: "true"
+    tsmeEnabled: "true"
+    abiMajor: "0"
+    abiMinor: "31"
+    singleSocket: "false"
+    smtAllowed: "true"
+
+  # Resource policy configuration
+  resourcePolicy:
+    # Public, independently approved guest identities for individual model-key
+    # tags. Also append their exact InitData/launch references to RVPS. Existing
+    # tags keep their current CPU+GPU policy; new bound tags fail on mismatch.
+    modelKeyBindings: {}
+    confidentialGuestBindings: {}
+    # Enforce hardware trust claims in resource policy
+    # When true: requires hardware claim >= 2 (affirming range)
+    # When false: allows resource access even if hardware claim fails
+    # Note: For SNP, hardware enforcement requires TCB reference values
+    # (tcb_bootloader, tcb_microcode, tcb_snp, tcb_tee) in RVPS
+    enforceHardware: true
+
+# Attestation token certificate configuration
+# Used when secretStore.backend is "none" (cert-manager generates certs)
+attestation:
+  commonName: "kbs-trustee-operator-system"
+  organization: "Red Hat"

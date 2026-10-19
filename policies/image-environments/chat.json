@@ -1,0 +1,27 @@
+{
+  "architecture": "amd64",
+  "environment": [
+    "container=oci",
+    "STI_SCRIPTS_URL=image:///usr/libexec/s2i",
+    "STI_SCRIPTS_PATH=/usr/libexec/s2i",
+    "APP_ROOT=/opt/app-root",
+    "HOME=/opt/app-root/src",
+    "PLATFORM=el9",
+    "NODEJS_VER=22",
+    "PYTHON_VERSION=3.12",
+    "PATH=/opt/app-root/src/.local/bin/:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "PYTHONUNBUFFERED=1",
+    "PYTHONIOENCODING=UTF-8",
+    "LC_ALL=en_US.UTF-8",
+    "LANG=en_US.UTF-8",
+    "CNB_STACK_ID=com.redhat.stacks.ubi9-python-312",
+    "CNB_USER_ID=1001",
+    "CNB_GROUP_ID=0",
+    "PIP_NO_CACHE_DIR=off",
+    "SUMMARY=Platform for building and running Python 3.12 applications",
+    "DESCRIPTION=Python 3.12 available as container is a base platform for building and running various Python 3.12 applications and frameworks. Python is an easy to learn, powerful programming language. It has efficient high-level data structures and a simple but effective approach to object-oriented programming. Python's elegant syntax and dynamic typing, together with its interpreted nature, make it an ideal language for scripting and rapid application development in many areas on most platforms.",
+    "BASH_ENV=/opt/app-root/bin/activate",
+    "ENV=/opt/app-root/bin/activate",
+    "PROMPT_COMMAND=. /opt/app-root/bin/activate"
+  ]
+}

@@ -1,0 +1,22 @@
+{{- if .Values.kbs.registryCa.enabled }}
+---
+apiVersion: "external-secrets.io/v1"
+kind: ExternalSecret
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  name: registry-ca-eso
+  namespace: imperative
+spec:
+  refreshInterval: 15s
+  secretStoreRef:
+    name: {{ .Values.secretStore.name }}
+    kind: {{ .Values.secretStore.kind }}
+  target:
+    name: registry-ca
+    template:
+      type: Opaque
+  dataFrom:
+  - extract:
+      key: 'secret/data/hub/registryCaCert'
+{{- end }}

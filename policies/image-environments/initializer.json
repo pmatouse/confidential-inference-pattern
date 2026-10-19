@@ -1,0 +1,10 @@
+{
+  "architecture": "amd64",
+  "environment": [
+    "container=oci",
+    "VIRTUAL_ENV=/prod_venv",
+    "PATH=/prod_venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "HOME=/home/kserve",
+    "HF_HOME=/home/kserve"
+  ]
+}

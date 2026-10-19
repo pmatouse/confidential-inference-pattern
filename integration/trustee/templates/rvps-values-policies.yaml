@@ -1,0 +1,183 @@
+{{ if eq .Values.global.coco.secured  true }}
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: rvps-policy
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: rvps-policy-cp
+      spec:
+        remediationAction: enforce
+        severity: medium
+        object-templates-raw: |
+          {{`{{- $pcr8Hash := fromConfigMap "imperative" "initdata" "PCR8_HASH" -}}`}}
+          {{`{{- $debugPcr8Hash := fromConfigMap "imperative" "debug-initdata" "PCR8_HASH" -}}`}}
+          {{`{{- $rawHash := fromConfigMap "imperative" "initdata" "RAW_HASH" -}}`}}
+          {{`{{- $debugRawHash := fromConfigMap "imperative" "debug-initdata" "RAW_HASH" -}}`}}
+          {{`{{- $rawHashPadded := printf "%s00000000000000000000000000000000" $rawHash -}}`}}
+          {{`{{- $debugRawHashPadded := printf "%s00000000000000000000000000000000" $debugRawHash -}}`}}
+          {{`{{- $referenceValues := dict -}}`}}
+          {{`{{- $storageBindings := `}}{{ merge (deepCopy (.Values.kbs.resourcePolicy.modelKeyBindings | default dict)) (.Values.kbs.resourcePolicy.confidentialGuestBindings | default dict) | toJson | quote }}{{` | fromJson -}}`}}
+          {{`{{- $initValues := list $pcr8Hash $debugPcr8Hash $rawHash $debugRawHash $rawHashPadded $debugRawHashPadded -}}`}}
+          {{`{{- range $_, $binding := $storageBindings -}}`}}
+          {{`{{- $initValues = append $initValues $binding.initData -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- $launchValues := list -}}`}}
+          {{`{{- $entry := dict "version" "0.1.0" "name" "init_data" "expiration" "2027-12-12T00:00:00Z" "value" (uniq $initValues) -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "init_data" (toJson $entry | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- $e := dict "version" "0.1.0" "name" "snp_pcr08" "expiration" "2027-12-12T00:00:00Z" "value" (list $pcr8Hash $debugPcr8Hash) -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "snp_pcr08" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- $e = dict "version" "0.1.0" "name" "tdx_pcr08" "expiration" "2027-12-12T00:00:00Z" "value" (list $pcr8Hash $debugPcr8Hash) -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "tdx_pcr08" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- $pcrStash := (lookup "v1" "Secret" "trustee-operator-system" "pcr-stash") -}}`}}
+          {{`{{- if $pcrStash -}}`}}
+          {{`{{- $secretData := $pcrStash.data.json | base64dec | fromJson -}}`}}
+          {{`{{- if $secretData.snp_pcr03 -}}`}}
+          {{`{{- $e := dict "version" "0.1.0" "name" "snp_pcr03" "expiration" "2027-12-12T00:00:00Z" "value" $secretData.snp_pcr03 -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "snp_pcr03" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- if $secretData.tdx_pcr03 -}}`}}
+          {{`{{- $e := dict "version" "0.1.0" "name" "tdx_pcr03" "expiration" "2027-12-12T00:00:00Z" "value" $secretData.tdx_pcr03 -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "tdx_pcr03" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- if $secretData.snp_pcr09 -}}`}}
+          {{`{{- $e := dict "version" "0.1.0" "name" "snp_pcr09" "expiration" "2027-12-12T00:00:00Z" "value" $secretData.snp_pcr09 -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "snp_pcr09" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- if $secretData.tdx_pcr09 -}}`}}
+          {{`{{- $e := dict "version" "0.1.0" "name" "tdx_pcr09" "expiration" "2027-12-12T00:00:00Z" "value" $secretData.tdx_pcr09 -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "tdx_pcr09" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- if $secretData.snp_pcr11 -}}`}}
+          {{`{{- $e := dict "version" "0.1.0" "name" "snp_pcr11" "expiration" "2027-12-12T00:00:00Z" "value" $secretData.snp_pcr11 -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "snp_pcr11" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- if $secretData.tdx_pcr11 -}}`}}
+          {{`{{- $e := dict "version" "0.1.0" "name" "tdx_pcr11" "expiration" "2027-12-12T00:00:00Z" "value" $secretData.tdx_pcr11 -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "tdx_pcr11" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- if $secretData.snp_pcr12 -}}`}}
+          {{`{{- $e := dict "version" "0.1.0" "name" "snp_pcr12" "expiration" "2027-12-12T00:00:00Z" "value" $secretData.snp_pcr12 -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "snp_pcr12" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- if $secretData.tdx_pcr12 -}}`}}
+          {{`{{- $e := dict "version" "0.1.0" "name" "tdx_pcr12" "expiration" "2027-12-12T00:00:00Z" "value" $secretData.tdx_pcr12 -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "tdx_pcr12" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- $firmwareStash := (lookup "v1" "Secret" "trustee-operator-system" "firmware-reference-values") -}}`}}
+          {{`{{- if $firmwareStash -}}`}}
+          {{`{{- $firmwareData := $firmwareStash.data.json | base64dec | fromJson -}}`}}
+          {{`{{- if $firmwareData.mr_td -}}`}}
+          {{`{{- $e := dict "version" "0.1.0" "name" "mr_td" "expiration" "2027-12-12T00:00:00Z" "value" $firmwareData.mr_td -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "mr_td" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- if $firmwareData.rtmr_1 -}}`}}
+          {{`{{- $e := dict "version" "0.1.0" "name" "rtmr_1" "expiration" "2027-12-12T00:00:00Z" "value" $firmwareData.rtmr_1 -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "rtmr_1" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- if $firmwareData.rtmr_2 -}}`}}
+          {{`{{- $e := dict "version" "0.1.0" "name" "rtmr_2" "expiration" "2027-12-12T00:00:00Z" "value" $firmwareData.rtmr_2 -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "rtmr_2" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- if $firmwareData.snp_launch_measurement -}}`}}
+          {{`{{- $launchValues = $firmwareData.snp_launch_measurement -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- if $firmwareData.snp_bootloader -}}`}}
+          {{`{{- $e := dict "version" "0.1.0" "name" "snp_bootloader" "expiration" "2027-12-12T00:00:00Z" "value" $firmwareData.snp_bootloader -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "snp_bootloader" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- if $firmwareData.snp_microcode -}}`}}
+          {{`{{- $e := dict "version" "0.1.0" "name" "snp_microcode" "expiration" "2027-12-12T00:00:00Z" "value" $firmwareData.snp_microcode -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "snp_microcode" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- if $firmwareData.snp_snp_svn -}}`}}
+          {{`{{- $e := dict "version" "0.1.0" "name" "snp_snp_svn" "expiration" "2027-12-12T00:00:00Z" "value" $firmwareData.snp_snp_svn -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "snp_snp_svn" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- if $firmwareData.snp_tee_svn -}}`}}
+          {{`{{- $e := dict "version" "0.1.0" "name" "snp_tee_svn" "expiration" "2027-12-12T00:00:00Z" "value" $firmwareData.snp_tee_svn -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "snp_tee_svn" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- if $firmwareData.xfam -}}`}}
+          {{`{{- $e := dict "version" "0.1.0" "name" "xfam" "expiration" "2027-12-12T00:00:00Z" "value" $firmwareData.xfam -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "xfam" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- range $_, $binding := $storageBindings -}}`}}
+          {{`{{- $launchValues = append $launchValues $binding.launchMeasurement -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- if gt (len $launchValues) 0 -}}`}}
+          {{`{{- $e := dict "version" "0.1.0" "name" "snp_launch_measurement" "expiration" "2027-12-12T00:00:00Z" "value" (uniq $launchValues) -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "snp_launch_measurement" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- end -}}`}}
+          {{- if .Values.kbs.azure }}
+          {{- with .Values.kbs.azure }}
+          {{`{{- $e := dict "version" "0.1.0" "name" "measurement" "expiration" "2099-12-31T00:00:00Z" "value" (list `}} "{{ .snpLaunchMeasurement }}" {{`) -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "measurement" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- $e = dict "version" "0.1.0" "name" "smt_enabled" "expiration" "2099-12-31T00:00:00Z" "value" (list `}} "{{ .smtEnabled }}" {{`) -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "smt_enabled" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- $e = dict "version" "0.1.0" "name" "tsme_enabled" "expiration" "2099-12-31T00:00:00Z" "value" (list `}} "{{ .tsmeEnabled }}" {{`) -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "tsme_enabled" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- $e = dict "version" "0.1.0" "name" "abi_major" "expiration" "2099-12-31T00:00:00Z" "value" (list `}} "{{ .abiMajor }}" {{`) -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "abi_major" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- $e = dict "version" "0.1.0" "name" "abi_minor" "expiration" "2099-12-31T00:00:00Z" "value" (list `}} "{{ .abiMinor }}" {{`) -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "abi_minor" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- $e = dict "version" "0.1.0" "name" "single_socket" "expiration" "2099-12-31T00:00:00Z" "value" (list `}} "{{ .singleSocket }}" {{`) -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "single_socket" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{`{{- $e = dict "version" "0.1.0" "name" "smt_allowed" "expiration" "2099-12-31T00:00:00Z" "value" (list `}} "{{ .smtAllowed }}" {{`) -}}`}}
+          {{`{{- $referenceValues = set $referenceValues "smt_allowed" (toJson $e | base64enc | replace "+" "-" | replace "/" "_") -}}`}}
+          {{- end }}
+          {{- end }}
+          - complianceType: mustonlyhave
+            objectDefinition:
+              apiVersion: v1
+              kind: ConfigMap
+              metadata:
+                name: rvps-reference-values
+                namespace: trustee-operator-system
+                annotations:
+                  kbs.confidentialcontainers.org/migrated-from-v1.1.0: v1.2.0
+              data:
+                reference_value: '{{`{{ toJson $referenceValues }}`}}'
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: rvps-placement-binding
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "6"
+placementRef:
+  name: rvps-placement-rule
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+  - name: rvps-policy
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: rvps-placement-rule
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
+spec:
+  clusterConditions:
+    - status: 'True'
+      type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchLabels:
+      local-cluster: "true"
+---
+{{ end }}

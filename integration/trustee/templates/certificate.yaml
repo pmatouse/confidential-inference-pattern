@@ -1,0 +1,18 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kbs-certificate
+  namespace: imperative
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  secretName: kbs-tls-self-signed
+  duration: 8760h # 1 year
+  renewBefore: 720h # 30 days
+  commonName: kbs.{{ .Values.global.hubClusterDomain }}
+  dnsNames:
+  - kbs.{{ .Values.global.hubClusterDomain }}
+  issuerRef:
+    name: kbs-self-signed-issuer
+    kind: Issuer

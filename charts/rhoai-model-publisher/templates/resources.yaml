@@ -1,0 +1,135 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: model-publisher
+  namespace: {{ .Release.Namespace }}
+data:
+{{ (.Files.Glob "files/*").AsConfig | indent 2 }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: encrypted-model
+  namespace: {{ .Release.Namespace | quote }}
+  annotations:
+    helm.sh/resource-policy: keep
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: {{ .Values.storageClass | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.size | quote }}
+---
+{{- if .Values.publish }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: publish-qwen
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        coco.io/skip-initdata: 'true'
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      containers:
+      - name: publish
+        image: {{ .Values.image | quote }}
+        command:
+        - /bin/bash
+        - /scripts/publish.sh
+        resources:
+          requests:
+            cpu: '1'
+            memory: 1Gi
+          limits:
+            cpu: '4'
+            memory: 2Gi
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: scripts
+          mountPath: /scripts
+          readOnly: true
+        - name: key
+          mountPath: /keys
+          readOnly: true
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: encrypted-model
+      - name: scripts
+        configMap:
+          name: model-publisher
+      - name: key
+        secret:
+          secretName: {{ .Values.keySecret | quote }}
+{{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: encrypted-model
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: encrypted-model
+  template:
+    metadata:
+      labels:
+        app: encrypted-model
+        coco.io/skip-initdata: 'true'
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: http
+        image: {{ .Values.image | quote }}
+        command:
+        - python3
+        - -m
+        - http.server
+        - '8080'
+        - --directory
+        - /data/public
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: '1'
+            memory: 256Mi
+        volumeMounts:
+        - name: data
+          mountPath: /data
+          readOnly: true
+        readinessProbe:
+          exec:
+            command:
+            - python3
+            - -c
+            - import pathlib; assert pathlib.Path("/data/public/qwen.tar").stat().st_size
+              > 0
+          periodSeconds: 15
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: encrypted-model
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: encrypted-model
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  selector:
+    app: encrypted-model
+  ports:
+  - port: 8080
+    targetPort: 8080

@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify-streaming
+  namespace: DEMO_NAMESPACE
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        coco.io/skip-initdata: 'true'
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      containers:
+      - name: test
+        image: INITIALIZER_IMAGE
+        command:
+        - python3
+        - /scripts/verify.py
+        resources:
+          requests:
+            cpu: '1'
+            memory: 256Mi
+          limits:
+            cpu: '2'
+            memory: 512Mi
+        volumeMounts:
+        - name: scripts
+          mountPath: /scripts
+          readOnly: true
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: scripts
+        configMap:
+          name: streaming-test
+      - name: data
+        ephemeral:
+          volumeClaimTemplate:
+            spec:
+              accessModes:
+              - ReadWriteOnce
+              storageClassName: STORAGE_CLASS
+              resources:
+                requests:
+                  storage: 10Gi

@@ -1,0 +1,5 @@
+storageClass: lvms-vg1
+size: 15Gi
+keySecret: model-publisher-key
+publish: true
+image: registry.redhat.io/rhoai/odh-kserve-storage-initializer-rhel9@sha256:33def048f85820f43495cac53115f902a5b18bb98d516ac6ac1e9a6905647a6d

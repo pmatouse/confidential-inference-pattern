@@ -1,0 +1,22 @@
+{{- if .Values.kbs.baremetal.enabled }}
+---
+apiVersion: "external-secrets.io/v1"
+kind: ExternalSecret
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  name: firmware-refvals-eso
+  namespace: trustee-operator-system
+spec:
+  refreshInterval: 15s
+  secretStoreRef:
+    name: {{ .Values.secretStore.name }}
+    kind: {{ .Values.secretStore.kind }}
+  target:
+    name: firmware-reference-values
+    template:
+      type: generic
+  dataFrom:
+  - extract:
+      key: 'secret/data/hub/firmwareReferenceValues'
+{{- end }}

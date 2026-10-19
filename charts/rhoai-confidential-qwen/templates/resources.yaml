@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Values.name }}
+automountServiceAccountToken: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Values.name }}-privileged
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:openshift:scc:privileged
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.name }}
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Values.storage.claimName }}
+  annotations:
+    helm.sh/resource-policy: keep
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  accessModes: [ReadWriteOncePod]
+  volumeMode: Block
+  storageClassName: {{ .Values.storage.className | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.storage.size }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Values.name }}-scripts
+data:
+{{- range $path, $_ := .Files.Glob "files/*.sh" }}
+  {{ base $path }}: {{ $.Files.Get $path | toJson }}
+{{- end }}
+  model.sha256: {{ .Files.Get "files/model.sha256" | toJson }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Values.name }}-chat
+data:
+  server.py: {{ .Files.Get "files/server.py" | toJson }}
+  index.html: {{ .Files.Get "files/index.html" | toJson }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Values.name }}-chat
+spec:
+  selector:
+    app.kubernetes.io/name: {{ .Values.name }}-confidential
+  ports:
+    - name: https
+      port: 443
+      targetPort: 8443
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Values.name }}-chat
+spec:
+  {{- if .Values.chat.hostname }}
+  host: {{ .Values.chat.hostname }}
+  {{- end }}
+  to:
+    kind: Service
+    name: {{ .Values.name }}-chat
+  port:
+    targetPort: https
+  tls:
+    termination: passthrough
+    insecureEdgeTerminationPolicy: Redirect

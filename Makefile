@@ -1,4 +1,16 @@
 PYTHON ?= python3
+.DEFAULT_GOAL := rhoai-help
+HELM ?= helm
+OPA ?= opa
+.PHONY: rhoai-help rhoai-preflight rhoai-platform rhoai-build rhoai-publish rhoai-deploy rhoai-verify test-rhoai
+rhoai-help:
+	@echo 'RHOAI confidential Qwen: follow docs/rhoai/install.md'
+	@echo 'Stages: rhoai-preflight rhoai-platform rhoai-build rhoai-publish rhoai-deploy rhoai-verify'
+rhoai-preflight rhoai-platform rhoai-build rhoai-publish rhoai-deploy rhoai-verify:
+	HELM="$(HELM)" scripts/rhoai-demo.sh $(@:rhoai-%=%)
+test-rhoai:
+	HELM="$(HELM)" OPA="$(OPA)" tests/rhoai/check.sh
+
 VALUES ?= values-global.yaml
 OUTPUT ?= output/rendered.yaml
 .PHONY: test lint render demo-preflight install-addon demo-provision bind-volumes demo-status

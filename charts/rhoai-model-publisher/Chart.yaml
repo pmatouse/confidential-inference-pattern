@@ -1,0 +1,4 @@
+apiVersion: v2
+name: rhoai-model-publisher
+version: 0.1.0
+description: Trusted Qwen JWE preparation and ciphertext-only HTTP distribution

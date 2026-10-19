@@ -1,0 +1,8 @@
+operator:
+  namespace: redhat-ods-operator
+  channel: beta
+  csv: rhods-operator.3.6.0-ea.2
+  catalog: redhat-operators
+  catalogNamespace: openshift-marketplace
+components:
+  enabled: false
