@@ -104,6 +104,19 @@ public configuration; never copy the rest of `STATE_DIR` into either repository.
 For an existing lab, `TRUSTEE_CHART_PATH=charts/hub/trustee-edge` retains that
 chart location. A new site defaults to `charts/hub/rhoai-trustee`.
 
+When migrating an existing Pattern from an SSH repository URL to public HTTPS,
+remove stale `spec.gitSpec.tokenSecret` and `tokenSecretNamespace` references if
+its status reports `invalid auth method`. Keep the credential Secret itself for
+rollback. The standard installer merges the Pattern and preserves those old
+fields. A new public-HTTPS installation has no such credential references.
+
+When reusing a cluster from the earlier custom storage demo, retire that
+installation's orphaned SCCs along with its owner. An OLM-managed operator can
+otherwise select an old `MustRunAs: 0` importer SCC and conflict with its own
+`runAsNonRoot: true`, even though the confidential demo itself is healthy. Check
+the failed pod's `openshift.io/scc` annotation and remove only constraints owned
+by the retired installation; keep the standard platform SCCs.
+
 The scripts stop on failures. They do not erase old model volumes, rotate keys
 implicitly, approve a different RHOAI CSV, or retire unrelated applications.
 The retained block claim and Vault data are required for a safe rerun.

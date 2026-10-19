@@ -41,7 +41,7 @@ case "${1:-help}" in
     "$0" preflight
     "$HELM" template rhoai "$ROOT/charts/rhoai-platform" | oc apply -f -
     for ((i=0; i<120; i++)); do
-      plan=$(oc get subscription rhods-operator -n redhat-ods-operator -o jsonpath='{.status.installPlanRef.name}')
+      plan=$(oc get subscription.operators.coreos.com rhods-operator -n redhat-ods-operator -o jsonpath='{.status.installPlanRef.name}')
       [ -n "$plan" ] && break
       sleep 5
     done
